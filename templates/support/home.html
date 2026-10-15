@@ -1,0 +1,79 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Trung tâm hỗ trợ - HULO
+{% endblock %}
+
+{% block content %}
+
+<div class="content-container">
+
+    <div style="
+        background: #eaf3ff;
+        padding: 45px 30px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 30px;
+    ">
+        <h1>Trung tâm hỗ trợ HULO</h1>
+
+        <p>
+            Chúng tôi luôn sẵn sàng hỗ trợ bạn!
+        </p>
+
+        <p>
+            Tìm câu trả lời nhanh chóng hoặc
+            liên hệ bộ phận chăm sóc khách hàng.
+        </p>
+    </div>
+
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    ">
+
+        <!-- LIÊN KẾT MODULE 2 -->
+        <div style="
+            background: white;
+            border: 1px solid #d9e6fa;
+            padding: 30px;
+            border-radius: 12px;
+        ">
+            <h2>FAQ / Chatbot</h2>
+
+            <p>
+                Tra cứu câu trả lời tự động
+                và trò chuyện với Chatbot HULO.
+            </p>
+
+            <a href="{% url 'chatbot:home' %}">
+                Mở Chatbot →
+            </a>
+        </div>
+
+        <!-- LIÊN KẾT MODULE 3 -->
+        <div style="
+            background: white;
+            border: 1px solid #d9e6fa;
+            padding: 30px;
+            border-radius: 12px;
+        ">
+            <h2>Yêu cầu hỗ trợ</h2>
+
+            <p>
+                Gửi yêu cầu và theo dõi
+                quá trình hỗ trợ từ HULO.
+            </p>
+
+            <a href="{% url 'tickets:home' %}">
+                Đến trang Ticket →
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,157 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}CRM HULO{% endblock %}</title>
+
+    <!-- CSS dùng chung -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- CSS riêng của từng module -->
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- HEADER DÙNG CHUNG -->
+    <header class="header">
+
+        <!-- Logo HULO -->
+        <a href="{% url 'home' %}" class="brand">
+            HULOECOM
+        </a>
+
+        <!-- MENU THEO VAI TRÒ -->
+        <nav class="navbar">
+
+            <!-- Trang chủ dùng chung -->
+            <a href="{% url 'home' %}">
+                Trang chủ
+            </a>
+
+            <!-- 1. KHÁCH HÀNG -->
+            {% if user_role == 'CUSTOMER' %}
+
+                <!-- Chưa xây dựng chức năng đơn hàng -->
+                <span class="nav-placeholder">
+                    Đơn hàng
+                </span>
+
+                <!-- Sẽ kết nối với Ticket của khách hàng -->
+                <span class="nav-placeholder">
+                    Yêu cầu của tôi
+                </span>
+
+                <!-- Sẽ kết nối với Trung tâm hỗ trợ -->
+                <a href="{% url 'support:home' %}">
+                    Hỗ trợ
+                </a>
+
+            <!-- 2. NHÂN VIÊN CSKH -->
+            {% elif user_role == 'CSKH' %}
+
+                <!-- Module 3: Ticket Management & SLA -->
+                <a href="{% url 'tickets:home' %}">
+                    Quản lý Ticket
+                </a>
+
+                <!-- Module 5: Customer 360, CSAT & Loyalty -->
+                <a href="{% url 'customers:home' %}">
+                    Khách hàng
+                </a>
+
+            <!-- 3. NHÂN VIÊN THẨM ĐỊNH -->
+            {% elif user_role == 'ASSESSOR' %}
+
+                <!-- Sẽ kết nối với Module 4 -->
+                <span class="nav-placeholder">
+                    Xử lý khiếu nại
+                </span>
+
+            <!-- 4. QUẢN LÝ -->
+            {% elif user_role == 'MANAGER' %}
+
+                <!-- Sẽ kết nối với Module 3 -->
+                <span class="nav-placeholder">
+                    Quản lý Ticket
+                </span>
+
+                <!-- Sẽ kết nối với Module 4 -->
+                <span class="nav-placeholder">
+                    Khiếu nại
+                </span>
+
+                <!-- Sẽ kết nối với Module 5 -->
+                <span class="nav-placeholder">
+                    Chăm sóc khách hàng
+                </span>
+
+            <!-- 5. QUẢN TRỊ HỆ THỐNG -->
+            {% elif user_role == 'ADMIN' %}
+
+                <a href="{% url 'admin:index' %}">
+                    Quản trị hệ thống
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+        <!-- KHU VỰC TÀI KHOẢN -->
+        <div class="account-area">
+
+            {% if request.user.is_authenticated %}
+
+                <!-- Tên tài khoản đang đăng nhập -->
+                <span class="username">
+                    {{ request.user.username }}
+                </span>
+
+                <!-- Đăng xuất an toàn bằng POST -->
+                <form method="POST" action="{% url 'logout' %}">
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="logout-button"
+                    >
+                        Đăng xuất
+                    </button>
+                </form>
+
+            {% else %}
+
+                <a href="{% url 'login' %}">
+                    Đăng nhập
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </header>
+
+    <!-- NỘI DUNG CỦA TỪNG TRANG -->
+    <main class="main-content">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <!-- FOOTER DÙNG CHUNG -->
+    <footer class="footer">
+        © 2026 HULOECOM –
+        Hệ thống quản lý và chăm sóc khách hàng
+    </footer>
+
+    <!-- JAVASCRIPT RIÊNG CỦA TỪNG MODULE -->
+    {% block extra_js %}
+    {% endblock %}
+
+</body>
+</html>

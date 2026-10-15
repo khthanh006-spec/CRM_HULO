@@ -1,0 +1,43 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Trang chủ - CRM HULO
+{% endblock %}
+
+{% block content %}
+
+<div class="content-container">
+
+    <h1>Chào mừng đến với CRM HULO!</h1>
+
+    <p>
+        Xin chào,
+        <strong>{{ request.user.username }}</strong>!
+    </p>
+
+    <p>
+        <strong>Vai trò của bạn:</strong>
+        {{ role_display }}
+    </p>
+
+    <p>
+        Bạn đã đăng nhập thành công vào hệ thống
+        quản lý và chăm sóc khách hàng HULO.
+    </p>
+
+    <hr>
+
+    <h2>Hệ thống CRM HULO</h2>
+
+    <p>
+        Đây là trang chủ dùng chung của hệ thống.
+        Các chức năng Help Center, Chatbot,
+        Ticket Management, xử lý khiếu nại
+        và chăm sóc khách hàng sẽ được
+        bổ sung trong quá trình lập trình.
+    </p>
+
+</div>
+
+{% endblock %}
