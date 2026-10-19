@@ -6,4 +6,10 @@ app_name = 'customers'
 
 urlpatterns = [
     path('', views.customer_home, name='home'),
+    path('list/', views.customer_list, name='list'),
+    path(
+        '<int:customer_id>/',
+        views.customer_detail,
+        name='detail'
+    ),
 ]

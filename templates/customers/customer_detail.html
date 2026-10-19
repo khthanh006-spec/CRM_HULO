@@ -1,0 +1,139 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Hồ sơ Customer 360 - CRM HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .m5-detail {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .m5-detail h1 {
+        color: #103b78;
+        margin-bottom: 10px;
+    }
+
+    .m5-detail-card {
+        background: white;
+        border: 1px solid #dce4f0;
+        border-radius: 10px;
+        padding: 25px;
+        margin-top: 20px;
+    }
+
+    .m5-detail-card h2 {
+        color: #103b78;
+        margin-top: 0;
+        font-size: 21px;
+    }
+
+    .m5-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(
+            auto-fit, minmax(240px, 1fr)
+        );
+        gap: 20px;
+    }
+
+    .m5-detail-label {
+        color: #667085;
+        margin-bottom: 6px;
+    }
+
+    .m5-detail-value {
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .m5-detail-back {
+        display: inline-block;
+        margin-top: 25px;
+        color: #103b78;
+    }
+</style>
+
+<div class="content-container m5-detail">
+
+    <h1>Hồ sơ Customer 360°</h1>
+
+    <p>
+        Thông tin tổng hợp khách hàng
+        trong hệ thống CRM HULO.
+    </p>
+
+    <div class="m5-detail-card">
+
+        <h2>Thông tin khách hàng</h2>
+
+        <div class="m5-detail-grid">
+
+            <div>
+                <p class="m5-detail-label">
+                    Mã khách hàng
+                </p>
+                <p class="m5-detail-value">
+                    {{ customer.ma_khach_hang }}
+                </p>
+            </div>
+
+            <div>
+                <p class="m5-detail-label">
+                    Họ và tên
+                </p>
+                <p class="m5-detail-value">
+                    {{ customer.ho_ten }}
+                </p>
+            </div>
+
+            <div>
+                <p class="m5-detail-label">
+                    Email
+                </p>
+                <p class="m5-detail-value">
+                    {{ customer.email }}
+                </p>
+            </div>
+
+            <div>
+                <p class="m5-detail-label">
+                    Số điện thoại
+                </p>
+                <p class="m5-detail-value">
+                    {{ customer.so_dien_thoai|default:"Chưa cập nhật" }}
+                </p>
+            </div>
+
+            <div>
+                <p class="m5-detail-label">
+                    Địa chỉ
+                </p>
+                <p class="m5-detail-value">
+                    {{ customer.dia_chi_mac_dinh|default:"Chưa cập nhật" }}
+                </p>
+            </div>
+
+            <div>
+                <p class="m5-detail-label">
+                    Ngày tạo hồ sơ
+                </p>
+                <p class="m5-detail-value">
+                    {{ customer.thoi_diem_tao|date:"d/m/Y H:i" }}
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <a class="m5-detail-back"
+       href="{% url 'customers:list' %}">
+        ← Quay về danh sách khách hàng
+    </a>
+
+</div>
+
+{% endblock %}
