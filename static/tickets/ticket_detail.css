@@ -521,3 +521,7 @@
     background: #1258b1;
 }
 
+.ticket-detail-page,
+.ticket-detail-page * {
+    font-family: Arial, sans-serif;
+}

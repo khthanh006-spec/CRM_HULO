@@ -1291,3 +1291,20 @@
 }
 
 
+/* ==================================================
+   HULOECOM - DONG BO FONT MODULE 3
+   Arial theo giao dien ban dau
+   ================================================== */
+
+.ticket-page,
+.ticket-page *,
+.ticket-page *::before,
+.ticket-page *::after,
+.customer-ticket-page,
+.customer-ticket-page *,
+.customer-ticket-page *::before,
+.customer-ticket-page *::after {
+    font-family: Arial, sans-serif;
+}
+
+

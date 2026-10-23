@@ -375,3 +375,8 @@
         grid-template-columns: 1fr;
     }
 }
+
+.customer-ticket-page,
+.customer-ticket-page * {
+    font-family: Arial, sans-serif;
+}

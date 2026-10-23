@@ -22,3 +22,8 @@
     font-size: 20px;
     font-weight: 700;
 }
+
+.ticket-page,
+.ticket-page * {
+    font-family: Arial, sans-serif;
+}
