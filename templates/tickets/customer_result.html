@@ -1,0 +1,226 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Xác nhận kết quả Ticket - HULOECOM
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{% static 'tickets/customer_result.css' %}?v=3">
+{% endblock %}
+
+{% block content %}
+
+<div class="customer-ticket-page">
+
+    <!-- 1. BANNER -->
+    <section class="customer-ticket-banner">
+        <h1>Xác nhận kết quả hỗ trợ</h1>
+        <p>
+            Xem kết quả xử lý và gửi phản hồi của bạn
+            đến HULOECOM.
+        </p>
+    </section>
+
+    <!-- 2. THÔNG BÁO -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="customer-ticket-notice
+                {% if 'success' not in message.tags %}
+                    customer-ticket-notice-error
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- 3. THÔNG TIN TICKET -->
+    <section class="customer-ticket-card">
+
+        <div class="customer-ticket-heading">
+            <div>
+                <p class="customer-ticket-eyebrow">
+                    HULOECOM / Kết quả hỗ trợ
+                </p>
+
+                <h2 class="customer-ticket-code">
+                    #{{ ticket.ma_ticket|default:"Chưa có mã" }}
+                </h2>
+
+                <h3 class="customer-ticket-title">
+                    {{ ticket.tieu_de }}
+                </h3>
+            </div>
+
+            <span class="customer-ticket-status">
+                {{ ticket.get_trang_thai_display }}
+            </span>
+        </div>
+
+        <div class="customer-ticket-info-grid">
+
+            <div class="customer-ticket-info-item">
+                <span>Khách hàng</span>
+                <strong>{{ ticket.khach_hang.ho_ten }}</strong>
+            </div>
+
+            <div class="customer-ticket-info-item">
+                <span>Ngày gửi yêu cầu</span>
+                <strong>
+                    {{ ticket.thoi_diem_tao|date:"d/m/Y H:i" }}
+                </strong>
+            </div>
+
+        </div>
+
+        <h4 class="customer-ticket-section-title">
+            Nội dung yêu cầu ban đầu
+        </h4>
+
+        <div class="customer-ticket-content">
+            {{ ticket.noi_dung|linebreaksbr }}
+        </div>
+
+    </section>
+
+    <!-- 4. KẾT QUẢ XỬ LÝ -->
+    <section class="customer-ticket-card">
+
+        <h3 class="customer-ticket-section-title">
+            ✅ Kết quả xử lý từ HULOECOM
+        </h3>
+
+        {% if ticket.ket_qua_xu_ly %}
+            <div class="customer-ticket-content">
+                {{ ticket.ket_qua_xu_ly|linebreaksbr }}
+            </div>
+        {% else %}
+            <p class="customer-ticket-muted">
+                Chưa có kết quả xử lý cuối cùng.
+            </p>
+        {% endif %}
+
+    </section>
+
+    <!-- 5. PHẢN HỒI KHÁCH HÀNG -->
+    <section class="customer-ticket-card">
+
+        <h3 class="customer-ticket-section-title">
+            💬 Phản hồi về kết quả xử lý
+        </h3>
+
+        <!-- CHƯA XÁC NHẬN -->
+        {% if ticket.trang_thai == 'RESOLVED' and ticket.trang_thai_xac_nhan == 'PENDING' %}
+
+            <p class="customer-ticket-muted">
+                Vui lòng xác nhận bạn có đồng ý với
+                phương án xử lý được HULOECOM đề xuất hay không.
+            </p>
+
+            <form method="POST"
+                  action="{% url 'tickets:customer_confirm' ticket.pk %}">
+                {% csrf_token %}
+
+                <fieldset class="customer-ticket-options">
+                    <legend>
+                        Bạn có đồng ý với kết quả xử lý?
+                    </legend>
+
+                    {% for choice in confirmation_form.lua_chon %}
+                        <label class="customer-ticket-option">
+                            {{ choice.tag }}
+                            <span>{{ choice.choice_label }}</span>
+                        </label>
+                    {% endfor %}
+                </fieldset>
+
+                <div class="customer-ticket-form-group">
+                    <label for="{{ confirmation_form.ly_do.id_for_label }}">
+                        Lý do / Phản hồi bổ sung
+                    </label>
+
+                    {{ confirmation_form.ly_do }}
+
+                    <p class="customer-ticket-hint">
+                        Nếu không đồng ý, bạn bắt buộc phải nhập
+                        lý do để HULOECOM tiếp tục hỗ trợ.
+                    </p>
+                </div>
+
+                <button type="submit" class="customer-ticket-button">
+                    ✓ Gửi xác nhận
+                </button>
+            </form>
+
+        <!-- ĐÃ ĐỒNG Ý -->
+        {% elif ticket.trang_thai_xac_nhan == 'AGREED' %}
+
+            <div class="customer-ticket-success">
+                <h4>✅ Bạn đã đồng ý với kết quả xử lý</h4>
+
+                <p>
+                    HULOECOM đã ghi nhận xác nhận của bạn.
+                    Ticket sẽ tiếp tục theo quy trình CSAT
+                    và được đóng khi đáp ứng đủ điều kiện.
+                </p>
+
+                {% if ticket.thoi_diem_xac_nhan %}
+                    <p class="customer-ticket-time">
+                        Thời điểm xác nhận:
+                        <strong>
+                            {{ ticket.thoi_diem_xac_nhan|date:"d/m/Y H:i" }}
+                        </strong>
+                    </p>
+                {% endif %}
+            </div>
+
+        <!-- KHÔNG ĐỒNG Ý -->
+        {% elif ticket.trang_thai_xac_nhan == 'DISAGREED' %}
+
+            <div class="customer-ticket-warning">
+                <h4>🔄 Bạn đã yêu cầu xử lý lại Ticket</h4>
+
+                <p>
+                    HULOECOM đã ghi nhận phản hồi của bạn.
+                    Nhân viên phụ trách sẽ tiếp tục xem xét yêu cầu.
+                </p>
+
+                {% if ticket.ly_do_khong_dong_y %}
+                    <div class="customer-ticket-reason">
+                        <strong>Lý do không đồng ý:</strong>
+                        <p>{{ ticket.ly_do_khong_dong_y|linebreaksbr }}</p>
+                    </div>
+                {% endif %}
+
+                {% if ticket.thoi_diem_xac_nhan %}
+                    <p class="customer-ticket-time">
+                        Thời điểm phản hồi:
+                        {{ ticket.thoi_diem_xac_nhan|date:"d/m/Y H:i" }}
+                    </p>
+                {% endif %}
+            </div>
+
+        <!-- ĐÃ ĐÓNG -->
+        {% elif ticket.trang_thai == 'CLOSED' %}
+
+            <div class="customer-ticket-success">
+                <h4>✅ Ticket đã được đóng</h4>
+                <p>Quy trình hỗ trợ đã hoàn tất.</p>
+            </div>
+
+        <!-- TRẠNG THÁI KHÁC -->
+        {% else %}
+
+            <p class="customer-ticket-muted">
+                Ticket chưa đến giai đoạn xác nhận kết quả xử lý.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}
