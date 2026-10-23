@@ -616,3 +616,84 @@ def ticket_resume(request, pk):
         'tickets:detail',
         pk=ticket.pk
     )
+
+
+# ==========================================================
+# UC-3.5 - DONG TICKET
+# RESOLVED + AGREED -> CLOSED
+# ==========================================================
+
+@login_required(login_url='login')
+@role_required('CSKH')
+@require_POST
+def ticket_close(request, pk):
+
+    # 1. Kiem tra nhan vien dang dang nhap
+    staff = getattr(request.user, 'staff_profile', None)
+
+    if staff is None or staff.vai_tro != 'CSKH':
+        return HttpResponseForbidden(
+            "Ban khong co quyen dong Ticket."
+        )
+
+    # 2. Khoa Ticket khi cap nhat
+    with transaction.atomic():
+
+        ticket = get_object_or_404(
+            Ticket.objects.select_for_update(),
+            pk=pk
+        )
+
+        # 3. Chi nhan vien duoc phan cong moi duoc dong
+        if ticket.nguoi_phu_trach_id != staff.pk:
+            return HttpResponseForbidden(
+                "Ticket nay khong duoc phan cong cho ban."
+            )
+
+        # 4. Ticket phai o trang thai RESOLVED
+        if ticket.trang_thai != 'RESOLVED':
+            messages.error(
+                request,
+                "Chi co the dong Ticket da duoc giai quyet."
+            )
+            return redirect('tickets:detail', pk=ticket.pk)
+
+        # 5. Khach hang phai dong y voi ket qua
+        if ticket.trang_thai_xac_nhan != 'AGREED':
+            messages.error(
+                request,
+                "Chua the dong Ticket vi khach hang "
+                "chua dong y voi ket qua xu ly."
+            )
+            return redirect('tickets:detail', pk=ticket.pk)
+
+        # 6. Chuyen RESOLVED -> CLOSED
+        ticket.trang_thai = 'CLOSED'
+        ticket.thoi_diem_cap_nhat = timezone.now()
+
+        ticket.save(
+            update_fields=[
+                'trang_thai',
+                'thoi_diem_cap_nhat',
+            ]
+        )
+
+        # 7. Ghi lich su dong Ticket
+        TicketLog.objects.create(
+            ticket=ticket,
+            nguoi_thuc_hien=request.user,
+            hanh_dong='DONG TICKET',
+            noi_dung=(
+                f"Nhan vien {staff.ho_ten} dong Ticket "
+                "sau khi khach hang dong y voi ket qua. "
+                "Trang thai RESOLVED -> CLOSED."
+            )
+        )
+
+    # 8. Thong bao thanh cong
+    messages.success(
+        request,
+        "Da dong Ticket thanh cong!"
+    )
+
+    return redirect('tickets:detail', pk=ticket.pk)
