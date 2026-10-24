@@ -1,0 +1,29 @@
+/* ==========================================================
+   HULOECOM - KHOI PHUC GIAO DIEN TICKET QUEUE
+
+
+
+/* ==========================================
+   KHOI PHUC FONT CHU TICKET QUEUE
+   ========================================== */
+
+.ticket-page {
+    font-family: Arial, sans-serif;
+}
+
+.ticket-page .ticket-banner h1 {
+    font-family: Arial, sans-serif;
+    font-size: 27px;
+    font-weight: 700;
+}
+
+.ticket-page .ticket-section-title {
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.ticket-page,
+.ticket-page * {
+    font-family: Arial, sans-serif;
+}

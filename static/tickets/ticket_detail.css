@@ -1,0 +1,527 @@
+/* ==================================================
+   HULOECOM - KHOI PHUC GIAO DIEN TICKET DETAIL
+   Chi thay doi CSS, khong thay doi du lieu
+   ================================================== */
+
+/* 1. NUT QUAY LAI */
+
+.ticket-detail-back {
+    margin-bottom: 18px;
+}
+
+.ticket-detail-back a {
+    display: inline-flex;
+    align-items: center;
+    color: #1769d2;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.ticket-detail-back a:hover {
+    text-decoration: underline;
+}
+
+/* 2. HEADER TICKET */
+
+.ticket-detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 25px 28px;
+    margin-bottom: 22px;
+    background: linear-gradient(110deg, #dfedff, #d5e8ff);
+    border-radius: 16px;
+}
+
+.ticket-detail-eyebrow {
+    margin: 0 0 12px;
+    color: #6683a8;
+    font-size: 12px;
+}
+
+.ticket-detail-header h1 {
+    margin: 0 0 8px;
+    color: #123f86;
+    font-size: 29px;
+    font-weight: 800;
+}
+
+.ticket-detail-header h2 {
+    margin: 0 0 15px;
+    color: #254c7e;
+    font-size: 18px;
+    font-weight: 650;
+}
+
+.ticket-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* 3. SLA BOX */
+
+.ticket-detail-sla {
+    flex-shrink: 0;
+    min-width: 220px;
+    padding: 16px 18px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #d7e5f8;
+    border-radius: 12px;
+}
+
+.ticket-detail-sla p {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: #6782a5;
+}
+
+.ticket-detail-sla strong {
+    display: block;
+    color: #123f86;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.ticket-detail-sla small {
+    display: block;
+    margin-top: 8px;
+    color: #7e93af;
+    font-size: 11px;
+}
+
+/* 4. BO CUC 2 COT */
+
+.ticket-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(260px, 1fr);
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 22px;
+}
+
+.ticket-detail-main,
+.ticket-detail-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
+/* 5. CAC CARD NOI DUNG */
+
+.ticket-detail-card {
+    padding: 22px 24px;
+    background: #ffffff;
+    border: 1px solid #dce8f8;
+    border-radius: 14px;
+}
+
+.ticket-detail-card h3 {
+    margin: 0 0 18px;
+    color: #123f86;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.ticket-detail-card h4 {
+    margin: 20px 0 12px;
+    color: #234e82;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.ticket-detail-muted {
+    margin: 0 0 15px;
+    color: #8497b1;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* 6. CAC DONG THONG TIN */
+
+.ticket-detail-info-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.ticket-detail-info-row > span {
+    color: #7c91ac;
+}
+
+.ticket-detail-info-row > strong {
+    color: #244a7c;
+    font-weight: 700;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.ticket-detail-description {
+    padding: 15px 16px;
+    background: #f6faff;
+    border: 1px solid #e2ecf9;
+    border-radius: 10px;
+    color: #315377;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+/* 7. THONG TIN NHAN VIEN */
+
+.ticket-assignee-name {
+    margin: 0 0 8px;
+    color: #174788;
+    font-size: 16px;
+    font-weight: 750;
+}
+
+/* 8. TRAO DOI VA GHI CHU */
+
+.ticket-conversation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ticket-conversation-item {
+    padding: 15px;
+    border: 1px solid #dce8f8;
+    border-radius: 11px;
+    background: #f9fbff;
+}
+
+.ticket-conversation-public {
+    background: #f2f8ff;
+}
+
+.ticket-conversation-internal {
+    background: #fff9ed;
+    border-color: #efdfbf;
+}
+
+.ticket-conversation-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.ticket-conversation-heading strong {
+    color: #19477f;
+    font-size: 13px;
+}
+
+.ticket-conversation-time,
+.ticket-conversation-sender {
+    color: #8598b1;
+    font-size: 11px;
+}
+
+.ticket-conversation-sender {
+    margin: 0 0 9px;
+}
+
+.ticket-conversation-content {
+    color: #345575;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.ticket-conversation-empty,
+.ticket-detail-empty {
+    padding: 15px;
+    background: #f7faff;
+    border-radius: 9px;
+    color: #8b9bb2;
+    font-size: 13px;
+}
+
+/* 9. LICH SU XU LY */
+
+.ticket-detail-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+}
+
+.ticket-timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.ticket-timeline-dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    margin-top: 6px;
+    background: #2473d6;
+    border: 3px solid #dfedff;
+    border-radius: 50%;
+}
+
+.ticket-timeline-item strong {
+    color: #1b497e;
+    font-size: 13px;
+}
+
+.ticket-timeline-item p {
+    margin: 7px 0;
+    color: #44617f;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.ticket-timeline-item small {
+    color: #8a9bb2;
+    font-size: 11px;
+}
+
+/* 10. KHU VUC HANH DONG */
+
+.ticket-detail-actions {
+    margin-bottom: 28px;
+}
+
+.ticket-detail-actions > p {
+    color: #607999;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.ticket-action-block {
+    padding: 20px;
+    margin-top: 18px;
+    background: #f8fbff;
+    border: 1px solid #e0ebf9;
+    border-radius: 12px;
+}
+
+.ticket-resolve-block {
+    background: #f6fcf8;
+    border-color: #d4ebdc;
+}
+
+.ticket-action-block h4 {
+    margin: 0 0 14px;
+}
+
+.ticket-action-block > p {
+    color: #64809c;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* 11. FORM NHAN VIEN */
+
+.ticket-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.ticket-form-group label {
+    color: #244c7c;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ticket-form-group input,
+.ticket-form-group select,
+.ticket-form-group textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid #d7e4f3;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #244568;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.ticket-form-group textarea {
+    min-height: 115px;
+    resize: vertical;
+}
+
+.ticket-form-hint {
+    margin: 0 0 13px;
+    color: #8598b2;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* 12. NUT HANH DONG */
+
+.ticket-detail-actions .ticket-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+    padding: 10px 18px;
+    background: #1769d2;
+    border: none;
+    border-radius: 9px;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ticket-detail-actions .ticket-btn:hover {
+    background: #1258b1;
+}
+
+.ticket-detail-actions .ticket-btn-resolve {
+    background: #21834b;
+}
+
+.ticket-detail-actions .ticket-btn-resolve:hover {
+    background: #196b3c;
+}
+
+/* 13. THONG BAO */
+
+.ticket-notice {
+    padding: 13px 16px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.ticket-notice-success {
+    background: #eaf8ef;
+    color: #207c49;
+}
+
+.ticket-notice-error {
+    background: #fff0f0;
+    color: #ad4444;
+}
+
+/* 14. RESPONSIVE */
+
+@media (max-width: 800px) {
+    .ticket-detail-header {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .ticket-detail-sla {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .ticket-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .ticket-detail-card {
+        padding: 18px;
+    }
+
+    .ticket-detail-header h1 {
+        font-size: 23px;
+        overflow-wrap: anywhere;
+    }
+
+    .ticket-conversation-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+
+/* ==========================================
+   HULOECOM - FONT TICKET DETAIL
+   Dong bo voi giao dien ban dau
+   ========================================== */
+
+/* Font chung */
+.ticket-page {
+    font-family: Arial, sans-serif;
+}
+
+/* Ma Ticket */
+.ticket-detail-header h1 {
+    font-family: Arial, sans-serif;
+    font-size: 29px;
+    font-weight: 700;
+}
+
+/* Tieu de yeu cau */
+.ticket-detail-header h2 {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Tieu de cac card */
+.ticket-detail-card h3 {
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+/* Tieu de phu */
+.ticket-detail-card h4 {
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+}
+
+/* Noi dung thong tin */
+.ticket-detail-card,
+.ticket-detail-info-row,
+.ticket-detail-description,
+.ticket-detail-sla {
+    font-family: Arial, sans-serif;
+}
+
+/* Cac nut hanh dong */
+.ticket-detail-actions .ticket-btn {
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+}
+
+
+/* ==========================================
+   UC-3.5 - DONG TICKET
+   ========================================== */
+
+.ticket-close-section {
+    margin-top: 15px;
+}
+
+.ticket-close-description {
+    margin: 18px 0 14px;
+    color: #607999;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.ticket-detail-actions .ticket-btn-close {
+    background: #1769d2;
+    color: #ffffff;
+}
+
+.ticket-detail-actions .ticket-btn-close:hover {
+    background: #1258b1;
+}
+
+.ticket-detail-page,
+.ticket-detail-page * {
+    font-family: Arial, sans-serif;
+}
