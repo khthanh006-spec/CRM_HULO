@@ -44,6 +44,13 @@ urlpatterns = [
         name='add_message'
     ),
 
+    # UC3.4 - Ghi nhận yêu cầu thẩm định
+    path(
+        '<int:pk>/request-assessment/',
+        views.ticket_request_assessment,
+        name='request_assessment'
+    ),
+
     # ==================================================
     # UC-3.5 - HOÀN TẤT XỬ LÝ
     # IN_PROGRESS -> RESOLVED
@@ -91,5 +98,13 @@ urlpatterns = [
         views.ticket_customer_confirm,
         name='customer_confirm'
     ),
+
+
+    path(
+        '<int:pk>/assign/',
+        views.ticket_assign,
+        name='assign'
+    ),
+
 
 ]

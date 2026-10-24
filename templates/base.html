@@ -36,17 +36,14 @@
             <!-- 1. KHÁCH HÀNG -->
             {% if user_role == 'CUSTOMER' %}
 
-                <!-- Chưa xây dựng chức năng đơn hàng -->
                 <span class="nav-placeholder">
                     Đơn hàng
                 </span>
 
-                <!-- Sẽ kết nối với Ticket của khách hàng -->
                 <span class="nav-placeholder">
                     Yêu cầu của tôi
                 </span>
 
-                <!-- Sẽ kết nối với Trung tâm hỗ trợ -->
                 <a href="{% url 'support:home' %}">
                     Hỗ trợ
                 </a>
@@ -54,12 +51,12 @@
             <!-- 2. NHÂN VIÊN CSKH -->
             {% elif user_role == 'CSKH' %}
 
-                <!-- Module 3: Ticket Management & SLA -->
+                <!-- Module 3 -->
                 <a href="{% url 'tickets:home' %}">
                     Quản lý Ticket
                 </a>
 
-                <!-- Module 5: Customer 360, CSAT & Loyalty -->
+                <!-- Module 5 -->
                 <a href="{% url 'customers:home' %}">
                     Khách hàng
                 </a>
@@ -67,7 +64,6 @@
             <!-- 3. NHÂN VIÊN THẨM ĐỊNH -->
             {% elif user_role == 'ASSESSOR' %}
 
-                <!-- Sẽ kết nối với Module 4 -->
                 <span class="nav-placeholder">
                     Xử lý khiếu nại
                 </span>
@@ -75,17 +71,17 @@
             <!-- 4. QUẢN LÝ -->
             {% elif user_role == 'MANAGER' %}
 
-                <!-- Sẽ kết nối với Module 3 -->
-                <span class="nav-placeholder">
+                <!-- Module 3: Đã có chức năng -->
+                <a href="{% url 'tickets:home' %}">
                     Quản lý Ticket
-                </span>
+                </a>
 
-                <!-- Sẽ kết nối với Module 4 -->
+                <!-- Module 4: Chờ tích hợp -->
                 <span class="nav-placeholder">
                     Khiếu nại
                 </span>
 
-                <!-- Sẽ kết nối với Module 5 -->
+                <!-- Module 5: Chờ tích hợp -->
                 <span class="nav-placeholder">
                     Chăm sóc khách hàng
                 </span>
@@ -93,6 +89,12 @@
             <!-- 5. QUẢN TRỊ HỆ THỐNG -->
             {% elif user_role == 'ADMIN' %}
 
+                <!-- Module 3: Quản lý và phân công Ticket -->
+                <a href="{% url 'tickets:home' %}">
+                    Quản lý Ticket
+                </a>
+
+                <!-- Django Admin -->
                 <a href="{% url 'admin:index' %}">
                     Quản trị hệ thống
                 </a>
@@ -106,12 +108,10 @@
 
             {% if request.user.is_authenticated %}
 
-                <!-- Tên tài khoản đang đăng nhập -->
                 <span class="username">
                     {{ request.user.username }}
                 </span>
 
-                <!-- Đăng xuất an toàn bằng POST -->
                 <form method="POST" action="{% url 'logout' %}">
                     {% csrf_token %}
 
@@ -150,8 +150,7 @@
     </footer>
 
     <!-- JAVASCRIPT RIÊNG CỦA TỪNG MODULE -->
-    {% block extra_js %}
-    {% endblock %}
+    {% block extra_js %}{% endblock %}
 
 </body>
 </html>

@@ -8,7 +8,9 @@ from .models import (
     Ticket,
     TicketLog,
     TicketMessage,
+    TicketAttachment,
 )
+
 
 
 @admin.register(TicketCategory)
@@ -86,3 +88,24 @@ class TicketMessageAdmin(admin.ModelAdmin):
         'thoi_diem_gui',
     )
     list_filter = ('loai_tin_nhan',)
+
+
+# Quản lý tệp đính kèm Ticket trong Django Admin
+@admin.register(TicketAttachment)
+class TicketAttachmentAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'ticket',
+        'ten_tep_goc',
+        'nguoi_tai_len',
+        'thoi_diem_tai_len',
+    )
+
+    list_filter = ('thoi_diem_tai_len',)
+
+    search_fields = (
+        'ticket__ma_ticket',
+        'ten_tep_goc',
+    )
+
+    readonly_fields = ('thoi_diem_tai_len',)

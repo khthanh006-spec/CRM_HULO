@@ -9,6 +9,10 @@ class TicketCategory(models.Model):
     mo_ta = models.TextField(blank=True)
     dang_hoat_dong = models.BooleanField(default=True)
 
+    class Meta:
+        verbose_name = "Ticket category"
+        verbose_name_plural = "Ticket categories"
+
     def __str__(self):
         return self.ten_danh_muc
 
@@ -109,6 +113,17 @@ class Ticket(models.Model):
         blank=True
     )
 
+
+    # Mã yêu cầu nguồn từ M1 hoặc M2
+    # Dùng để chống tạo Ticket trùng khi gửi lại
+    source_request_id = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True
+    )
+
+
     khach_hang = models.ForeignKey(
         'customers.Customer',
         on_delete=models.PROTECT,
@@ -165,10 +180,30 @@ class Ticket(models.Model):
         blank=True
     )
 
+
     ket_qua_xu_ly = models.TextField(blank=True)
+
+    # UC3.4 - Theo dõi yêu cầu thẩm định trong M3
+    ASSESSMENT_STATUS_CHOICES = [
+        ('NOT_REQUESTED', 'Chưa yêu cầu'),
+        ('WAITING', 'Đang chờ kết quả'),
+        ('COMPLETED', 'Đã có kết quả'),
+    ]
+
+    trang_thai_tham_dinh = models.CharField(
+        max_length=20,
+        choices=ASSESSMENT_STATUS_CHOICES,
+        default='NOT_REQUESTED'
+    )
+
+    thoi_diem_yeu_cau_tham_dinh = models.DateTimeField(
+        null=True,
+        blank=True
+    )
 
     thoi_diem_tao = models.DateTimeField(auto_now_add=True)
     thoi_diem_cap_nhat = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return self.ma_ticket or f"Ticket #{self.pk}"
@@ -232,4 +267,40 @@ class TicketMessage(models.Model):
         return (
             f"{self.ticket} - "
             f"{self.get_loai_tin_nhan_display()}"
+        )
+
+
+# 7. TỆP ĐÍNH KÈM CỦA TICKET
+class TicketAttachment(models.Model):
+
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name='attachments'
+    )
+
+    tep_dinh_kem = models.FileField(
+        upload_to='ticket_attachments/%Y/%m/%d/'
+    )
+
+    ten_tep_goc = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    nguoi_tai_len = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    thoi_diem_tai_len = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.ticket} - "
+            f"{self.ten_tep_goc or self.tep_dinh_kem.name}"
         )
