@@ -388,6 +388,15 @@ def ticket_resolve(request, pk):
                 "Ticket này không được phân công cho bạn."
             )
 
+        # Chỉ được hoàn tất Ticket đang xử lý
+        if ticket.trang_thai != 'IN_PROGRESS':
+            messages.error(
+                request,
+                "Chỉ có thể hoàn tất Ticket ở trạng thái đang xử lý."
+            )
+            return redirect('tickets:detail', pk=ticket.pk)
+
+
 
         # UC3.4 - Không hoàn tất Ticket khi chờ thẩm định
         if ticket.trang_thai_tham_dinh == 'WAITING':
