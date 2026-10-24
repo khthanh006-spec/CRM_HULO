@@ -1,0 +1,463 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Chăm sóc CSAT thấp - CRM HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+.m5-care-page,
+.m5-care-page * {
+    box-sizing: border-box;
+}
+
+.m5-care-page {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 25px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #173b75;
+    font-size: 15px;
+}
+
+.m5-care-page h1 {
+    font-size: 29px;
+    font-weight: 800;
+    color: #103c7c;
+    margin: 0 0 8px;
+}
+
+.m5-care-page h2 {
+    font-size: 19px;
+    font-weight: 800;
+    color: #123f83;
+    margin: 0 0 19px;
+}
+
+.m5-care-subtitle {
+    color: #7083a1;
+    margin: 0 0 22px;
+}
+
+.m5-care-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(280px, 0.9fr)
+        minmax(0, 2fr);
+    gap: 18px;
+    align-items: stretch;
+}
+
+.m5-care-card {
+    background: #fff;
+    border: 1px solid #cfe0ff;
+    border-radius: 13px;
+    padding: 22px;
+    box-shadow: 0 3px 12px rgba(30, 75, 145, .06);
+    min-width: 0;
+}
+
+.m5-care-row {
+    margin-bottom: 16px;
+}
+
+.m5-care-label {
+    display: block;
+    color: #7084a5;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.m5-care-value {
+    color: #123e7d;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.m5-care-notice {
+    padding: 14px;
+    border-radius: 9px;
+    background: #f1f6ff;
+    color: #5876a4;
+    line-height: 1.6;
+    font-size: 13px;
+}
+
+.m5-care-choices {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+    margin: 10px 0 22px;
+}
+
+.m5-care-choice {
+    display: block;
+    position: relative;
+    cursor: pointer;
+}
+
+.m5-care-choice input {
+    position: absolute;
+    opacity: 0;
+}
+
+.m5-care-choice span {
+    display: block;
+    background: #eff5ff;
+    border: 1px solid #cbdfff;
+    color: #245fae;
+    border-radius: 8px;
+    padding: 12px 6px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.m5-care-choice input:checked + span {
+    background: #2478e8;
+    border-color: #2478e8;
+    color: #fff;
+}
+
+.m5-care-choice input:focus-visible + span {
+    outline: 3px solid #f5b94d;
+    outline-offset: 2px;
+}
+
+.m5-care-textarea {
+    width: 100%;
+    min-height: 145px;
+    padding: 13px;
+    font: inherit;
+    color: #173b75;
+    border: 1px solid #cbdcf5;
+    border-radius: 9px;
+    background: #fbfdff;
+    resize: vertical;
+}
+
+.m5-care-save {
+    padding: 12px 22px;
+    border: 0;
+    background: #2478e8;
+    color: white;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.m5-care-save:hover {
+    background: #155bb8;
+}
+
+.m5-care-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.m5-care-error {
+    color: #bd2929;
+    font-size: 13px;
+    margin: 8px 0;
+}
+
+.m5-care-history {
+    margin-top: 18px;
+}
+
+.m5-care-table-wrap {
+    overflow-x: auto;
+}
+
+.m5-care-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+}
+
+.m5-care-table th {
+    background: #edf4ff;
+    color: #174784;
+    text-align: left;
+    padding: 13px;
+    white-space: nowrap;
+}
+
+.m5-care-table td {
+    padding: 13px;
+    color: #426088;
+    border-bottom: 1px solid #e9eff8;
+    vertical-align: top;
+}
+
+.m5-care-empty {
+    text-align: center;
+    color: #8293ac;
+    padding: 20px;
+}
+
+.m5-care-back {
+    display: inline-block;
+    margin-top: 22px;
+    color: #1553a7;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@media (max-width: 850px) {
+    .m5-care-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .m5-care-page {
+        padding: 14px;
+    }
+
+    .m5-care-choices {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+
+<div class="m5-care-page">
+
+    <h1>Chăm sóc khách hàng sau CSAT</h1>
+
+    <p class="m5-care-subtitle">
+        Ghi nhận hoạt động chăm sóc và theo dõi
+        lịch sử hỗ trợ khách hàng trong CRM HULO.
+    </p>
+
+    <div class="m5-care-grid">
+
+        <!-- CỘT TRÁI -->
+        <section class="m5-care-card">
+
+            <h2>Thông tin khách hàng</h2>
+
+            <div class="m5-care-row">
+                <span class="m5-care-label">
+                    Mã khách hàng
+                </span>
+                <div class="m5-care-value">
+                    KH{{ customer.ma_khach_hang|stringformat:"03d" }}
+                </div>
+            </div>
+
+            <div class="m5-care-row">
+                <span class="m5-care-label">
+                    Họ và tên
+                </span>
+                <div class="m5-care-value">
+                    {{ customer.ho_ten }}
+                </div>
+            </div>
+
+            <div class="m5-care-row">
+                <span class="m5-care-label">
+                    Email
+                </span>
+                <div class="m5-care-value">
+                    {{ customer.email }}
+                </div>
+            </div>
+
+            <div class="m5-care-row">
+                <span class="m5-care-label">
+                    Số điện thoại
+                </span>
+                <div class="m5-care-value">
+                    {{ customer.so_dien_thoai|default:"Chưa cập nhật" }}
+                </div>
+            </div>
+
+            <hr>
+
+            <h2>Ticket và CSAT liên quan</h2>
+
+            <div class="m5-care-notice">
+                Chưa tích hợp Ticket M3 và CSAT M5
+                vào hồ sơ chăm sóc này.
+
+                Chưa có đủ dữ liệu để xác nhận
+                khách hàng đang có đánh giá CSAT thấp.
+            </div>
+
+        </section>
+
+
+        <!-- CỘT PHẢI -->
+        <section class="m5-care-card">
+
+            <h2>Thông tin chăm sóc</h2>
+
+            <div class="m5-care-row">
+                <span class="m5-care-label">
+                    Nhân viên đang thực hiện
+                </span>
+                <div class="m5-care-value">
+                    {{ request.user.get_username }}
+                </div>
+            </div>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <span class="m5-care-label">
+                    Hình thức chăm sóc
+                </span>
+
+                <div class="m5-care-choices">
+
+                    <label class="m5-care-choice">
+                        <input
+                            type="radio"
+                            name="care_type"
+                            value="CALL"
+                            {% if form.care_type.value == 'CALL' %}checked{% endif %}
+                        >
+                        <span>📞 Gọi điện</span>
+                    </label>
+
+                    <label class="m5-care-choice">
+                        <input
+                            type="radio"
+                            name="care_type"
+                            value="MESSAGE"
+                            {% if form.care_type.value == 'MESSAGE' %}checked{% endif %}
+                        >
+                        <span>💬 Nhắn tin</span>
+                    </label>
+
+                    <label class="m5-care-choice">
+                        <input
+                            type="radio"
+                            name="care_type"
+                            value="OTHER"
+                            {% if form.care_type.value == 'OTHER' %}checked{% endif %}
+                        >
+                        <span>Khác</span>
+                    </label>
+
+                </div>
+
+                {% if form.care_type.errors %}
+                    <div class="m5-care-error">
+                        {{ form.care_type.errors }}
+                    </div>
+                {% endif %}
+
+                <label class="m5-care-label"
+                       for="id_content">
+                    Nội dung chăm sóc
+                </label>
+
+                {{ form.content }}
+
+                {% if form.content.errors %}
+                    <div class="m5-care-error">
+                        {{ form.content.errors }}
+                    </div>
+                {% endif %}
+
+                <div class="m5-care-actions">
+                    <button class="m5-care-save"
+                            type="submit">
+                        Lưu hoạt động chăm sóc
+                    </button>
+                </div>
+
+            </form>
+
+            <p class="m5-care-notice"
+               style="margin-top: 18px;">
+                Chức năng Voucher, cập nhật kết quả
+                thẩm định M4 và trạng thái chăm sóc
+                theo Ticket sẽ được bổ sung ở giai đoạn
+                tích hợp.
+            </p>
+
+        </section>
+
+    </div>
+
+
+    <!-- LỊCH SỬ CHĂM SÓC -->
+    <section class="m5-care-card m5-care-history">
+
+        <h2>Lịch sử chăm sóc khách hàng</h2>
+
+        <div class="m5-care-table-wrap">
+
+            <table class="m5-care-table">
+
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Hình thức</th>
+                        <th>Nội dung</th>
+                        <th>Nhân viên</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for record in care_records %}
+
+                    <tr>
+                        <td>
+                            {{ record.created_at|date:"d/m/Y H:i" }}
+                        </td>
+
+                        <td>
+                            {{ record.get_care_type_display }}
+                        </td>
+
+                        <td>
+                            {{ record.content|linebreaksbr }}
+                        </td>
+
+                        <td>
+                            {% if record.created_by %}
+                                {{ record.created_by.get_username }}
+                            {% else %}
+                                Không xác định
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="4"
+                            class="m5-care-empty">
+                            Chưa có lịch sử chăm sóc.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <a class="m5-care-back"
+       href="{% url 'customers:detail' customer.ma_khach_hang %}">
+        ← Quay về Customer 360°
+    </a>
+
+</div>
+
+{% endblock %}
