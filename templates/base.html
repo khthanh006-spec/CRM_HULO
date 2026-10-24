@@ -7,32 +7,23 @@
 
     <title>{% block title %}CRM HULO{% endblock %}</title>
 
-    <!-- CSS dùng chung -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
-    <!-- CSS riêng của từng module -->
     {% block extra_css %}{% endblock %}
 </head>
 
 <body>
-
-    <!-- HEADER DÙNG CHUNG -->
     <header class="header">
 
-        <!-- Logo HULO -->
         <a href="{% url 'home' %}" class="brand">
             HULOECOM
         </a>
 
-        <!-- MENU THEO VAI TRÒ -->
         <nav class="navbar">
-
-            <!-- Trang chủ dùng chung -->
             <a href="{% url 'home' %}">
                 Trang chủ
             </a>
 
-            <!-- 1. KHÁCH HÀNG -->
             {% if user_role == 'CUSTOMER' %}
 
                 <span class="nav-placeholder">
@@ -47,35 +38,28 @@
                     Hỗ trợ
                 </a>
 
-            <!-- 2. NHÂN VIÊN CSKH -->
             {% elif user_role == 'CSKH' %}
 
-                <!-- Module 3 -->
                 <a href="{% url 'tickets:home' %}">
                     Quản lý Ticket
                 </a>
 
-                <!-- Module 5 -->
                 <a href="{% url 'customers:home' %}">
                     Khách hàng
                 </a>
 
-            <!-- 3. NHÂN VIÊN THẨM ĐỊNH -->
             {% elif user_role == 'ASSESSOR' %}
 
-                <!-- Module 4 -->
                 <a href="{% url 'disputes:home' %}">
                     Hồ sơ thẩm định
                 </a>
 
-            <!-- 4. QUẢN LÝ -->
             {% elif user_role == 'MANAGER' %}
 
-                <span class="nav-placeholder">
+                <a href="{% url 'tickets:home' %}">
                     Quản lý Ticket
-                </span>
+                </a>
 
-                <!-- Module 4 -->
                 <a href="{% url 'disputes:home' %}">
                     Hồ sơ thẩm định
                 </a>
@@ -84,10 +68,12 @@
                     Chăm sóc khách hàng
                 </span>
 
-            <!-- 5. QUẢN TRỊ HỆ THỐNG -->
             {% elif user_role == 'ADMIN' %}
 
-                <!-- Module 4 -->
+                <a href="{% url 'tickets:home' %}">
+                    Quản lý Ticket
+                </a>
+
                 <a href="{% url 'disputes:home' %}">
                     Hồ sơ thẩm định
                 </a>
@@ -97,26 +83,18 @@
                 </a>
 
             {% endif %}
-
         </nav>
 
-        <!-- KHU VỰC TÀI KHOẢN -->
         <div class="account-area">
-
             {% if request.user.is_authenticated %}
 
                 <span class="username">
                     {{ request.user.username }}
                 </span>
 
-                <!-- Đăng xuất bằng POST -->
                 <form method="POST" action="{% url 'logout' %}">
                     {% csrf_token %}
-
-                    <button
-                        type="submit"
-                        class="logout-button"
-                    >
+                    <button type="submit" class="logout-button">
                         Đăng xuất
                     </button>
                 </form>
@@ -128,28 +106,19 @@
                 </a>
 
             {% endif %}
-
         </div>
 
     </header>
 
-    <!-- NỘI DUNG CỦA TỪNG TRANG -->
     <main class="main-content">
-
-        {% block content %}
-        {% endblock %}
-
+        {% block content %}{% endblock %}
     </main>
 
-    <!-- FOOTER DÙNG CHUNG -->
     <footer class="footer">
         © 2026 HULOECOM –
         Hệ thống quản lý và chăm sóc khách hàng
     </footer>
 
-    <!-- JAVASCRIPT RIÊNG CỦA TỪNG MODULE -->
-    {% block extra_js %}
-    {% endblock %}
-
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

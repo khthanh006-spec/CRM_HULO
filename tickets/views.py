@@ -1,4 +1,4 @@
-
+from accounts.models import Staff
 from datetime import timedelta
 
 from django.contrib import messages
@@ -61,6 +61,12 @@ def ticket_home(request):
             trang_thai__in=['RESOLVED', 'CLOSED']
         ).count(),
 
+        'qua_han_sla': tickets.filter(
+            sla_deadline__lte=now
+        ).exclude(
+            trang_thai__in=['RESOLVED', 'CLOSED']
+        ).count(),
+
         'da_giai_quyet': tickets.filter(
             trang_thai='RESOLVED'
         ).count(),
@@ -90,6 +96,27 @@ def ticket_home(request):
         tickets = tickets.filter(danh_muc_id=int(category))
 
     tickets = tickets.order_by('-thoi_diem_tao')
+
+    # UC3.6 - Xác định trạng thái SLA cho từng Ticket
+    tickets = list(tickets)
+
+    for ticket in tickets:
+
+        if ticket.trang_thai in ['RESOLVED', 'CLOSED']:
+            ticket.sla_status = 'DONE'
+
+        elif ticket.sla_deadline is None:
+            ticket.sla_status = 'NO_SLA'
+
+        elif ticket.sla_deadline <= now:
+            ticket.sla_status = 'OVERDUE'
+
+        elif ticket.sla_deadline <= warning_limit:
+            ticket.sla_status = 'WARNING'
+
+        else:
+            ticket.sla_status = 'ON_TIME'
+
 
     categories = TicketCategory.objects.filter(
         dang_hoat_dong=True
@@ -137,6 +164,21 @@ def ticket_detail(request, pk):
                 "Bạn không có quyền xem Ticket này."
             )
 
+    # Xác định vai trò người đang đăng nhập
+    user_role = (
+        staff.vai_tro if staff is not None
+        else ('ADMIN' if request.user.is_superuser else None)
+    )
+
+    # Danh sách nhân viên CSKH để phân công Ticket mới
+    staff_options = Staff.objects.none()
+
+    if ticket.trang_thai == 'NEW' and user_role in ('MANAGER', 'ADMIN'):
+        staff_options = Staff.objects.filter(
+            vai_tro='CSKH'
+        ).order_by('ho_ten')
+
+
     logs = ticket.logs.select_related(
         'nguoi_thuc_hien'
     ).order_by('-thoi_diem')
@@ -154,6 +196,8 @@ def ticket_detail(request, pk):
             'ticket_messages': ticket_messages,
             'message_form': TicketMessageForm(),
             'resolve_form': TicketResolveForm(),
+            'user_role': user_role,
+            'staff_options': staff_options,
         }
     )
 
@@ -344,12 +388,25 @@ def ticket_resolve(request, pk):
                 "Ticket này không được phân công cho bạn."
             )
 
+        # Chỉ được hoàn tất Ticket đang xử lý
         if ticket.trang_thai != 'IN_PROGRESS':
             messages.error(
                 request,
-                "Chỉ được hoàn tất Ticket đang xử lý."
+                "Chỉ có thể hoàn tất Ticket ở trạng thái đang xử lý."
             )
             return redirect('tickets:detail', pk=ticket.pk)
+
+
+
+        # UC3.4 - Không hoàn tất Ticket khi chờ thẩm định
+        if ticket.trang_thai_tham_dinh == 'WAITING':
+            messages.error(
+                request,
+                "Không thể hoàn tất Ticket vì đang chờ "
+                "kết quả thẩm định từ bộ phận chuyên môn."
+            )
+            return redirect('tickets:detail', pk=ticket.pk)
+
 
         # Lưu kết quả
         ticket.ket_qua_xu_ly = form.cleaned_data['ket_qua_xu_ly']
@@ -697,3 +754,169 @@ def ticket_close(request, pk):
     )
 
     return redirect('tickets:detail', pk=ticket.pk)
+
+
+# ==========================================================
+# UC-3.1 / UC-3.2 - PHÂN CÔNG TICKET
+# ==========================================================
+
+@login_required(login_url='login')
+@role_required('MANAGER', 'ADMIN')
+@require_POST
+def ticket_assign(request, pk):
+
+    staff_id = request.POST.get('staff_id')
+
+    if not staff_id or not staff_id.isdigit():
+        messages.error(
+            request,
+            "Vui lòng chọn nhân viên CSKH hợp lệ."
+        )
+        return redirect('tickets:detail', pk=pk)
+
+    with transaction.atomic():
+
+        ticket = get_object_or_404(
+            Ticket.objects.select_for_update(),
+            pk=pk
+        )
+
+        if ticket.trang_thai != 'NEW':
+            messages.error(
+                request,
+                "Chỉ có thể phân công Ticket ở trạng thái NEW."
+            )
+            return redirect('tickets:detail', pk=ticket.pk)
+
+        staff = get_object_or_404(
+            Staff,
+            pk=int(staff_id),
+            vai_tro='CSKH'
+        )
+
+        ticket.nguoi_phu_trach = staff
+        ticket.trang_thai = 'ASSIGNED'
+
+        ticket.save(
+            update_fields=[
+                'nguoi_phu_trach',
+                'trang_thai',
+                'thoi_diem_cap_nhat',
+            ]
+        )
+
+        TicketLog.objects.create(
+            ticket=ticket,
+            nguoi_thuc_hien=request.user,
+            hanh_dong='PHAN_CONG',
+            noi_dung=(
+                f"Ticket được phân công cho nhân viên "
+                f"{staff.ho_ten}. "
+                "Trạng thái NEW → ASSIGNED."
+            )
+        )
+
+    messages.success(
+        request,
+        f"Đã phân công Ticket cho {staff.ho_ten}."
+    )
+
+    return redirect('tickets:detail', pk=ticket.pk)
+
+
+# ==========================================================
+# UC-3.4 - GHI NHẬN YÊU CẦU CHUYỂN THẨM ĐỊNH
+# ==========================================================
+
+@login_required(login_url='login')
+@role_required('CSKH')
+@require_POST
+
+def ticket_request_assessment(request, pk):
+
+    staff = getattr(request.user, 'staff_profile', None)
+
+    if staff is None or staff.vai_tro != 'CSKH':
+        return HttpResponseForbidden(
+            "Bạn không có quyền yêu cầu thẩm định Ticket."
+        )
+
+    ly_do = request.POST.get('ly_do_tham_dinh', '').strip()
+
+    if len(ly_do) < 10:
+        messages.error(
+            request,
+            "Vui lòng nhập lý do thẩm định ít nhất 10 ký tự."
+        )
+        return redirect('tickets:detail', pk=pk)
+
+    with transaction.atomic():
+
+        ticket = get_object_or_404(
+            Ticket.objects.select_for_update(),
+            pk=pk
+        )
+
+        if ticket.nguoi_phu_trach_id != staff.pk:
+            return HttpResponseForbidden(
+                "Bạn không được phân công xử lý Ticket này."
+            )
+
+        if ticket.trang_thai != 'IN_PROGRESS':
+            messages.error(
+                request,
+                "Chỉ được yêu cầu thẩm định khi Ticket đang xử lý."
+            )
+            return redirect('tickets:detail', pk=ticket.pk)
+
+        # Ngăn gửi trùng khi đang chờ thẩm định
+        if ticket.trang_thai_tham_dinh == 'WAITING':
+            messages.warning(
+                request,
+                "Ticket đã có yêu cầu thẩm định đang chờ kết quả."
+            )
+            return redirect('tickets:detail', pk=ticket.pk)
+
+        # Đã có kết quả: không tạo yêu cầu mới tự động.
+        # Khi REOPENED, hồ sơ M4 cũ phải được tái sử dụng.
+        if ticket.trang_thai_tham_dinh == 'COMPLETED':
+            messages.warning(
+                request,
+                "Ticket đã có kết quả thẩm định. "
+                "Việc điều chỉnh phương án sẽ sử dụng hồ sơ M4 cũ."
+            )
+            return redirect('tickets:detail', pk=ticket.pk)
+
+        now = timezone.now()
+
+        # Cập nhật trạng thái theo dõi thẩm định trong M3
+        ticket.trang_thai_tham_dinh = 'WAITING'
+        ticket.thoi_diem_yeu_cau_tham_dinh = now
+
+        ticket.save(
+            update_fields=[
+                'trang_thai_tham_dinh',
+                'thoi_diem_yeu_cau_tham_dinh',
+                'thoi_diem_cap_nhat',
+            ]
+        )
+
+        # Lưu lịch sử yêu cầu thẩm định
+        TicketLog.objects.create(
+            ticket=ticket,
+            nguoi_thuc_hien=request.user,
+            hanh_dong='YEU_CAU_THAM_DINH',
+            noi_dung=(
+                f"Nhân viên {staff.ho_ten} ghi nhận "
+                f"yêu cầu thẩm định. Lý do: {ly_do}"
+            )
+        )
+
+    messages.success(
+        request,
+        "Đã ghi nhận yêu cầu thẩm định. "
+        "Ticket đang chờ kết quả từ bộ phận chuyên môn."
+    )
+
+    return redirect('tickets:detail', pk=ticket.pk)
+

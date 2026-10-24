@@ -1,29 +1,87 @@
-/* ==========================================================
-   HULOECOM - KHOI PHUC GIAO DIEN TICKET QUEUE
 
+/* ==========================================================
+   HULOECOM - TICKET QUEUE
+   Font chữ và bố cục thống kê SLA
+   ========================================================== */
 
 
 /* ==========================================
-   KHOI PHUC FONT CHU TICKET QUEUE
+   1. FONT CHỮ TICKET QUEUE
    ========================================== */
 
-.ticket-page {
+.ticket-page,
+.ticket-page * {
     font-family: Arial, sans-serif;
 }
 
 .ticket-page .ticket-banner h1 {
-    font-family: Arial, sans-serif;
     font-size: 27px;
     font-weight: 700;
 }
 
 .ticket-page .ticket-section-title {
-    font-family: Arial, sans-serif;
     font-size: 20px;
     font-weight: 700;
 }
 
-.ticket-page,
-.ticket-page * {
-    font-family: Arial, sans-serif;
+
+/* ==========================================
+   2. BỐ CỤC 5 Ô THỐNG KÊ
+   ========================================== */
+
+.ticket-page .ticket-stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+
+.ticket-page .ticket-stat-card {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.ticket-page .ticket-stat-number {
+    font-weight: 700;
+}
+
+
+/* ==========================================
+   3. MÀN HÌNH LAPTOP NHỎ
+   ========================================== */
+
+@media (max-width: 1200px) {
+
+    .ticket-page .ticket-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+}
+
+
+/* ==========================================
+   4. MÀN HÌNH TABLET
+   ========================================== */
+
+@media (max-width: 768px) {
+
+    .ticket-page .ticket-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+}
+
+
+/* ==========================================
+   5. MÀN HÌNH ĐIỆN THOẠI
+   ========================================== */
+
+@media (max-width: 480px) {
+
+    .ticket-page .ticket-stats {
+        grid-template-columns: 1fr;
+    }
+
 }

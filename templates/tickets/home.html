@@ -8,7 +8,7 @@ Quản lý Ticket - CRM HULO
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'tickets/tickets.css' %}?v=5">
-<link rel="stylesheet" href="{% static 'tickets/ticket_queue.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'tickets/ticket_queue.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
@@ -16,7 +16,7 @@ Quản lý Ticket - CRM HULO
 <div class="ticket-page">
 
     <!-- ==========================================
-         1. BANNER - PHONG CÁCH FIGMA HULOECOM
+         1. BANNER
          ========================================== -->
     <section class="ticket-banner">
 
@@ -29,21 +29,19 @@ Quản lý Ticket - CRM HULO
 
     </section>
 
-
     <!-- ==========================================
-         2. TIÊU ĐỀ TICKET QUEUE
+         2. TIÊU ĐỀ
          ========================================== -->
     <h2 class="ticket-section-title">
         Ticket Queue
     </h2>
 
-
     <!-- ==========================================
-         3. THỐNG KÊ TICKET TỪ DATABASE
+         3. THỐNG KÊ TICKET VÀ SLA
          ========================================== -->
     <section class="ticket-stats">
 
-        <!-- Ticket chờ tiếp nhận -->
+        <!-- Chờ tiếp nhận -->
         <div class="ticket-stat-card">
             <div class="ticket-stat-icon">📋</div>
 
@@ -58,7 +56,7 @@ Quản lý Ticket - CRM HULO
             </div>
         </div>
 
-        <!-- Ticket đang xử lý -->
+        <!-- Đang xử lý -->
         <div class="ticket-stat-card">
             <div class="ticket-stat-icon">⚙️</div>
 
@@ -73,7 +71,7 @@ Quản lý Ticket - CRM HULO
             </div>
         </div>
 
-        <!-- Ticket sắp quá SLA -->
+        <!-- Sắp quá SLA -->
         <div class="ticket-stat-card">
             <div class="ticket-stat-icon">⏳</div>
 
@@ -88,7 +86,22 @@ Quản lý Ticket - CRM HULO
             </div>
         </div>
 
-        <!-- Ticket đã giải quyết -->
+        <!-- Quá hạn SLA - UC3.6 -->
+        <div class="ticket-stat-card">
+            <div class="ticket-stat-icon">🚨</div>
+
+            <div>
+                <p class="ticket-stat-number">
+                    {{ stats.qua_han_sla|default:0 }}
+                </p>
+
+                <p class="ticket-stat-label">
+                    Quá hạn SLA
+                </p>
+            </div>
+        </div>
+
+        <!-- Đã giải quyết -->
         <div class="ticket-stat-card">
             <div class="ticket-stat-icon">✅</div>
 
@@ -105,10 +118,8 @@ Quản lý Ticket - CRM HULO
 
     </section>
 
-
     <!-- ==========================================
          4. TÌM KIẾM VÀ BỘ LỌC
-         Phương thức GET
          ========================================== -->
     <form
         method="GET"
@@ -118,7 +129,7 @@ Quản lý Ticket - CRM HULO
 
         <div class="ticket-filters">
 
-            <!-- Tìm theo mã Ticket, tiêu đề, khách hàng -->
+            <!-- Tìm kiếm -->
             <input
                 type="search"
                 name="q"
@@ -128,84 +139,109 @@ Quản lý Ticket - CRM HULO
                 aria-label="Tìm kiếm Ticket"
             >
 
-            <!-- Lọc trạng thái -->
+            <!-- Trạng thái -->
             <select
                 name="status"
                 class="ticket-filter-select"
                 aria-label="Lọc theo trạng thái"
             >
+
                 <option value="">
                     Tất cả trạng thái
                 </option>
 
-                <option value="NEW"
-                    {% if selected_status == 'NEW' %}selected{% endif %}>
+                <option
+                    value="NEW"
+                    {% if selected_status == 'NEW' %}selected{% endif %}
+                >
                     Mới tạo
                 </option>
 
-                <option value="ASSIGNED"
-                    {% if selected_status == 'ASSIGNED' %}selected{% endif %}>
+                <option
+                    value="ASSIGNED"
+                    {% if selected_status == 'ASSIGNED' %}selected{% endif %}
+                >
                     Đã phân công
                 </option>
 
-                <option value="IN_PROGRESS"
-                    {% if selected_status == 'IN_PROGRESS' %}selected{% endif %}>
+                <option
+                    value="IN_PROGRESS"
+                    {% if selected_status == 'IN_PROGRESS' %}selected{% endif %}
+                >
                     Đang xử lý
                 </option>
 
-                <option value="RESOLVED"
-                    {% if selected_status == 'RESOLVED' %}selected{% endif %}>
+                <option
+                    value="RESOLVED"
+                    {% if selected_status == 'RESOLVED' %}selected{% endif %}
+                >
                     Đã giải quyết
                 </option>
 
-                <option value="CLOSED"
-                    {% if selected_status == 'CLOSED' %}selected{% endif %}>
+                <option
+                    value="CLOSED"
+                    {% if selected_status == 'CLOSED' %}selected{% endif %}
+                >
                     Đã đóng
                 </option>
 
-                <option value="REOPENED"
-                    {% if selected_status == 'REOPENED' %}selected{% endif %}>
+                <option
+                    value="REOPENED"
+                    {% if selected_status == 'REOPENED' %}selected{% endif %}
+                >
                     Mở lại
                 </option>
+
             </select>
 
-            <!-- Lọc mức độ ưu tiên -->
+            <!-- Mức độ ưu tiên -->
             <select
                 name="priority"
                 class="ticket-filter-select"
                 aria-label="Lọc theo mức ưu tiên"
             >
+
                 <option value="">
                     Mức ưu tiên
                 </option>
 
-                <option value="LOW"
-                    {% if selected_priority == 'LOW' %}selected{% endif %}>
+                <option
+                    value="LOW"
+                    {% if selected_priority == 'LOW' %}selected{% endif %}
+                >
                     Thấp
                 </option>
 
-                <option value="MEDIUM"
-                    {% if selected_priority == 'MEDIUM' %}selected{% endif %}>
+                <option
+                    value="MEDIUM"
+                    {% if selected_priority == 'MEDIUM' %}selected{% endif %}
+                >
                     Trung bình
                 </option>
 
-                <option value="HIGH"
-                    {% if selected_priority == 'HIGH' %}selected{% endif %}>
+                <option
+                    value="HIGH"
+                    {% if selected_priority == 'HIGH' %}selected{% endif %}
+                >
                     Cao
                 </option>
 
-                <option value="URGENT"
-                    {% if selected_priority == 'URGENT' %}selected{% endif %}>
+                <option
+                    value="URGENT"
+                    {% if selected_priority == 'URGENT' %}selected{% endif %}
+                >
                     Khẩn cấp
                 </option>
+
             </select>
 
-            <!-- Lọc danh mục vấn đề -->
+            <!-- Danh mục -->
             <select
                 name="category"
                 class="ticket-filter-select"
                 aria-label="Lọc theo danh mục"
             >
+
                 <option value="">
                     Danh mục vấn đề
                 </option>
@@ -222,12 +258,12 @@ Quản lý Ticket - CRM HULO
                     </option>
 
                 {% endfor %}
+
             </select>
 
         </div>
 
-
-        <!-- Nút tìm kiếm và xóa lọc -->
+        <!-- Nút tìm kiếm -->
         <div class="ticket-filter-actions">
 
             <button
@@ -248,7 +284,6 @@ Quản lý Ticket - CRM HULO
 
     </form>
 
-
     <!-- ==========================================
          5. BẢNG DANH SÁCH TICKET
          ========================================== -->
@@ -256,7 +291,6 @@ Quản lý Ticket - CRM HULO
 
         <table class="ticket-table">
 
-            <!-- Tiêu đề bảng -->
             <thead>
                 <tr>
                     <th>Mã Ticket</th>
@@ -270,210 +304,241 @@ Quản lý Ticket - CRM HULO
                 </tr>
             </thead>
 
-
-            <!-- Dữ liệu bảng -->
             <tbody>
 
                 {% for ticket in tickets %}
 
-                <tr>
+                    <tr>
 
-                    <!-- Mã Ticket -->
-                    <td>
-                        <a
-                            href="{% url 'tickets:detail' ticket.pk %}"
-                            class="ticket-code"
-                        >
-                            {{ ticket.ma_ticket|default:"Chưa có mã" }}
-                        </a>
-                    </td>
+                        <!-- Mã Ticket -->
+                        <td>
+                            <a
+                                href="{% url 'tickets:detail' ticket.pk %}"
+                                class="ticket-code"
+                            >
+                                {{ ticket.ma_ticket|default:"Chưa có mã" }}
+                            </a>
+                        </td>
 
+                        <!-- Khách hàng -->
+                        <td>
+                            {{ ticket.khach_hang.ho_ten }}
+                        </td>
 
-                    <!-- Khách hàng -->
-                    <td>
-                        {{ ticket.khach_hang.ho_ten }}
-                    </td>
+                        <!-- Danh mục -->
+                        <td>
 
+                            {% if ticket.danh_muc %}
+                                {{ ticket.danh_muc.ten_danh_muc }}
+                            {% else %}
+                                Chưa phân loại
+                            {% endif %}
 
-                    <!-- Danh mục -->
-                    <td>
-                        {% if ticket.danh_muc %}
-                            {{ ticket.danh_muc.ten_danh_muc }}
-                        {% else %}
-                            Chưa phân loại
-                        {% endif %}
-                    </td>
+                        </td>
 
+                        <!-- Ưu tiên -->
+                        <td>
 
-                    <!-- Mức độ ưu tiên -->
-                    <td>
+                            {% if ticket.muc_uu_tien == 'URGENT' %}
 
-                        {% if ticket.muc_uu_tien == 'URGENT' %}
+                                <span class="ticket-badge ticket-priority-high">
+                                    Khẩn cấp
+                                </span>
 
-                            <span class="ticket-badge ticket-priority-high">
-                                Khẩn cấp
-                            </span>
+                            {% elif ticket.muc_uu_tien == 'HIGH' %}
 
-                        {% elif ticket.muc_uu_tien == 'HIGH' %}
+                                <span class="ticket-badge ticket-priority-high">
+                                    Cao
+                                </span>
 
-                            <span class="ticket-badge ticket-priority-high">
-                                Cao
-                            </span>
+                            {% elif ticket.muc_uu_tien == 'MEDIUM' %}
 
-                        {% elif ticket.muc_uu_tien == 'MEDIUM' %}
+                                <span class="ticket-badge ticket-priority-medium">
+                                    Trung bình
+                                </span>
 
-                            <span class="ticket-badge ticket-priority-medium">
-                                Trung bình
-                            </span>
+                            {% elif ticket.muc_uu_tien == 'LOW' %}
 
-                        {% elif ticket.muc_uu_tien == 'LOW' %}
+                                <span class="ticket-badge ticket-priority-low">
+                                    Thấp
+                                </span>
 
-                            <span class="ticket-badge ticket-priority-low">
-                                Thấp
-                            </span>
+                            {% else %}
 
-                        {% else %}
+                                <span class="ticket-badge ticket-badge-new">
+                                    Chưa xác định
+                                </span>
 
-                            <span class="ticket-badge ticket-badge-new">
-                                Chưa xác định
-                            </span>
+                            {% endif %}
 
-                        {% endif %}
+                        </td>
 
-                    </td>
+                        <!-- Trạng thái Ticket -->
+                        <td>
 
+                            {% if ticket.trang_thai == 'NEW' %}
 
-                    <!-- Trạng thái Ticket -->
-                    <td>
+                                <span class="ticket-badge ticket-badge-new">
+                                    NEW
+                                </span>
 
-                        {% if ticket.trang_thai == 'NEW' %}
+                            {% elif ticket.trang_thai == 'ASSIGNED' %}
 
-                            <span class="ticket-badge ticket-badge-new">
-                                NEW
-                            </span>
+                                <span class="ticket-badge ticket-badge-assigned">
+                                    ASSIGNED
+                                </span>
 
-                        {% elif ticket.trang_thai == 'ASSIGNED' %}
+                            {% elif ticket.trang_thai == 'IN_PROGRESS' %}
 
-                            <span class="ticket-badge ticket-badge-assigned">
-                                ASSIGNED
-                            </span>
+                                <span class="ticket-badge ticket-badge-progress">
+                                    IN_PROGRESS
+                                </span>
 
-                        {% elif ticket.trang_thai == 'IN_PROGRESS' %}
+                            {% elif ticket.trang_thai == 'RESOLVED' %}
 
-                            <span class="ticket-badge ticket-badge-progress">
-                                IN_PROGRESS
-                            </span>
+                                <span class="ticket-badge ticket-badge-resolved">
+                                    RESOLVED
+                                </span>
 
-                        {% elif ticket.trang_thai == 'RESOLVED' %}
+                            {% elif ticket.trang_thai == 'CLOSED' %}
 
-                            <span class="ticket-badge ticket-badge-resolved">
-                                RESOLVED
-                            </span>
+                                <span class="ticket-badge ticket-badge-closed">
+                                    CLOSED
+                                </span>
 
-                        {% elif ticket.trang_thai == 'CLOSED' %}
+                            {% elif ticket.trang_thai == 'REOPENED' %}
 
-                            <span class="ticket-badge ticket-badge-closed">
-                                CLOSED
-                            </span>
+                                <span class="ticket-badge ticket-badge-reopened">
+                                    REOPENED
+                                </span>
 
-                        {% elif ticket.trang_thai == 'REOPENED' %}
+                            {% else %}
 
-                            <span class="ticket-badge ticket-badge-reopened">
-                                REOPENED
-                            </span>
+                                <span class="ticket-badge ticket-badge-new">
+                                    Không xác định
+                                </span>
 
-                        {% else %}
+                            {% endif %}
 
-                            <span class="ticket-badge ticket-badge-new">
-                                Không xác định
-                            </span>
+                        </td>
 
-                        {% endif %}
+                        <!-- Nhân viên phụ trách -->
+                        <td>
 
-                    </td>
+                            {% if ticket.nguoi_phu_trach %}
 
+                                {{ ticket.nguoi_phu_trach.ho_ten }}
 
-                    <!-- Nhân viên phụ trách -->
-                    <td>
+                            {% else %}
 
-                        {% if ticket.nguoi_phu_trach %}
+                                <span class="ticket-detail-muted">
+                                    Chưa phân công
+                                </span>
 
-                            {{ ticket.nguoi_phu_trach.ho_ten }}
+                            {% endif %}
 
-                        {% else %}
+                        </td>
 
-                            <span class="ticket-detail-muted">
-                                Chưa phân công
-                            </span>
+                        <!-- =====================================
+                             UC3.6 - CẢNH BÁO SLA TỪ BACKEND
+                             ===================================== -->
+                        <td>
 
-                        {% endif %}
+                            {% if ticket.sla_deadline %}
 
-                    </td>
+                                <span class="ticket-sla">
+                                    {{ ticket.sla_deadline|date:"d/m/Y H:i" }}
+                                </span>
 
+                            {% endif %}
 
-                    <!-- SLA Deadline -->
-                    <td>
+                            <div style="margin-top: 8px;">
 
-                        {% if ticket.sla_deadline %}
+                                {% if ticket.sla_status == 'OVERDUE' %}
 
-                            <span class="ticket-sla">
-                                {{ ticket.sla_deadline|date:"d/m/Y H:i" }}
-                            </span>
+                                    <span
+                                        class="ticket-badge ticket-priority-high"
+                                        title="Ticket đã đến hoặc vượt thời hạn SLA"
+                                    >
+                                        🚨 Quá hạn SLA
+                                    </span>
 
-                        {% else %}
+                                {% elif ticket.sla_status == 'WARNING' %}
 
-                            <span class="ticket-detail-muted">
-                                Chưa thiết lập
-                            </span>
+                                    <span
+                                        class="ticket-badge ticket-priority-medium"
+                                        title="Ticket còn tối đa 4 giờ trước thời hạn SLA"
+                                    >
+                                        ⏳ Sắp quá hạn
+                                    </span>
 
-                        {% endif %}
+                                {% elif ticket.sla_status == 'ON_TIME' %}
 
-                    </td>
+                                    <span class="ticket-badge ticket-badge-resolved">
+                                        ✓ Còn hạn
+                                    </span>
 
+                                {% elif ticket.sla_status == 'DONE' %}
 
-                    <!-- Hành động: XEM CHI TIẾT -->
-                    <td>
+                                    <span class="ticket-badge ticket-badge-closed">
+                                        ✓ Đã giải quyết
+                                    </span>
 
-                        <a
-                            href="{% url 'tickets:detail' ticket.pk %}"
-                            class="ticket-action-link"
-                        >
-                            Xem chi tiết →
-                        </a>
+                                {% else %}
 
-                    </td>
+                                    <span class="ticket-detail-muted">
+                                        Chưa thiết lập SLA
+                                    </span>
 
-                </tr>
+                                {% endif %}
 
+                            </div>
 
-                <!-- Không có Ticket phù hợp -->
-                {% empty %}
+                        </td>
 
-                <tr>
-
-                    <td colspan="8">
-
-                        <div class="ticket-empty">
-
-                            <h3>Không tìm thấy Ticket phù hợp</h3>
-
-                            <p>
-                                Hiện chưa có Ticket hoặc không có
-                                kết quả phù hợp với điều kiện tìm kiếm.
-                            </p>
+                        <!-- Xem chi tiết -->
+                        <td>
 
                             <a
-                                href="{% url 'tickets:home' %}"
+                                href="{% url 'tickets:detail' ticket.pk %}"
                                 class="ticket-action-link"
                             >
-                                Xem tất cả Ticket →
+                                Xem chi tiết →
                             </a>
 
-                        </div>
+                        </td>
 
-                    </td>
+                    </tr>
 
-                </tr>
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="8">
+
+                            <div class="ticket-empty">
+
+                                <h3>
+                                    Không tìm thấy Ticket phù hợp
+                                </h3>
+
+                                <p>
+                                    Hiện chưa có Ticket hoặc không có
+                                    kết quả phù hợp với điều kiện tìm kiếm.
+                                </p>
+
+                                <a
+                                    href="{% url 'tickets:home' %}"
+                                    class="ticket-action-link"
+                                >
+                                    Xem tất cả Ticket →
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
 
                 {% endfor %}
 

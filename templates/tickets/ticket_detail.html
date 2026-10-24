@@ -153,11 +153,13 @@
 
                 {% if ticket.ly_do_khong_dong_y %}
                     <div class="ticket-reopen-reason">
+
                         <strong>Lý do khách hàng:</strong>
 
                         <p>
                             {{ ticket.ly_do_khong_dong_y|linebreaksbr }}
                         </p>
+
                     </div>
                 {% endif %}
 
@@ -387,6 +389,128 @@
 
                 {% endif %}
 
+                <!-- FORM PHÂN CÔNG TICKET MỚI -->
+                {% if ticket.trang_thai == 'NEW' %}
+                    {% if user_role == 'MANAGER' or user_role == 'ADMIN' %}
+
+                        <div class="ticket-action-block">
+
+                            <h4>Phân công nhân viên CSKH</h4>
+
+                            <form
+                                method="POST"
+                                action="{% url 'tickets:assign' ticket.pk %}"
+                            >
+                                {% csrf_token %}
+
+                                <div class="ticket-form-group">
+
+                                    <label for="staff_id">
+                                        Chọn nhân viên phụ trách
+                                    </label>
+
+                                    <select
+                                        name="staff_id"
+                                        id="staff_id"
+                                        required
+                                    >
+                                        <option value="">
+                                            -- Chọn nhân viên --
+                                        </option>
+
+                                        {% for staff in staff_options %}
+                                            <option value="{{ staff.pk }}">
+                                                {{ staff.ho_ten }}
+                                            </option>
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+                                {% if staff_options %}
+
+                                    <button
+                                        type="submit"
+                                        class="ticket-btn"
+                                    >
+                                        Phân công Ticket
+                                    </button>
+
+                                {% else %}
+
+                                    <p class="ticket-detail-muted">
+                                        Chưa có nhân viên CSKH để phân công.
+                                    </p>
+
+                                {% endif %}
+
+                            </form>
+
+                        </div>
+
+                    {% endif %}
+                {% endif %}
+
+            </section>
+
+            <!-- ==========================================
+                 UC3.4 - THEO DÕI TRẠNG THÁI THẨM ĐỊNH
+                 ========================================== -->
+            <section class="ticket-detail-card">
+
+                <h3>📋 Theo dõi thẩm định</h3>
+
+                <div class="ticket-detail-info-row">
+                    <span>Trạng thái thẩm định</span>
+
+                    <strong>
+                        {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
+                            ⏳ Đang chờ kết quả
+                        {% elif ticket.trang_thai_tham_dinh == 'COMPLETED' %}
+                            ✅ Đã có kết quả
+                        {% else %}
+                            Chưa yêu cầu
+                        {% endif %}
+                    </strong>
+                </div>
+
+                {% if ticket.thoi_diem_yeu_cau_tham_dinh %}
+
+                    <div class="ticket-detail-info-row">
+                        <span>Thời điểm yêu cầu</span>
+
+                        <strong>
+                            {{ ticket.thoi_diem_yeu_cau_tham_dinh|date:"d/m/Y H:i" }}
+                        </strong>
+                    </div>
+
+                {% endif %}
+
+                {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
+
+                    <p class="ticket-detail-muted">
+                        Hồ sơ đang chờ phối hợp chuyên môn.
+                        Nhân viên không cần gửi lại yêu cầu.
+                    </p>
+
+                {% elif ticket.trang_thai_tham_dinh == 'COMPLETED' %}
+
+                    <p class="ticket-detail-muted">
+                        Đã ghi nhận kết quả thẩm định.
+                        Nếu khách hàng yêu cầu xử lý lại,
+                        hồ sơ M4 cũ sẽ được sử dụng để tiếp tục
+                        theo dõi các lần điều chỉnh phương án.
+                    </p>
+
+                {% else %}
+
+                    <p class="ticket-detail-muted">
+                        Ticket hiện chưa ghi nhận yêu cầu thẩm định.
+                    </p>
+
+                {% endif %}
+
             </section>
 
             <!-- KẾT QUẢ XỬ LÝ -->
@@ -443,6 +567,7 @@
                     >
                         ✓ Tiếp nhận Ticket
                     </button>
+
                 </form>
 
             {% endif %}
@@ -470,6 +595,7 @@
                     >
                         ↻ Tiếp tục xử lý Ticket
                     </button>
+
                 </form>
 
             {% else %}
@@ -481,13 +607,13 @@
 
             {% endif %}
 
-        <!-- IN_PROGRESS: PHẢN HỒI VÀ HOÀN TẤT -->
+        <!-- IN_PROGRESS: PHẢN HỒI VÀ XỬ LÝ -->
         {% elif ticket.trang_thai == 'IN_PROGRESS' %}
 
             <p>
                 Nhân viên có thể phản hồi khách hàng,
-                ghi chú nội bộ hoặc hoàn tất xử lý
-                khi đã có phương án giải quyết.
+                ghi chú nội bộ, yêu cầu thẩm định
+                hoặc hoàn tất Ticket khi có phương án giải quyết.
             </p>
 
             {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
@@ -542,48 +668,150 @@
 
                 </div>
 
+                <!-- ==========================================
+                     UC3.4 - GHI NHẬN YÊU CẦU THẨM ĐỊNH
+                     ========================================== -->
+                <div class="ticket-action-block">
+
+                    <h4>📋 Yêu cầu chuyển thẩm định</h4>
+
+                    {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
+
+                        <p class="ticket-detail-muted">
+                            ⏳ Ticket đã được ghi nhận yêu cầu
+                            thẩm định và đang chờ kết quả.
+                            Không cần gửi lại yêu cầu.
+                        </p>
+
+                        {% if ticket.thoi_diem_yeu_cau_tham_dinh %}
+
+                            <p class="ticket-form-hint">
+                                Thời điểm gửi:
+                                {{ ticket.thoi_diem_yeu_cau_tham_dinh|date:"d/m/Y H:i" }}
+                            </p>
+
+                        {% endif %}
+
+                    {% elif ticket.trang_thai_tham_dinh == 'COMPLETED' %}
+
+                        <p class="ticket-detail-muted">
+                            ✅ Ticket đã có kết quả thẩm định.
+                            Nếu cần điều chỉnh phương án,
+                            phải sử dụng hồ sơ thẩm định M4
+                            hiện có và giữ lịch sử thay đổi.
+                        </p>
+
+                    {% else %}
+
+                        <p class="ticket-detail-muted">
+                            Sử dụng khi cần bộ phận chuyên môn
+                            xác minh lỗi sản phẩm, yêu cầu đổi trả
+                            hoặc bồi hoàn.
+                        </p>
+
+                        <form
+                            method="POST"
+                            action="{% url 'tickets:request_assessment' ticket.pk %}"
+                        >
+                            {% csrf_token %}
+
+                            <div class="ticket-form-group">
+
+                                <label for="ly_do_tham_dinh">
+                                    Lý do yêu cầu thẩm định
+                                </label>
+
+                                <textarea
+                                    name="ly_do_tham_dinh"
+                                    id="ly_do_tham_dinh"
+                                    rows="4"
+                                    minlength="10"
+                                    required
+                                    placeholder="Nhập nội dung cần bộ phận chuyên môn xác minh..."
+                                ></textarea>
+
+                            </div>
+
+                            <p class="ticket-form-hint">
+                                Yêu cầu được ghi nhận vào lịch sử Ticket.
+                                Ticket vẫn ở trạng thái IN_PROGRESS.
+                                Việc chuyển hồ sơ thực tế sang Module 4
+                                sẽ được kết nối khi tích hợp các module.
+                            </p>
+
+                            <button
+                                type="submit"
+                                class="ticket-btn"
+                            >
+                                ✓ Ghi nhận yêu cầu thẩm định
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+
                 <!-- FORM HOÀN TẤT -->
                 <div class="ticket-action-block ticket-resolve-block">
 
                     <h4>✅ Hoàn tất xử lý Ticket</h4>
 
-                    <p>
-                        Nhập phương án giải quyết rõ ràng
-                        trước khi chuyển Ticket sang RESOLVED.
-                    </p>
+                    {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
 
-                    <form
-                        method="POST"
-                        action="{% url 'tickets:resolve' ticket.pk %}"
-                        class="ticket-resolve-form"
-                    >
-                        {% csrf_token %}
-
-                        <div class="ticket-form-group">
-
-                            <label for="{{ resolve_form.ket_qua_xu_ly.id_for_label }}">
-                                Kết quả xử lý
-                            </label>
-
-                            {{ resolve_form.ket_qua_xu_ly }}
-
-                        </div>
-
-                        <p class="ticket-form-hint">
-                            Ticket sẽ chuyển IN_PROGRESS → RESOLVED
-                            và chờ khách hàng xác nhận.
+                        <p class="ticket-detail-muted">
+                            ⏳ Ticket đang chờ kết quả thẩm định
+                            từ bộ phận chuyên môn.
                         </p>
 
-                        <button
-                            type="submit"
-                            class="ticket-btn ticket-btn-resolve"
-                        >
-                            ✓ Xác nhận hoàn tất xử lý
-                        </button>
+                        <p class="ticket-form-hint">
+                            Chưa thể hoàn tất Ticket cho đến khi
+                            có kết quả thẩm định hợp lệ.
+                        </p>
 
-                    </form>
+                    {% else %}
+
+                        <p>
+                            Nhập phương án giải quyết rõ ràng
+                            trước khi chuyển Ticket sang RESOLVED.
+                        </p>
+
+                        <form
+                            method="POST"
+                            action="{% url 'tickets:resolve' ticket.pk %}"
+                            class="ticket-resolve-form"
+                        >
+                            {% csrf_token %}
+
+                            <div class="ticket-form-group">
+
+                                <label for="{{ resolve_form.ket_qua_xu_ly.id_for_label }}">
+                                    Kết quả xử lý
+                                </label>
+
+                                {{ resolve_form.ket_qua_xu_ly }}
+
+                            </div>
+
+                            <p class="ticket-form-hint">
+                                Ticket sẽ chuyển IN_PROGRESS → RESOLVED
+                                và chờ khách hàng xác nhận.
+                            </p>
+
+                            <button
+                                type="submit"
+                                class="ticket-btn ticket-btn-resolve"
+                            >
+                                ✓ Xác nhận hoàn tất xử lý
+                            </button>
+
+                        </form>
+
+                    {% endif %}
 
                 </div>
+
 
             {% endif %}
 
