@@ -1,0 +1,512 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Khai báo yêu cầu hỗ trợ - HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .m2-request-page {
+        max-width: 850px;
+        margin: 30px auto;
+        padding: 0 20px 40px;
+        color: #173b68;
+    }
+
+    .m2-request-heading {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .m2-request-heading h1 {
+        font-size: 28px;
+        color: #103e78;
+        margin-bottom: 10px;
+    }
+
+    .m2-request-card {
+        background: #fff;
+        border: 2px solid #84bdeb;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 60, 120, 0.06);
+    }
+
+    .m2-request-type {
+        background: #eef6ff;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .m2-request-type strong {
+        color: #1268bd;
+        font-size: 18px;
+    }
+
+    .m2-section-title {
+        font-size: 15px;
+        color: #135ba4;
+        font-weight: bold;
+        margin: 25px 0 14px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #dce7f3;
+    }
+
+    .m2-field {
+        margin-bottom: 18px;
+    }
+
+    .m2-field label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .m2-input,
+    .m2-textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbdbea;
+        border-radius: 8px;
+        font-size: 15px;
+        background: white;
+        color: #173b68;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .m2-input:focus,
+    .m2-textarea:focus {
+        border-color: #1677d2;
+        outline: 2px solid #d5eaff;
+    }
+
+    .m2-textarea {
+        resize: vertical;
+    }
+
+    .m2-note {
+        font-size: 13px;
+        color: #6581a2;
+        margin-top: 6px;
+    }
+
+    .m2-upload-preview {
+        border: 2px dashed #bbd7f0;
+        border-radius: 10px;
+        background: #f7fbff;
+        text-align: center;
+        padding: 28px 15px;
+        color: #5782ac;
+    }
+
+    .m2-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+
+    .m2-btn {
+        display: inline-block;
+        padding: 12px 22px;
+        border-radius: 8px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .m2-btn-primary {
+        background: #1677d2;
+        border: none;
+        color: white;
+    }
+
+    .m2-btn-secondary {
+        background: #f1f5f9;
+        border: 1px solid #d8e2ed;
+        color: #315b82;
+    }
+
+    .m2-error {
+        color: #b42318;
+        margin-top: 5px;
+        font-size: 13px;
+    }
+
+    .m2-success {
+        background: #e9f7ee;
+        color: #176337;
+        padding: 17px;
+        border-radius: 10px;
+        margin-bottom: 22px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 600px) {
+        .m2-request-card {
+            padding: 18px;
+        }
+
+        .m2-request-type {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="m2-request-page">
+
+    <div class="m2-request-heading">
+        <h1>Gửi yêu cầu hỗ trợ</h1>
+        <p>
+            Vui lòng cung cấp đầy đủ thông tin
+            để HULO hỗ trợ bạn nhanh chóng.
+        </p>
+    </div>
+
+    <div class="m2-request-card">
+
+        <!-- LOẠI VẤN ĐỀ -->
+        <div class="m2-request-type">
+            <div>
+                <small>Loại vấn đề đã chọn</small>
+                <br>
+                <strong>{{ ten_loai_van_de }}</strong>
+            </div>
+
+            <a href="{% url 'chatbot:chuyen_ho_tro' %}">
+                Thay đổi
+            </a>
+        </div>
+
+        {% if da_luu %}
+            <div class="m2-success">
+                <strong>Đã lưu bản nháp thành công!</strong>
+                <p>
+                    Thông tin yêu cầu đã được ghi nhận tạm thời.
+                    Chúng ta sẽ tiếp tục bổ sung bằng chứng ở UC-2.5.
+                </p>
+                <p>
+                    Yêu cầu chưa được gửi chính thức
+                    và chưa tạo Ticket.
+                </p>
+            </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="m2-error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <!-- THÔNG TIN ĐƠN HÀNG -->
+            <div class="m2-section-title">
+                THÔNG TIN ĐƠN HÀNG
+            </div>
+
+            <div class="m2-field">
+                <label for="{{ form.ma_don_hang.id_for_label }}">
+                    {{ form.ma_don_hang.label }}
+                </label>
+
+                {{ form.ma_don_hang }}
+
+                <div class="m2-note">
+                    Chỉ nhập nếu yêu cầu có liên quan đến đơn hàng.
+                    Mã sẽ được xác minh khi tích hợp với Module 4.
+                </div>
+
+                <div class="m2-error">
+                    {{ form.ma_don_hang.errors }}
+                </div>
+            </div>
+
+            <!-- NỘI DUNG YÊU CẦU -->
+            <div class="m2-section-title">
+                NỘI DUNG YÊU CẦU
+            </div>
+
+            <div class="m2-field">
+                <label for="{{ form.tieu_de.id_for_label }}">
+                    {{ form.tieu_de.label }} *
+                </label>
+
+                {{ form.tieu_de }}
+
+                <div class="m2-error">
+                    {{ form.tieu_de.errors }}
+                </div>
+            </div>
+
+            <div class="m2-field">
+                <label for="{{ form.mo_ta.id_for_label }}">
+                    {{ form.mo_ta.label }} *
+                </label>
+
+                {{ form.mo_ta }}
+
+                <div class="m2-error">
+                    {{ form.mo_ta.errors }}
+                </div>
+            </div>
+
+            <!-- THÔNG TIN LIÊN HỆ -->
+            <div class="m2-section-title">
+                THÔNG TIN LIÊN HỆ
+            </div>
+
+            <div class="m2-field">
+                <label for="{{ form.email_lien_he.id_for_label }}">
+                    {{ form.email_lien_he.label }}
+                </label>
+
+                {{ form.email_lien_he }}
+
+                <div class="m2-error">
+                    {{ form.email_lien_he.errors }}
+                </div>
+            </div>
+
+            <div class="m2-field">
+                <label for="{{ form.so_dien_thoai.id_for_label }}">
+                    {{ form.so_dien_thoai.label }}
+                </label>
+
+                {{ form.so_dien_thoai }}
+
+                <div class="m2-error">
+                    {{ form.so_dien_thoai.errors }}
+                </div>
+            </div>
+
+
+            <!-- NÚT THAO TÁC -->
+            <div class="m2-actions">
+
+                <a href="{% url 'chatbot:chuyen_ho_tro' %}"
+                   class="m2-btn m2-btn-secondary">
+                    Quay lại
+                </a>
+
+                <button type="submit"
+                        class="m2-btn m2-btn-primary">
+                    Lưu bản nháp
+                </button>
+
+            </div>
+
+        </form>
+        <!-- ====================================== -->
+<!-- UC-2.5: TẢI BẰNG CHỨNG NGAY TRÊN FORM -->
+<!-- ====================================== -->
+
+<div class="m2-section-title" id="bang-chung">
+    BẰNG CHỨNG / TỆP ĐÍNH KÈM
+</div>
+
+<!-- Thông báo sau khi tải tệp -->
+{% if thong_bao_tep %}
+
+    {% if thong_bao_tep.thanh_cong %}
+        <div class="m2-success">
+            {{ thong_bao_tep.noi_dung }}
+        </div>
+    {% else %}
+        <div class="m2-error">
+            {{ thong_bao_tep.noi_dung }}
+        </div>
+    {% endif %}
+
+{% endif %}
+
+
+{% if co_ban_nhap %}
+
+    <!-- Form tải tệp riêng của UC-2.5 -->
+    <form
+        method="post"
+        action="{% url 'chatbot:bang_chung' %}"
+        enctype="multipart/form-data"
+    >
+
+        {% csrf_token %}
+
+        <div class="m2-upload-preview">
+
+            <h3>Tải ảnh hoặc tệp lên</h3>
+
+            <p>
+                Chọn hình ảnh sản phẩm bị lỗi,
+                hóa đơn hoặc tài liệu liên quan.
+            </p>
+
+            <p class="m2-note">
+                Chỉ hỗ trợ ảnh JPG/JPEG.
+                Tối đa 10 MB mỗi ảnh và tối đa 5 ảnh.
+            </p>
+
+            <div style="margin: 20px 0;">
+
+                <input
+                    type="file"
+                    name="tep_bang_chung"
+                    id="id_tep_bang_chung"
+                    accept=".jpg,.jpeg"
+                    required
+                >
+
+            </div>
+
+            <button
+                type="submit"
+                class="m2-btn m2-btn-primary"
+            >
+                Tải bằng chứng
+            </button>
+
+        </div>
+
+    </form>
+
+    {% else %}
+
+        <div class="m2-upload-preview">
+
+            <h3>Tải ảnh hoặc tệp lên</h3>
+
+            <p>
+                Vui lòng nhập thông tin yêu cầu
+                và nhấn "Lưu bản nháp" trước khi
+                tải bằng chứng.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- Danh sách tệp đã tải -->
+
+    <div class="m2-section-title">
+        DANH SÁCH BẰNG CHỨNG ĐÃ TẢI
+    </div>
+
+    {% if danh_sach_tep %}
+
+
+        {% for tep in danh_sach_tep %}
+
+            <div style="
+                padding: 15px;
+                border: 1px solid #dce7f3;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                background: #f7fbff;
+            ">
+
+                <!-- Thông tin bằng chứng -->
+
+                <strong>
+                    📄 {{ tep.ten_goc }}
+                </strong>
+
+                <p class="m2-note">
+                    Dung lượng:
+                    {{ tep.dung_luong|filesizeformat }}
+                </p>
+
+
+                <!-- UC-2.5: Nút xóa bằng chứng -->
+
+                <form
+                    method="post"
+                    action="{% url 'chatbot:xoa_bang_chung' %}"
+                    onsubmit="return confirm('Bạn có chắc muốn xóa bằng chứng này?');"
+                >
+
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="vi_tri"
+                        value="{{ forloop.counter0 }}"
+                    >
+
+                    <button
+                        type="submit"
+                        style="
+                            background: #fff0f0;
+                            color: #c62828;
+                            border: 1px solid #ffc9c9;
+                            padding: 8px 16px;
+                            border-radius: 7px;
+                            cursor: pointer;
+                            font-weight: bold;
+                        "
+                    >
+                        🗑 Xóa bằng chứng
+                    </button>
+
+                </form>
+
+            </div>
+
+        {% endfor %}
+
+
+    {% else %}
+
+        <p class="m2-note">
+            Bạn chưa tải bằng chứng nào.
+        </p>
+
+    {% endif %}
+
+    <!-- UC-2.6: Chuyển sang trang kiểm tra yêu cầu -->
+
+    {% if co_ban_nhap %}
+
+        <div style="
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        ">
+
+            <a
+                href="{% url 'chatbot:xac_nhan_yeu_cau' %}"
+                class="m2-btn m2-btn-primary"
+                style="
+                    display: inline-block;
+                    background: #1976d2;
+                    color: white;
+                    padding: 14px 24px;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    font-weight: bold;
+                "
+            >
+                Tiếp tục kiểm tra yêu cầu →
+            </a>
+
+        </div>
+
+    {% endif %}
+
+
+    </div>
+</div>
+
+{% endblock %}
