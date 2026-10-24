@@ -1,27 +1,487 @@
 
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
 Quản lý Ticket - CRM HULO
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'tickets/tickets.css' %}?v=5">
+<link rel="stylesheet" href="{% static 'tickets/ticket_queue.css' %}?v=1">
+{% endblock %}
+
 {% block content %}
 
-<div class="content-container">
+<div class="ticket-page">
 
-    <h1>Quản lý yêu cầu hỗ trợ - CRM HULO</h1>
+    <!-- ==========================================
+         1. BANNER - PHONG CÁCH FIGMA HULOECOM
+         ========================================== -->
+    <section class="ticket-banner">
 
-    <p>
-        Chào mừng bạn đến với Module 3:
-        Ticket Management & SLA.
-    </p>
+        <h1>Quản lý Ticket hỗ trợ</h1>
 
-    <p>
-        Đây là trang khởi đầu của Module 3.
-        Các chức năng tạo Ticket, tiếp nhận,
-        phân loại, phân công, xử lý Ticket
-        và theo dõi SLA sẽ được xây dựng tại đây.
-    </p>
+        <p>
+            Theo dõi, phân loại và xử lý các yêu cầu hỗ trợ
+            từ khách hàng HULOECOM.
+        </p>
+
+    </section>
+
+
+    <!-- ==========================================
+         2. TIÊU ĐỀ TICKET QUEUE
+         ========================================== -->
+    <h2 class="ticket-section-title">
+        Ticket Queue
+    </h2>
+
+
+    <!-- ==========================================
+         3. THỐNG KÊ TICKET TỪ DATABASE
+         ========================================== -->
+    <section class="ticket-stats">
+
+        <!-- Ticket chờ tiếp nhận -->
+        <div class="ticket-stat-card">
+            <div class="ticket-stat-icon">📋</div>
+
+            <div>
+                <p class="ticket-stat-number">
+                    {{ stats.cho_tiep_nhan|default:0 }}
+                </p>
+
+                <p class="ticket-stat-label">
+                    Chờ tiếp nhận
+                </p>
+            </div>
+        </div>
+
+        <!-- Ticket đang xử lý -->
+        <div class="ticket-stat-card">
+            <div class="ticket-stat-icon">⚙️</div>
+
+            <div>
+                <p class="ticket-stat-number">
+                    {{ stats.dang_xu_ly|default:0 }}
+                </p>
+
+                <p class="ticket-stat-label">
+                    Đang xử lý
+                </p>
+            </div>
+        </div>
+
+        <!-- Ticket sắp quá SLA -->
+        <div class="ticket-stat-card">
+            <div class="ticket-stat-icon">⏳</div>
+
+            <div>
+                <p class="ticket-stat-number">
+                    {{ stats.sap_qua_sla|default:0 }}
+                </p>
+
+                <p class="ticket-stat-label">
+                    Sắp quá SLA
+                </p>
+            </div>
+        </div>
+
+        <!-- Ticket đã giải quyết -->
+        <div class="ticket-stat-card">
+            <div class="ticket-stat-icon">✅</div>
+
+            <div>
+                <p class="ticket-stat-number">
+                    {{ stats.da_giai_quyet|default:0 }}
+                </p>
+
+                <p class="ticket-stat-label">
+                    Đã giải quyết
+                </p>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================
+         4. TÌM KIẾM VÀ BỘ LỌC
+         Phương thức GET
+         ========================================== -->
+    <form
+        method="GET"
+        action="{% url 'tickets:home' %}"
+        class="ticket-filter-form"
+    >
+
+        <div class="ticket-filters">
+
+            <!-- Tìm theo mã Ticket, tiêu đề, khách hàng -->
+            <input
+                type="search"
+                name="q"
+                class="ticket-search"
+                value="{{ keyword|default:'' }}"
+                placeholder="🔍 Tìm mã Ticket, khách hàng..."
+                aria-label="Tìm kiếm Ticket"
+            >
+
+            <!-- Lọc trạng thái -->
+            <select
+                name="status"
+                class="ticket-filter-select"
+                aria-label="Lọc theo trạng thái"
+            >
+                <option value="">
+                    Tất cả trạng thái
+                </option>
+
+                <option value="NEW"
+                    {% if selected_status == 'NEW' %}selected{% endif %}>
+                    Mới tạo
+                </option>
+
+                <option value="ASSIGNED"
+                    {% if selected_status == 'ASSIGNED' %}selected{% endif %}>
+                    Đã phân công
+                </option>
+
+                <option value="IN_PROGRESS"
+                    {% if selected_status == 'IN_PROGRESS' %}selected{% endif %}>
+                    Đang xử lý
+                </option>
+
+                <option value="RESOLVED"
+                    {% if selected_status == 'RESOLVED' %}selected{% endif %}>
+                    Đã giải quyết
+                </option>
+
+                <option value="CLOSED"
+                    {% if selected_status == 'CLOSED' %}selected{% endif %}>
+                    Đã đóng
+                </option>
+
+                <option value="REOPENED"
+                    {% if selected_status == 'REOPENED' %}selected{% endif %}>
+                    Mở lại
+                </option>
+            </select>
+
+            <!-- Lọc mức độ ưu tiên -->
+            <select
+                name="priority"
+                class="ticket-filter-select"
+                aria-label="Lọc theo mức ưu tiên"
+            >
+                <option value="">
+                    Mức ưu tiên
+                </option>
+
+                <option value="LOW"
+                    {% if selected_priority == 'LOW' %}selected{% endif %}>
+                    Thấp
+                </option>
+
+                <option value="MEDIUM"
+                    {% if selected_priority == 'MEDIUM' %}selected{% endif %}>
+                    Trung bình
+                </option>
+
+                <option value="HIGH"
+                    {% if selected_priority == 'HIGH' %}selected{% endif %}>
+                    Cao
+                </option>
+
+                <option value="URGENT"
+                    {% if selected_priority == 'URGENT' %}selected{% endif %}>
+                    Khẩn cấp
+                </option>
+            </select>
+
+            <!-- Lọc danh mục vấn đề -->
+            <select
+                name="category"
+                class="ticket-filter-select"
+                aria-label="Lọc theo danh mục"
+            >
+                <option value="">
+                    Danh mục vấn đề
+                </option>
+
+                {% for category in categories %}
+
+                    <option
+                        value="{{ category.pk }}"
+                        {% if selected_category == category.pk|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ category.ten_danh_muc }}
+                    </option>
+
+                {% endfor %}
+            </select>
+
+        </div>
+
+
+        <!-- Nút tìm kiếm và xóa lọc -->
+        <div class="ticket-filter-actions">
+
+            <button
+                type="submit"
+                class="ticket-btn"
+            >
+                🔍 Tìm kiếm / Lọc
+            </button>
+
+            <a
+                href="{% url 'tickets:home' %}"
+                class="ticket-btn ticket-btn-secondary"
+            >
+                Xóa lọc
+            </a>
+
+        </div>
+
+    </form>
+
+
+    <!-- ==========================================
+         5. BẢNG DANH SÁCH TICKET
+         ========================================== -->
+    <section class="ticket-table-wrapper">
+
+        <table class="ticket-table">
+
+            <!-- Tiêu đề bảng -->
+            <thead>
+                <tr>
+                    <th>Mã Ticket</th>
+                    <th>Khách hàng</th>
+                    <th>Danh mục</th>
+                    <th>Ưu tiên</th>
+                    <th>Trạng thái</th>
+                    <th>Người xử lý</th>
+                    <th>SLA Deadline</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+
+
+            <!-- Dữ liệu bảng -->
+            <tbody>
+
+                {% for ticket in tickets %}
+
+                <tr>
+
+                    <!-- Mã Ticket -->
+                    <td>
+                        <a
+                            href="{% url 'tickets:detail' ticket.pk %}"
+                            class="ticket-code"
+                        >
+                            {{ ticket.ma_ticket|default:"Chưa có mã" }}
+                        </a>
+                    </td>
+
+
+                    <!-- Khách hàng -->
+                    <td>
+                        {{ ticket.khach_hang.ho_ten }}
+                    </td>
+
+
+                    <!-- Danh mục -->
+                    <td>
+                        {% if ticket.danh_muc %}
+                            {{ ticket.danh_muc.ten_danh_muc }}
+                        {% else %}
+                            Chưa phân loại
+                        {% endif %}
+                    </td>
+
+
+                    <!-- Mức độ ưu tiên -->
+                    <td>
+
+                        {% if ticket.muc_uu_tien == 'URGENT' %}
+
+                            <span class="ticket-badge ticket-priority-high">
+                                Khẩn cấp
+                            </span>
+
+                        {% elif ticket.muc_uu_tien == 'HIGH' %}
+
+                            <span class="ticket-badge ticket-priority-high">
+                                Cao
+                            </span>
+
+                        {% elif ticket.muc_uu_tien == 'MEDIUM' %}
+
+                            <span class="ticket-badge ticket-priority-medium">
+                                Trung bình
+                            </span>
+
+                        {% elif ticket.muc_uu_tien == 'LOW' %}
+
+                            <span class="ticket-badge ticket-priority-low">
+                                Thấp
+                            </span>
+
+                        {% else %}
+
+                            <span class="ticket-badge ticket-badge-new">
+                                Chưa xác định
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- Trạng thái Ticket -->
+                    <td>
+
+                        {% if ticket.trang_thai == 'NEW' %}
+
+                            <span class="ticket-badge ticket-badge-new">
+                                NEW
+                            </span>
+
+                        {% elif ticket.trang_thai == 'ASSIGNED' %}
+
+                            <span class="ticket-badge ticket-badge-assigned">
+                                ASSIGNED
+                            </span>
+
+                        {% elif ticket.trang_thai == 'IN_PROGRESS' %}
+
+                            <span class="ticket-badge ticket-badge-progress">
+                                IN_PROGRESS
+                            </span>
+
+                        {% elif ticket.trang_thai == 'RESOLVED' %}
+
+                            <span class="ticket-badge ticket-badge-resolved">
+                                RESOLVED
+                            </span>
+
+                        {% elif ticket.trang_thai == 'CLOSED' %}
+
+                            <span class="ticket-badge ticket-badge-closed">
+                                CLOSED
+                            </span>
+
+                        {% elif ticket.trang_thai == 'REOPENED' %}
+
+                            <span class="ticket-badge ticket-badge-reopened">
+                                REOPENED
+                            </span>
+
+                        {% else %}
+
+                            <span class="ticket-badge ticket-badge-new">
+                                Không xác định
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- Nhân viên phụ trách -->
+                    <td>
+
+                        {% if ticket.nguoi_phu_trach %}
+
+                            {{ ticket.nguoi_phu_trach.ho_ten }}
+
+                        {% else %}
+
+                            <span class="ticket-detail-muted">
+                                Chưa phân công
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- SLA Deadline -->
+                    <td>
+
+                        {% if ticket.sla_deadline %}
+
+                            <span class="ticket-sla">
+                                {{ ticket.sla_deadline|date:"d/m/Y H:i" }}
+                            </span>
+
+                        {% else %}
+
+                            <span class="ticket-detail-muted">
+                                Chưa thiết lập
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- Hành động: XEM CHI TIẾT -->
+                    <td>
+
+                        <a
+                            href="{% url 'tickets:detail' ticket.pk %}"
+                            class="ticket-action-link"
+                        >
+                            Xem chi tiết →
+                        </a>
+
+                    </td>
+
+                </tr>
+
+
+                <!-- Không có Ticket phù hợp -->
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="8">
+
+                        <div class="ticket-empty">
+
+                            <h3>Không tìm thấy Ticket phù hợp</h3>
+
+                            <p>
+                                Hiện chưa có Ticket hoặc không có
+                                kết quả phù hợp với điều kiện tìm kiếm.
+                            </p>
+
+                            <a
+                                href="{% url 'tickets:home' %}"
+                                class="ticket-action-link"
+                            >
+                                Xem tất cả Ticket →
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </section>
 
 </div>
 

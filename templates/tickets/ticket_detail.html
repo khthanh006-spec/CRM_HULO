@@ -1,0 +1,676 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chi tiết Ticket - CRM HULO{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'tickets/tickets.css' %}?v=5">
+<link rel="stylesheet" href="{% static 'tickets/ticket_detail.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+
+<div class="ticket-page ticket-detail-page">
+
+    <!-- QUAY LẠI DANH SÁCH -->
+    <div class="ticket-detail-back">
+        <a href="{% url 'tickets:home' %}">
+            ← Quay lại danh sách Ticket
+        </a>
+    </div>
+
+    <!-- THÔNG BÁO DJANGO -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="ticket-notice {% if 'success' in message.tags %}ticket-notice-success{% else %}ticket-notice-error{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ==========================================
+         1. BANNER THÔNG TIN TICKET
+         ========================================== -->
+    <section class="ticket-detail-header">
+
+        <div class="ticket-detail-header-main">
+
+            <p class="ticket-detail-eyebrow">
+                Ticket Management / Chi tiết Ticket
+            </p>
+
+            <h1>
+                #{{ ticket.ma_ticket|default:"Chưa có mã" }}
+            </h1>
+
+            <h2>{{ ticket.tieu_de }}</h2>
+
+            <div class="ticket-detail-tags">
+
+                <!-- MỨC ƯU TIÊN -->
+                {% if ticket.muc_uu_tien == 'URGENT' %}
+                    <span class="ticket-badge ticket-priority-high">
+                        Ưu tiên: Khẩn cấp
+                    </span>
+
+                {% elif ticket.muc_uu_tien == 'HIGH' %}
+                    <span class="ticket-badge ticket-priority-high">
+                        Ưu tiên: Cao
+                    </span>
+
+                {% elif ticket.muc_uu_tien == 'MEDIUM' %}
+                    <span class="ticket-badge ticket-priority-medium">
+                        Ưu tiên: Trung bình
+                    </span>
+
+                {% elif ticket.muc_uu_tien == 'LOW' %}
+                    <span class="ticket-badge ticket-priority-low">
+                        Ưu tiên: Thấp
+                    </span>
+
+                {% else %}
+                    <span class="ticket-badge ticket-badge-new">
+                        Chưa xác định ưu tiên
+                    </span>
+                {% endif %}
+
+                <!-- TRẠNG THÁI TICKET -->
+                {% if ticket.trang_thai == 'NEW' %}
+                    <span class="ticket-badge ticket-badge-new">
+                        NEW
+                    </span>
+
+                {% elif ticket.trang_thai == 'ASSIGNED' %}
+                    <span class="ticket-badge ticket-badge-assigned">
+                        ASSIGNED
+                    </span>
+
+                {% elif ticket.trang_thai == 'IN_PROGRESS' %}
+                    <span class="ticket-badge ticket-badge-progress">
+                        IN_PROGRESS
+                    </span>
+
+                {% elif ticket.trang_thai == 'RESOLVED' %}
+                    <span class="ticket-badge ticket-badge-resolved">
+                        RESOLVED
+                    </span>
+
+                {% elif ticket.trang_thai == 'CLOSED' %}
+                    <span class="ticket-badge ticket-badge-closed">
+                        CLOSED
+                    </span>
+
+                {% elif ticket.trang_thai == 'REOPENED' %}
+                    <span class="ticket-badge ticket-badge-reopened">
+                        REOPENED
+                    </span>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- THÔNG TIN SLA -->
+        <div class="ticket-detail-sla">
+
+            <p>⏳ SLA Deadline</p>
+
+            {% if ticket.sla_deadline %}
+                <strong>
+                    {{ ticket.sla_deadline|date:"d/m/Y H:i" }}
+                </strong>
+            {% else %}
+                <strong>Chưa thiết lập</strong>
+            {% endif %}
+
+            {% if ticket.sla_config %}
+                <small>
+                    SLA cấu hình:
+                    {{ ticket.sla_config.thoi_han_gio }} giờ
+                </small>
+            {% endif %}
+
+        </div>
+
+    </section>
+
+    <!-- ==========================================
+         2. THÔNG BÁO KHÁCH KHÔNG ĐỒNG Ý
+         ========================================== -->
+    {% if ticket.trang_thai_xac_nhan == 'DISAGREED' %}
+
+        {% if ticket.trang_thai == 'REOPENED' or ticket.trang_thai == 'IN_PROGRESS' %}
+
+            <section class="ticket-detail-card ticket-reopen-notice">
+
+                <h3>🔄 Khách hàng yêu cầu xử lý lại</h3>
+
+                <p>
+                    Khách hàng không đồng ý với kết quả xử lý
+                    trước đó. Nhân viên cần xem xét lý do và
+                    tiếp tục hỗ trợ.
+                </p>
+
+                {% if ticket.ly_do_khong_dong_y %}
+                    <div class="ticket-reopen-reason">
+                        <strong>Lý do khách hàng:</strong>
+
+                        <p>
+                            {{ ticket.ly_do_khong_dong_y|linebreaksbr }}
+                        </p>
+                    </div>
+                {% endif %}
+
+                {% if ticket.thoi_diem_xac_nhan %}
+                    <small>
+                        Thời điểm phản hồi:
+                        {{ ticket.thoi_diem_xac_nhan|date:"d/m/Y H:i" }}
+                    </small>
+                {% endif %}
+
+            </section>
+
+        {% endif %}
+
+    {% endif %}
+
+    <!-- ==========================================
+         3. BỐ CỤC THÔNG TIN HAI CỘT
+         ========================================== -->
+    <div class="ticket-detail-grid">
+
+        <!-- CỘT TRÁI -->
+        <div class="ticket-detail-main">
+
+            <!-- THÔNG TIN YÊU CẦU -->
+            <section class="ticket-detail-card">
+
+                <h3>📋 Thông tin yêu cầu</h3>
+
+                <div class="ticket-detail-info-row">
+                    <span>Danh mục</span>
+
+                    <strong>
+                        {{ ticket.danh_muc.ten_danh_muc|default:"Chưa phân loại" }}
+                    </strong>
+                </div>
+
+                <div class="ticket-detail-info-row">
+                    <span>Hàng đợi xử lý</span>
+
+                    <strong>
+                        {{ ticket.queue.ten_queue|default:"Chưa phân luồng" }}
+                    </strong>
+                </div>
+
+                <div class="ticket-detail-info-row">
+                    <span>Thời điểm tạo</span>
+
+                    <strong>
+                        {{ ticket.thoi_diem_tao|date:"d/m/Y H:i" }}
+                    </strong>
+                </div>
+
+                <h4>Nội dung yêu cầu của khách hàng</h4>
+
+                <div class="ticket-detail-description">
+                    {{ ticket.noi_dung|linebreaksbr }}
+                </div>
+
+            </section>
+
+            <!-- TRAO ĐỔI VÀ GHI CHÚ -->
+            <section
+                class="ticket-detail-card"
+                id="ticket-conversation"
+            >
+
+                <h3>💬 Trao đổi và ghi chú xử lý</h3>
+
+                <p class="ticket-detail-muted">
+                    Phản hồi công khai và ghi chú nội bộ
+                    trong quá trình xử lý Ticket.
+                </p>
+
+                <div class="ticket-conversation-list">
+
+                    {% for item in ticket_messages %}
+
+                        <div class="ticket-conversation-item {% if item.loai_tin_nhan == 'PUBLIC' %}ticket-conversation-public{% else %}ticket-conversation-internal{% endif %}">
+
+                            <div class="ticket-conversation-heading">
+
+                                <strong>
+                                    {% if item.loai_tin_nhan == 'PUBLIC' %}
+                                        💬 Phản hồi khách hàng
+                                    {% else %}
+                                        🔒 Ghi chú nội bộ
+                                    {% endif %}
+                                </strong>
+
+                                <span class="ticket-conversation-time">
+                                    {{ item.thoi_diem_gui|date:"d/m/Y H:i" }}
+                                </span>
+
+                            </div>
+
+                            <p class="ticket-conversation-sender">
+                                Người gửi:
+                                {{ item.nguoi_gui.username }}
+                            </p>
+
+                            <div class="ticket-conversation-content">
+                                {{ item.noi_dung|linebreaksbr }}
+                            </div>
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="ticket-conversation-empty">
+                            Chưa có phản hồi hoặc ghi chú nào.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+            <!-- LỊCH SỬ XỬ LÝ -->
+            <section class="ticket-detail-card">
+
+                <h3>🕘 Lịch sử xử lý Ticket</h3>
+
+                <div class="ticket-detail-timeline">
+
+                    {% for log in logs %}
+
+                        <div class="ticket-timeline-item">
+
+                            <span class="ticket-timeline-dot"></span>
+
+                            <div class="ticket-timeline-content">
+
+                                <strong>
+                                    {{ log.hanh_dong }}
+                                </strong>
+
+                                {% if log.noi_dung %}
+                                    <p>
+                                        {{ log.noi_dung }}
+                                    </p>
+                                {% endif %}
+
+                                <small>
+                                    {{ log.thoi_diem|date:"d/m/Y H:i" }}
+
+                                    {% if log.nguoi_thuc_hien %}
+                                        · {{ log.nguoi_thuc_hien.username }}
+                                    {% else %}
+                                        · Hệ thống
+                                    {% endif %}
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="ticket-detail-empty">
+                            Chưa có lịch sử xử lý được ghi nhận.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+        </div>
+
+        <!-- CỘT PHẢI -->
+        <aside class="ticket-detail-sidebar">
+
+            <!-- KHÁCH HÀNG -->
+            <section class="ticket-detail-card">
+
+                <h3>👤 Thông tin khách hàng</h3>
+
+                <div class="ticket-detail-info-row">
+                    <span>Họ tên</span>
+
+                    <strong>
+                        {{ ticket.khach_hang.ho_ten }}
+                    </strong>
+                </div>
+
+                <div class="ticket-detail-info-row">
+                    <span>Email</span>
+
+                    <strong>
+                        {{ ticket.khach_hang.email }}
+                    </strong>
+                </div>
+
+                <div class="ticket-detail-info-row">
+                    <span>Số điện thoại</span>
+
+                    <strong>
+                        {{ ticket.khach_hang.so_dien_thoai|default:"Chưa cập nhật" }}
+                    </strong>
+                </div>
+
+            </section>
+
+            <!-- NHÂN VIÊN PHỤ TRÁCH -->
+            <section class="ticket-detail-card">
+
+                <h3>🎧 Nhân viên phụ trách</h3>
+
+                {% if ticket.nguoi_phu_trach %}
+
+                    <p class="ticket-assignee-name">
+                        {{ ticket.nguoi_phu_trach.ho_ten }}
+                    </p>
+
+                    <p class="ticket-detail-muted">
+                        {{ ticket.nguoi_phu_trach.get_vai_tro_display }}
+                    </p>
+
+                {% else %}
+
+                    <p class="ticket-detail-muted">
+                        Chưa phân công nhân viên.
+                    </p>
+
+                {% endif %}
+
+            </section>
+
+            <!-- KẾT QUẢ XỬ LÝ -->
+            <section class="ticket-detail-card">
+
+                <h3>✅ Kết quả xử lý</h3>
+
+                {% if ticket.ket_qua_xu_ly %}
+
+                    <div class="ticket-detail-description">
+                        {{ ticket.ket_qua_xu_ly|linebreaksbr }}
+                    </div>
+
+                {% else %}
+
+                    <p class="ticket-detail-muted">
+                        Chưa có kết quả xử lý cuối cùng.
+                    </p>
+
+                {% endif %}
+
+            </section>
+
+        </aside>
+
+    </div>
+
+    <!-- ==========================================
+         4. HÀNH ĐỘNG XỬ LÝ TICKET
+         ========================================== -->
+    <section class="ticket-detail-card ticket-detail-actions">
+
+        <h3>⚙️ Hành động xử lý</h3>
+
+        <!-- ASSIGNED: TIẾP NHẬN -->
+        {% if ticket.trang_thai == 'ASSIGNED' %}
+
+            <p>
+                Ticket đang chờ nhân viên được phân công
+                tiếp nhận và bắt đầu xử lý.
+            </p>
+
+            {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
+
+                <form
+                    method="POST"
+                    action="{% url 'tickets:accept' ticket.pk %}"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="ticket-btn"
+                    >
+                        ✓ Tiếp nhận Ticket
+                    </button>
+                </form>
+
+            {% endif %}
+
+        <!-- REOPENED: TIẾP TỤC XỬ LÝ -->
+        {% elif ticket.trang_thai == 'REOPENED' %}
+
+            <p>
+                Khách hàng đã yêu cầu xử lý lại.
+                Nhân viên phụ trách cần xem xét phản hồi
+                và tiếp tục xử lý Ticket.
+            </p>
+
+            {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
+
+                <form
+                    method="POST"
+                    action="{% url 'tickets:resume' ticket.pk %}"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="ticket-btn"
+                    >
+                        ↻ Tiếp tục xử lý Ticket
+                    </button>
+                </form>
+
+            {% else %}
+
+                <p class="ticket-detail-muted">
+                    Chỉ nhân viên được phân công mới
+                    có quyền tiếp tục xử lý.
+                </p>
+
+            {% endif %}
+
+        <!-- IN_PROGRESS: PHẢN HỒI VÀ HOÀN TẤT -->
+        {% elif ticket.trang_thai == 'IN_PROGRESS' %}
+
+            <p>
+                Nhân viên có thể phản hồi khách hàng,
+                ghi chú nội bộ hoặc hoàn tất xử lý
+                khi đã có phương án giải quyết.
+            </p>
+
+            {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
+
+                <!-- FORM PHẢN HỒI -->
+                <div class="ticket-action-block">
+
+                    <h4>
+                        💬 Phản hồi khách hàng / Ghi chú nội bộ
+                    </h4>
+
+                    <form
+                        method="POST"
+                        action="{% url 'tickets:add_message' ticket.pk %}"
+                        class="ticket-message-form"
+                    >
+                        {% csrf_token %}
+
+                        <div class="ticket-form-group">
+
+                            <label for="{{ message_form.loai_tin_nhan.id_for_label }}">
+                                Loại nội dung
+                            </label>
+
+                            {{ message_form.loai_tin_nhan }}
+
+                        </div>
+
+                        <div class="ticket-form-group">
+
+                            <label for="{{ message_form.noi_dung.id_for_label }}">
+                                Nội dung phản hồi / ghi chú
+                            </label>
+
+                            {{ message_form.noi_dung }}
+
+                        </div>
+
+                        <p class="ticket-form-hint">
+                            PUBLIC: Phản hồi dành cho khách hàng.
+                            INTERNAL: Ghi chú nội bộ.
+                        </p>
+
+                        <button
+                            type="submit"
+                            class="ticket-btn"
+                        >
+                            ✓ Lưu nội dung
+                        </button>
+
+                    </form>
+
+                </div>
+
+                <!-- FORM HOÀN TẤT -->
+                <div class="ticket-action-block ticket-resolve-block">
+
+                    <h4>✅ Hoàn tất xử lý Ticket</h4>
+
+                    <p>
+                        Nhập phương án giải quyết rõ ràng
+                        trước khi chuyển Ticket sang RESOLVED.
+                    </p>
+
+                    <form
+                        method="POST"
+                        action="{% url 'tickets:resolve' ticket.pk %}"
+                        class="ticket-resolve-form"
+                    >
+                        {% csrf_token %}
+
+                        <div class="ticket-form-group">
+
+                            <label for="{{ resolve_form.ket_qua_xu_ly.id_for_label }}">
+                                Kết quả xử lý
+                            </label>
+
+                            {{ resolve_form.ket_qua_xu_ly }}
+
+                        </div>
+
+                        <p class="ticket-form-hint">
+                            Ticket sẽ chuyển IN_PROGRESS → RESOLVED
+                            và chờ khách hàng xác nhận.
+                        </p>
+
+                        <button
+                            type="submit"
+                            class="ticket-btn ticket-btn-resolve"
+                        >
+                            ✓ Xác nhận hoàn tất xử lý
+                        </button>
+
+                    </form>
+
+                </div>
+
+            {% endif %}
+
+        <!-- RESOLVED: CHỜ XÁC NHẬN HOẶC ĐÓNG -->
+        {% elif ticket.trang_thai == 'RESOLVED' %}
+
+            <p>
+                Ticket đã được nhân viên giải quyết.
+                Vui lòng kiểm tra xác nhận của khách hàng
+                trước khi đóng Ticket.
+            </p>
+
+            {% if ticket.trang_thai_xac_nhan == 'AGREED' %}
+
+                <div class="ticket-close-section">
+
+                    <span class="ticket-badge ticket-badge-resolved">
+                        ✓ Khách hàng đã đồng ý với kết quả xử lý
+                    </span>
+
+                    {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
+
+                        <p class="ticket-close-description">
+                            Khách hàng đã chấp thuận phương án
+                            giải quyết. Bạn có thể đóng Ticket
+                            để hoàn tất quy trình hỗ trợ.
+                        </p>
+
+                        <!-- FORM ĐÓNG TICKET -->
+                        <form
+                            method="POST"
+                            action="{% url 'tickets:close' ticket.pk %}"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="ticket-btn ticket-btn-close"
+                            >
+                                ✓ Đóng Ticket
+                            </button>
+
+                        </form>
+
+                    {% else %}
+
+                        <p class="ticket-detail-muted ticket-close-description">
+                            Chỉ nhân viên được phân công mới
+                            có quyền đóng Ticket.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            {% else %}
+
+                <span class="ticket-badge ticket-badge-assigned">
+                    Đang chờ khách hàng xác nhận
+                </span>
+
+            {% endif %}
+
+        <!-- CLOSED: ĐÃ ĐÓNG -->
+        {% elif ticket.trang_thai == 'CLOSED' %}
+
+            <p>
+                Ticket đã được đóng và hoàn tất
+                quy trình xử lý.
+            </p>
+
+            <span class="ticket-badge ticket-badge-closed">
+                ✓ CLOSED
+            </span>
+
+        <!-- TRẠNG THÁI KHÁC -->
+        {% else %}
+
+            <p>
+                Trạng thái hiện tại:
+                {{ ticket.get_trang_thai_display }}.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}
