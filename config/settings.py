@@ -152,3 +152,15 @@ STATICFILES_DIRS = [
 
 # 12. KIỂU KHÓA CHÍNH MẶC ĐỊNH
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ==========================================
+# PRIVATE MEDIA - MODULE 3
+# Luu bang chung Ticket ngoai thu muc project
+# ==========================================
+
+MEDIA_ROOT = BASE_DIR.parent / "CRM_HULO_m3_private"
+
+# Khong dung MEDIA_URL de cong khai bang chung.
+# Tep dinh kem chi duoc truy cap qua view co kiem tra quyen.
+MEDIA_URL = "/private-media/"

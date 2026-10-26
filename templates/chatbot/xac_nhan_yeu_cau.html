@@ -1,0 +1,425 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Kiểm tra yêu cầu hỗ trợ - HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ==========================================
+       MODULE 2 - UC2.6
+       KIỂM TRA VÀ GỬI YÊU CẦU SANG MODULE 3
+       ========================================== */
+
+    .m2-confirm-page {
+        max-width: 850px;
+        margin: 35px auto;
+        padding: 0 20px 40px;
+        color: #173b68;
+    }
+
+    .m2-confirm-heading {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .m2-confirm-heading h1 {
+        color: #103e78;
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .m2-confirm-card {
+        background: white;
+        border: 2px solid #84bdeb;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 60, 120, .06);
+    }
+
+    .m2-confirm-type {
+        background: #eef6ff;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 25px;
+    }
+
+    .m2-confirm-type strong {
+        color: #1268bd;
+        font-size: 18px;
+    }
+
+    .m2-section-title {
+        color: #135ba4;
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 25px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dce7f3;
+    }
+
+    .m2-info-row {
+        display: flex;
+        gap: 15px;
+        padding: 12px 0;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .m2-info-label {
+        width: 180px;
+        flex-shrink: 0;
+        font-weight: bold;
+        color: #466786;
+    }
+
+    .m2-info-value {
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        color: #173b68;
+    }
+
+    .m2-description {
+        background: #f7fbff;
+        border: 1px solid #dce7f3;
+        border-radius: 10px;
+        padding: 15px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .m2-file-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #dce7f3;
+        border-radius: 10px;
+        background: #f7fbff;
+    }
+
+    .m2-file-info {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .m2-file-size {
+        color: #6581a2;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .m2-note {
+        background: #eef8ff;
+        border: 1px solid #b7d9f3;
+        color: #245580;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 25px;
+        line-height: 1.6;
+    }
+
+    .m2-alert {
+        padding: 13px 16px;
+        border-radius: 9px;
+        margin-bottom: 18px;
+        line-height: 1.6;
+    }
+
+    .m2-alert-success {
+        background: #eaf8ef;
+        border: 1px solid #9dd7ae;
+        color: #21613a;
+    }
+
+    .m2-alert-error {
+        background: #fff0f0;
+        border: 1px solid #e9b5b5;
+        color: #9a3030;
+    }
+
+    .m2-alert-warning {
+        background: #fff8e8;
+        border: 1px solid #f1dda5;
+        color: #735719;
+    }
+
+    .m2-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+
+    .m2-btn {
+        display: inline-block;
+        padding: 12px 22px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: bold;
+        text-decoration: none;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .m2-btn-back {
+        background: #f1f5f9;
+        color: #315b82;
+        border: 1px solid #d8e2ed;
+    }
+
+    .m2-btn-submit {
+        background: #1677d2;
+        color: white;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+    }
+
+    .m2-btn-submit:hover {
+        background: #0d5ca8;
+    }
+
+    .m2-btn-submit:disabled {
+        background: #a9b9ca;
+        cursor: not-allowed;
+    }
+
+    .m2-submit-form {
+        margin: 0;
+    }
+
+    @media (max-width: 600px) {
+        .m2-confirm-card {
+            padding: 18px;
+        }
+
+        .m2-info-row {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .m2-info-label {
+            width: auto;
+        }
+
+        .m2-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .m2-actions .m2-btn,
+        .m2-submit-form,
+        .m2-submit-form button {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="m2-confirm-page">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="m2-confirm-heading">
+        <h1>Kiểm tra yêu cầu hỗ trợ</h1>
+
+        <p>
+            Vui lòng kiểm tra lại thông tin
+            trước khi xác nhận gửi yêu cầu.
+        </p>
+    </div>
+
+
+    <div class="m2-confirm-card">
+
+        <!-- THÔNG BÁO TỪ DJANGO -->
+        {% if messages %}
+            {% for message in messages %}
+                <div
+                    class="m2-alert
+                    {% if message.tags == 'success' %}
+                        m2-alert-success
+                    {% elif message.tags == 'warning' %}
+                        m2-alert-warning
+                    {% else %}
+                        m2-alert-error
+                    {% endif %}"
+                    role="alert"
+                >
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+
+        <!-- LOẠI VẤN ĐỀ -->
+        <div class="m2-confirm-type">
+            <small>Loại vấn đề</small>
+
+            <br>
+
+            <strong>
+                {{ ten_loai_van_de }}
+            </strong>
+        </div>
+
+
+        <!-- THÔNG TIN YÊU CẦU -->
+        <div class="m2-section-title">
+            THÔNG TIN YÊU CẦU
+        </div>
+
+        <div class="m2-info-row">
+            <div class="m2-info-label">
+                Mã đơn hàng
+            </div>
+
+            <div class="m2-info-value">
+                {{ thong_tin.ma_don_hang|default:"Chưa cung cấp" }}
+            </div>
+        </div>
+
+        <div class="m2-info-row">
+            <div class="m2-info-label">
+                Tiêu đề
+            </div>
+
+            <div class="m2-info-value">
+                {{ thong_tin.tieu_de }}
+            </div>
+        </div>
+
+
+        <!-- MÔ TẢ CHI TIẾT -->
+        <div class="m2-section-title">
+            MÔ TẢ CHI TIẾT
+        </div>
+
+        <div class="m2-description">
+            {{ thong_tin.mo_ta|linebreaksbr }}
+        </div>
+
+
+        <!-- THÔNG TIN LIÊN HỆ -->
+        <div class="m2-section-title">
+            THÔNG TIN LIÊN HỆ
+        </div>
+
+        <div class="m2-info-row">
+            <div class="m2-info-label">
+                Email
+            </div>
+
+            <div class="m2-info-value">
+                {{ thong_tin.email_lien_he|default:"Chưa cung cấp" }}
+            </div>
+        </div>
+
+        <div class="m2-info-row">
+            <div class="m2-info-label">
+                Số điện thoại
+            </div>
+
+            <div class="m2-info-value">
+                {{ thong_tin.so_dien_thoai|default:"Chưa cung cấp" }}
+            </div>
+        </div>
+
+
+        <!-- BẰNG CHỨNG ĐÍNH KÈM -->
+        <div class="m2-section-title">
+            BẰNG CHỨNG ĐÍNH KÈM
+        </div>
+
+        {% if danh_sach_tep %}
+            {% for tep in danh_sach_tep %}
+
+                <div class="m2-file-item">
+                    <span style="font-size: 25px;">
+                        📄
+                    </span>
+
+                    <div class="m2-file-info">
+                        <strong>
+                            {{ tep.ten_goc }}
+                        </strong>
+
+                        <div class="m2-file-size">
+                            {{ tep.dung_luong|filesizeformat }}
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+        {% else %}
+            <p>
+                Yêu cầu chưa có bằng chứng đính kèm.
+            </p>
+        {% endif %}
+
+
+        <!-- LƯU Ý TRƯỚC KHI GỬI -->
+        <div class="m2-note">
+            <strong>Lưu ý:</strong>
+
+            Khi nhấn <strong>Xác nhận gửi yêu cầu</strong>,
+            hệ thống sẽ chuyển thông tin hỗ trợ sang
+            Module 3 để tạo Ticket.
+
+            <p style="margin: 10px 0 0;">
+                Sau khi gửi thành công, bạn sẽ nhận được
+                mã Ticket để theo dõi quá trình xử lý.
+            </p>
+
+            {% if danh_sach_tep %}
+                <p style="margin: 10px 0 0; color: #176b42;">
+                    Bạn đã đính kèm {{ danh_sach_tep|length }} hình ảnh
+                    để hỗ trợ quá trình xử lý yêu cầu.
+                    Sau khi xác nhận, hình ảnh sẽ được gửi kèm
+                    yêu cầu hỗ trợ để đội ngũ HULO kiểm tra
+                    và hỗ trợ bạn nhanh chóng, chính xác hơn.
+                </p>
+            {% endif %}
+        </div>
+
+
+        <!-- NÚT THAO TÁC -->
+        <div class="m2-actions">
+
+            <!-- QUAY LẠI CHỈNH SỬA -->
+            <a
+                href="{% url 'chatbot:khai_bao_yeu_cau' %}"
+                class="m2-btn m2-btn-back"
+            >
+                Quay lại chỉnh sửa
+            </a>
+
+            <!-- GỬI YÊU CẦU CHÍNH THỨC SANG M3 -->
+            <form
+                method="post"
+                action="{% url 'chatbot:gui_yeu_cau_m3' %}"
+                class="m2-submit-form"
+            >
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="m2-btn m2-btn-submit"
+                >
+                    Xác nhận gửi yêu cầu
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

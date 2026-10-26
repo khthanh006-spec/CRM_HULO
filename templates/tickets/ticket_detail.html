@@ -6,7 +6,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'tickets/tickets.css' %}?v=5">
-<link rel="stylesheet" href="{% static 'tickets/ticket_detail.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'tickets/ticket_detail.css' %}?v=3">
 {% endblock %}
 
 {% block content %}
@@ -218,6 +218,11 @@
                 <div class="ticket-detail-description">
                     {{ ticket.noi_dung|linebreaksbr }}
                 </div>
+
+            </section>
+
+                        <!-- BANG CHUNG KHACH HANG CUNG CAP -->
+            {% include "tickets/ticket_evidence.html" %}
 
             </section>
 
@@ -545,8 +550,91 @@
 
         <h3>⚙️ Hành động xử lý</h3>
 
-        <!-- ASSIGNED: TIẾP NHẬN -->
-        {% if ticket.trang_thai == 'ASSIGNED' %}
+
+<!-- ==========================================
+     NEW: PHÂN CÔNG TICKET
+     ========================================== -->
+{% if ticket.trang_thai == 'NEW' %}
+
+    <p>
+        Ticket mới được tạo và đang chờ phân công
+        cho nhân viên chăm sóc khách hàng.
+    </p>
+
+    {% if user_role == 'MANAGER' or user_role == 'ADMIN' %}
+
+        <div class="ticket-action-block">
+
+            <h4>👤 Phân công nhân viên CSKH</h4>
+
+            <form
+                method="POST"
+                action="{% url 'tickets:assign' ticket.pk %}"
+            >
+                {% csrf_token %}
+
+                <div class="ticket-form-group">
+
+                    <label for="staff_id">
+                        Chọn nhân viên phụ trách
+                    </label>
+
+                    <select
+                        name="staff_id"
+                        id="staff_id"
+                        required
+                    >
+                        <option value="">
+                            -- Chọn nhân viên CSKH --
+                        </option>
+
+                        {% for staff in staff_options %}
+                            <option value="{{ staff.pk }}">
+                                {{ staff.ho_ten }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                {% if staff_options %}
+
+                    <button
+                        type="submit"
+                        class="ticket-btn"
+                    >
+                        ✓ Xác nhận phân công
+                    </button>
+
+                {% else %}
+
+                    <p class="ticket-detail-muted">
+                        Chưa có nhân viên CSKH để phân công.
+                    </p>
+
+                {% endif %}
+
+            </form>
+
+        </div>
+
+    {% else %}
+
+        <p class="ticket-detail-muted">
+            Ticket chưa được phân công.
+            Vui lòng chờ Quản lý hoặc Admin
+            phân công nhân viên phụ trách.
+        </p>
+
+    {% endif %}
+
+
+<!-- ==========================================
+     ASSIGNED: TIẾP NHẬN
+     ========================================== -->
+{% elif ticket.trang_thai == 'ASSIGNED' %}
+
 
             <p>
                 Ticket đang chờ nhân viên được phân công

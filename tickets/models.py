@@ -288,6 +288,25 @@ class TicketAttachment(models.Model):
         blank=True
     )
 
+
+    # Ma nhan dien anh nguon tu Module 2.
+    # De trong voi file khong duoc gui tu M2.
+    ma_anh_nguon = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ticket", "ma_anh_nguon"],
+                name="unique_ticket_attachment_source",
+            )
+        ]
+
+
     nguoi_tai_len = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

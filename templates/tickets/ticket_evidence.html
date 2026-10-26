@@ -1,0 +1,82 @@
+
+{% comment %}
+    MODULE 3 - BANG CHUNG KHACH HANG
+
+    - Hien thi danh sach anh cua Ticket.
+    - Xem anh truc tiep qua endpoint bao mat.
+    - Tai anh qua endpoint bao mat.
+    - Khong su dung URL file cong khai.
+{% endcomment %}
+
+<section class="ticket-detail-card ticket-evidence-section">
+
+    <h3>
+        📎 Bằng chứng khách hàng cung cấp
+    </h3>
+
+    <p class="ticket-detail-muted">
+        Hình ảnh được khách hàng đính kèm để hỗ trợ
+        xác minh và xử lý yêu cầu.
+    </p>
+
+    {% if danh_sach_bang_chung %}
+
+        <div class="ticket-evidence-list">
+
+            {% for anh in danh_sach_bang_chung %}
+
+                <div class="ticket-evidence-item">
+
+                    <div class="ticket-evidence-info">
+
+                        <strong class="ticket-evidence-name">
+                            📷
+                            {{ anh.ten_tep_goc|default:"Ảnh bằng chứng" }}
+                        </strong>
+
+                        <span class="ticket-detail-muted">
+                            Thời điểm tải lên:
+                            {{ anh.thoi_diem_tai_len|date:"d/m/Y H:i" }}
+                        </span>
+
+                    </div>
+
+                    <div class="ticket-evidence-actions">
+
+                        <!-- XEM ANH -->
+                        <a
+                            href="{% url 'tickets:attachment_view' anh.pk %}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="ticket-evidence-btn ticket-evidence-view"
+                            aria-label="Xem ảnh {{ anh.ten_tep_goc }}"
+                        >
+                            👁 Xem ảnh
+                        </a>
+
+                        <!-- TAI ANH -->
+                        <a
+                            href="{% url 'tickets:attachment_download' anh.pk %}"
+                            class="ticket-evidence-btn ticket-evidence-download"
+                            aria-label="Tải xuống ảnh {{ anh.ten_tep_goc }}"
+                        >
+                            ⬇ Tải xuống
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <p class="ticket-detail-muted">
+            Khách hàng chưa cung cấp hình ảnh bằng chứng.
+        </p>
+
+    {% endif %}
+
+</section>

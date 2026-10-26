@@ -27,27 +27,55 @@ from .forms import (
 
 @login_required(login_url='login')
 @role_required('CSKH', 'MANAGER', 'ADMIN')
+
 def ticket_home(request):
 
+    # ==========================================
+    # 1. LẤY DANH SÁCH TICKET
+    # ==========================================
     tickets = Ticket.objects.select_related(
         'khach_hang',
         'danh_muc',
         'nguoi_phu_trach',
     )
 
-    # CSKH chỉ xem Ticket được giao cho mình
+    # ==========================================
+    # 2. PHÂN QUYỀN HIỂN THỊ CHO CSKH
+    # ==========================================
     staff = getattr(request.user, 'staff_profile', None)
 
     if staff is not None and staff.vai_tro == 'CSKH':
-        tickets = tickets.filter(nguoi_phu_trach=staff)
 
-    # Thống kê trước khi lọc
+        # CSKH được xem:
+        # - Ticket NEW chưa được phân công
+        # - Ticket đã được phân công cho mình
+        #
+        # Không hiển thị Ticket đã giao cho
+        # nhân viên CSKH khác.
+
+        tickets = tickets.filter(
+            Q(
+                trang_thai='NEW',
+                nguoi_phu_trach__isnull=True
+            )
+            |
+            Q(
+                nguoi_phu_trach=staff
+            )
+        )
+
+    # ==========================================
+    # 3. THỐNG KÊ TICKET VÀ SLA
+    # ==========================================
     now = timezone.now()
     warning_limit = now + timedelta(hours=4)
 
     stats = {
+
+        # Bao gồm Ticket NEW chưa phân công
+        # và Ticket ASSIGNED chờ xử lý
         'cho_tiep_nhan': tickets.filter(
-            trang_thai='ASSIGNED'
+            trang_thai__in=['NEW', 'ASSIGNED']
         ).count(),
 
         'dang_xu_ly': tickets.filter(
@@ -72,32 +100,60 @@ def ticket_home(request):
         ).count(),
     }
 
+    # ==========================================
+    # 4. LẤY THÔNG TIN BỘ LỌC
+    # ==========================================
     keyword = request.GET.get('q', '').strip()
     status = request.GET.get('status', '').strip()
     priority = request.GET.get('priority', '').strip()
     category = request.GET.get('category', '').strip()
 
-    # Tìm kiếm theo mã, tiêu đề, tên khách hàng
+    # ==========================================
+    # 5. TÌM KIẾM TICKET
+    # ==========================================
     if keyword:
         tickets = tickets.filter(
-            Q(ma_ticket__icontains=keyword) |
-            Q(tieu_de__icontains=keyword) |
+            Q(ma_ticket__icontains=keyword)
+            |
+            Q(tieu_de__icontains=keyword)
+            |
             Q(khach_hang__ho_ten__icontains=keyword)
         )
 
-    # Bộ lọc
+    # ==========================================
+    # 6. LỌC THEO TRẠNG THÁI
+    # ==========================================
     if status in dict(Ticket.STATUS_CHOICES):
-        tickets = tickets.filter(trang_thai=status)
+        tickets = tickets.filter(
+            trang_thai=status
+        )
 
+    # ==========================================
+    # 7. LỌC THEO ĐỘ ƯU TIÊN
+    # ==========================================
     if priority in dict(Ticket.PRIORITY_CHOICES):
-        tickets = tickets.filter(muc_uu_tien=priority)
+        tickets = tickets.filter(
+            muc_uu_tien=priority
+        )
 
+    # ==========================================
+    # 8. LỌC THEO DANH MỤC
+    # ==========================================
     if category.isdigit():
-        tickets = tickets.filter(danh_muc_id=int(category))
+        tickets = tickets.filter(
+            danh_muc_id=int(category)
+        )
 
-    tickets = tickets.order_by('-thoi_diem_tao')
+    # ==========================================
+    # 9. SẮP XẾP MỚI NHẤT TRƯỚC
+    # ==========================================
+    tickets = tickets.order_by(
+        '-thoi_diem_tao'
+    )
 
-    # UC3.6 - Xác định trạng thái SLA cho từng Ticket
+    # ==========================================
+    # 10. XÁC ĐỊNH TRẠNG THÁI SLA
+    # ==========================================
     tickets = list(tickets)
 
     for ticket in tickets:
@@ -117,11 +173,18 @@ def ticket_home(request):
         else:
             ticket.sla_status = 'ON_TIME'
 
-
+    # ==========================================
+    # 11. DANH MỤC TICKET
+    # ==========================================
     categories = TicketCategory.objects.filter(
         dang_hoat_dong=True
-    ).order_by('ten_danh_muc')
+    ).order_by(
+        'ten_danh_muc'
+    )
 
+    # ==========================================
+    # 12. HIỂN THỊ GIAO DIỆN
+    # ==========================================
     return render(
         request,
         'tickets/home.html',
@@ -137,14 +200,19 @@ def ticket_home(request):
     )
 
 
+
 # ==========================================================
 # UC-3.2 - CHI TIẾT TICKET DÀNH CHO NHÂN VIÊN
 # ==========================================================
 
 @login_required(login_url='login')
 @role_required('CSKH', 'MANAGER', 'ADMIN')
+
 def ticket_detail(request, pk):
 
+    # ==========================================
+    # 1. LẤY THÔNG TIN TICKET
+    # ==========================================
     ticket = get_object_or_404(
         Ticket.objects.select_related(
             'khach_hang',
@@ -156,37 +224,96 @@ def ticket_detail(request, pk):
         pk=pk
     )
 
-    staff = getattr(request.user, 'staff_profile', None)
+    # ==========================================
+    # 2. XÁC ĐỊNH VAI TRÒ NGƯỜI DÙNG
+    # ==========================================
+    staff = getattr(
+        request.user,
+        'staff_profile',
+        None
+    )
 
-    if staff is not None and staff.vai_tro == 'CSKH':
-        if ticket.nguoi_phu_trach_id != staff.pk:
+    user_role = (
+        staff.vai_tro
+        if staff is not None
+        else (
+            'ADMIN'
+            if request.user.is_superuser
+            else None
+        )
+    )
+
+    # ==========================================
+    # 3. KIỂM TRA QUYỀN XEM CHI TIẾT
+    # ==========================================
+
+    if user_role == 'CSKH':
+
+        # Ticket NEW chưa phân công:
+        # CSKH được xem để biết có yêu cầu mới.
+        ticket_moi_chua_phan_cong = (
+            ticket.trang_thai == 'NEW'
+            and ticket.nguoi_phu_trach_id is None
+        )
+
+        # Ticket đã giao cho chính nhân viên:
+        # CSKH được xem Ticket của mình.
+        ticket_cua_minh = (
+            ticket.nguoi_phu_trach_id == staff.pk
+        )
+
+        if not (
+            ticket_moi_chua_phan_cong
+            or ticket_cua_minh
+        ):
             return HttpResponseForbidden(
                 "Bạn không có quyền xem Ticket này."
             )
 
-    # Xác định vai trò người đang đăng nhập
-    user_role = (
-        staff.vai_tro if staff is not None
-        else ('ADMIN' if request.user.is_superuser else None)
-    )
+    elif user_role not in ('MANAGER', 'ADMIN'):
+        return HttpResponseForbidden(
+            "Bạn không có quyền xem Ticket này."
+        )
 
-    # Danh sách nhân viên CSKH để phân công Ticket mới
+    # ==========================================
+    # 4. DANH SÁCH NHÂN VIÊN ĐỂ PHÂN CÔNG
+    # ==========================================
     staff_options = Staff.objects.none()
 
-    if ticket.trang_thai == 'NEW' and user_role in ('MANAGER', 'ADMIN'):
+    if (
+        ticket.trang_thai == 'NEW'
+        and user_role in ('MANAGER', 'ADMIN')
+    ):
         staff_options = Staff.objects.filter(
             vai_tro='CSKH'
         ).order_by('ho_ten')
 
-
+    # ==========================================
+    # 5. LỊCH SỬ XỬ LÝ TICKET
+    # ==========================================
     logs = ticket.logs.select_related(
         'nguoi_thuc_hien'
     ).order_by('-thoi_diem')
 
+    # ==========================================
+    # 6. TIN NHẮN TRAO ĐỔI
+    # ==========================================
     ticket_messages = ticket.messages.select_related(
         'nguoi_gui'
-    ).order_by('thoi_diem_gui', 'pk')
+    ).order_by(
+        'thoi_diem_gui',
+        'pk'
+    )
 
+    # Bang chung khach hang dinh kem Ticket
+    danh_sach_bang_chung = ticket.attachments.all().order_by(
+        "thoi_diem_tai_len",
+        "pk"
+    )
+
+    # ==========================================
+    # 7. HIỂN THỊ TRANG CHI TIẾT
+    # ==========================================
     return render(
         request,
         'tickets/ticket_detail.html',
@@ -198,8 +325,10 @@ def ticket_detail(request, pk):
             'resolve_form': TicketResolveForm(),
             'user_role': user_role,
             'staff_options': staff_options,
+            'danh_sach_bang_chung': danh_sach_bang_chung,
         }
     )
+
 
 
 # ==========================================================
