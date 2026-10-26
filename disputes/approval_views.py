@@ -35,15 +35,32 @@ class PheDuyetForm(forms.Form):
 
     ly_do = forms.CharField(
         label="Nhận xét / lý do",
+        required=False,
+        help_text="Bắt buộc nhập khi từ chối hoặc yêu cầu điều chỉnh.",
         widget=forms.Textarea(
             attrs={
                 "rows": 4,
                 "placeholder": (
-                    "Nhập căn cứ phê duyệt hoặc nội dung cần điều chỉnh..."
+                    "Nhập lý do nếu yêu cầu điều chỉnh. "
+                    "Có thể để trống khi phê duyệt."
                 ),
             }
         ),
     )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if (
+            cleaned_data.get("quyet_dinh") == "TU_CHOI"
+            and not cleaned_data.get("ly_do", "").strip()
+        ):
+            self.add_error(
+                "ly_do",
+                "Bạn phải nhập lý do khi từ chối hoặc yêu cầu điều chỉnh.",
+            )
+
+        return cleaned_data
 
 
 @role_required("ASSESSOR")
@@ -66,17 +83,35 @@ def dispute_submit(request, pk):
         .first()
     )
 
+    if phuong_an is None:
+        messages.error(request, "Hồ sơ chưa có phương án xử lý.")
+        return redirect("disputes:detail", pk=pk)
+
+    if phuong_an.loai_phuong_an != "HOAN_TIEN":
+        messages.info(
+            request,
+            "Phương án này do nhân viên thẩm định quyết định, "
+            "không cần gửi quản lý.",
+        )
+        return redirect("disputes:detail", pk=pk)
+
+    # Form lập phương án hiện tại đã tự gửi hoàn tiền sang CHO_DUYET.
+    if phuong_an.trang_thai == "CHO_DUYET":
+        messages.info(
+            request,
+            "Phương án hoàn tiền đã được gửi và đang chờ quản lý duyệt.",
+        )
+        return redirect("disputes:detail", pk=pk)
+
     if (
-        phuong_an is None
-        or phuong_an.trang_thai != "DE_XUAT"
+        phuong_an.trang_thai != "DE_XUAT"
         or ho_so.trang_thai != "DA_KET_LUAN"
         or not ho_so.ket_luan.strip()
         or not _ticket_dang_cho_tham_dinh(ho_so.ma_ticket)
     ):
         messages.error(
             request,
-            "Hồ sơ chưa đủ điều kiện gửi phê duyệt "
-            "hoặc phương án đã được gửi.",
+            "Hồ sơ hoặc phương án chưa đủ điều kiện gửi phê duyệt.",
         )
         return redirect("disputes:detail", pk=pk)
 
@@ -84,9 +119,7 @@ def dispute_submit(request, pk):
 
     if request.method == "POST":
         try:
-            ma_phuong_an = int(
-                request.POST.get("ma_phuong_an", "")
-            )
+            ma_phuong_an = int(request.POST.get("ma_phuong_an", ""))
         except (TypeError, ValueError):
             loi = "Phương án không hợp lệ. Vui lòng tải lại trang."
         else:
@@ -101,8 +134,8 @@ def dispute_submit(request, pk):
             else:
                 messages.success(
                     request,
-                    f"Đã gửi phương án V{ket_qua.phien_ban} "
-                    "đến quản lý. Phương án đang chờ phê duyệt.",
+                    f"Đã gửi phương án hoàn tiền V{ket_qua.phien_ban} "
+                    "đến quản lý.",
                 )
                 return redirect("disputes:detail", pk=pk)
 
@@ -120,12 +153,14 @@ def dispute_submit(request, pk):
 @role_required("MANAGER")
 @require_http_methods(["GET", "POST"])
 def dispute_review(request, pk):
-    if not Staff.objects.filter(
+    quan_ly = Staff.objects.filter(
         ma_tai_khoan=request.user,
         vai_tro="MANAGER",
-    ).exists():
+    ).first()
+
+    if quan_ly is None or not request.user.is_active:
         raise PermissionDenied(
-            "Bạn cần tài khoản nhân viên có vai trò Quản lý."
+            "Bạn cần tài khoản nhân viên đang hoạt động có vai trò Quản lý."
         )
 
     ho_so = get_object_or_404(
@@ -144,6 +179,13 @@ def dispute_review(request, pk):
         messages.error(request, "Hồ sơ chưa có phương án xử lý.")
         return redirect("disputes:detail", pk=pk)
 
+    if phuong_an.loai_phuong_an != "HOAN_TIEN":
+        messages.info(
+            request,
+            "Chỉ phương án hoàn tiền cần quản lý xét duyệt.",
+        )
+        return redirect("disputes:detail", pk=pk)
+
     ket_qua = (
         ApprovalRecord.objects
         .select_related("nguoi_phe_duyet")
@@ -154,6 +196,7 @@ def dispute_review(request, pk):
     co_the_duyet = (
         phuong_an.trang_thai == "CHO_DUYET"
         and ket_qua is None
+        and phuong_an.nguoi_de_xuat_id != quan_ly.pk
         and ho_so.trang_thai == "DA_KET_LUAN"
         and bool(ho_so.ket_luan.strip())
         and _ticket_dang_cho_tham_dinh(ho_so.ma_ticket)
@@ -175,7 +218,7 @@ def dispute_review(request, pk):
 
         if form.is_valid():
             try:
-                quyet_dinh_phuong_an(
+                ket_qua = quyet_dinh_phuong_an(
                     user=request.user,
                     ma_ho_so=pk,
                     **form.cleaned_data,
@@ -185,7 +228,13 @@ def dispute_review(request, pk):
             else:
                 messages.success(
                     request,
-                    "Đã lưu quyết định của quản lý.",
+                    (
+                        "Đã phê duyệt hoàn tiền. "
+                        "Phương án sẵn sàng thực hiện."
+                        if ket_qua.quyet_dinh == "PHE_DUYET"
+                        else "Đã yêu cầu điều chỉnh. "
+                        "Nhân viên thẩm định cần lập phiên bản mới."
+                    ),
                 )
                 return redirect("disputes:review", pk=pk)
 

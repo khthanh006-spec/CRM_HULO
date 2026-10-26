@@ -12,25 +12,27 @@ from .services import (
 )
 
 
+def _kiem_tra_ho_so_da_ket_luan(ho_so):
+    if (
+        ho_so.trang_thai != "DA_KET_LUAN"
+        or not ho_so.ket_luan.strip()
+    ):
+        raise ValidationError(
+            "Hồ sơ phải có kết luận trước khi xét duyệt phương án."
+        )
+
+
 @transaction.atomic
 def gui_phuong_an_phe_duyet(*, user, ma_ho_so, ma_phuong_an):
-    """
-    Chỉ gửi phương án hoàn tiền đến quản lý phê duyệt.
-    """
+    """Gửi phiên bản hoàn tiền mới nhất đến quản lý."""
+
     nhan_vien, ticket, ho_so = _lay_ho_so_de_xu_ly(
         user=user,
         ma_ho_so=ma_ho_so,
     )
 
     _kiem_tra_ticket_dang_cho_tham_dinh(ticket)
-
-    if (
-        ho_so.trang_thai != "DA_KET_LUAN"
-        or not ho_so.ket_luan.strip()
-    ):
-        raise ValidationError(
-            "Hồ sơ phải có kết luận trước khi gửi phê duyệt."
-        )
+    _kiem_tra_ho_so_da_ket_luan(ho_so)
 
     phuong_an = (
         CompensationAction.objects.select_for_update()
@@ -39,25 +41,26 @@ def gui_phuong_an_phe_duyet(*, user, ma_ho_so, ma_phuong_an):
         .first()
     )
 
-    if phuong_an is None:
+    if phuong_an is None or phuong_an.pk != ma_phuong_an:
         raise ValidationError(
-            "Hồ sơ chưa có phương án xử lý."
-        )
-
-    if phuong_an.pk != ma_phuong_an:
-        raise ValidationError(
-            "Phương án đã thay đổi. Vui lòng tải lại trang."
+            "Phương án không tồn tại hoặc đã có phiên bản mới."
         )
 
     if phuong_an.loai_phuong_an != "HOAN_TIEN":
         raise ValidationError(
-            "Chỉ phương án hoàn tiền cần quản lý phê duyệt. "
-            "Phương án này do nhân viên thẩm định quyết định."
+            "Chỉ phương án hoàn tiền cần quản lý phê duyệt."
         )
 
     if phuong_an.trang_thai != "DE_XUAT":
         raise ValidationError(
-            "Chỉ được gửi phương án đang ở trạng thái Đã đề xuất."
+            "Phương án đã được gửi hoặc không còn ở trạng thái Đã đề xuất."
+        )
+
+    if ApprovalRecord.objects.filter(
+        ma_phuong_an=phuong_an
+    ).exists():
+        raise ValidationError(
+            "Phiên bản này đã có quyết định. Cần lập phiên bản điều chỉnh."
         )
 
     phuong_an.full_clean()
@@ -73,7 +76,7 @@ def gui_phuong_an_phe_duyet(*, user, ma_ho_so, ma_phuong_an):
 
     if so_ban_ghi != 1:
         raise ValidationError(
-            "Phương án đã được gửi hoặc trạng thái đã thay đổi."
+            "Trạng thái phương án đã thay đổi. Vui lòng tải lại trang."
         )
 
     TicketLog.objects.create(
@@ -82,9 +85,9 @@ def gui_phuong_an_phe_duyet(*, user, ma_ho_so, ma_phuong_an):
         hanh_dong="GUI_PHE_DUYET",
         noi_dung=(
             f"Nhân viên {nhan_vien.ho_ten} gửi phương án "
-            f"hoàn tiền V{phuong_an.phien_ban} "
-            f"của hồ sơ #{ho_so.pk} đến quản lý.\n"
-            f"Số tiền đề xuất hoàn: {phuong_an.so_tien_hoan} "
+            f"hoàn tiền V{phuong_an.phien_ban}, "
+            f"hồ sơ #{ho_so.pk} đến quản lý.\n"
+            f"Số tiền: {phuong_an.so_tien_hoan} "
             f"{phuong_an.don_vi_tien_te}."
         ),
     )
@@ -100,14 +103,13 @@ def quyet_dinh_phuong_an(
     ma_ho_so,
     ma_phuong_an,
     quyet_dinh,
-    ly_do,
+    ly_do="",
 ):
-    """
-    Quản lý phê duyệt hoặc yêu cầu điều chỉnh phương án hoàn tiền.
-    """
+    """Quản lý quyết định đối với phiên bản hoàn tiền đang chờ duyệt."""
+
     if not user.is_authenticated or not user.is_active:
         raise PermissionDenied(
-            "Bạn cần đăng nhập bằng tài khoản hoạt động."
+            "Bạn cần đăng nhập bằng tài khoản đang hoạt động."
         )
 
     quan_ly = Staff.objects.filter(
@@ -117,18 +119,20 @@ def quyet_dinh_phuong_an(
 
     if quan_ly is None:
         raise PermissionDenied(
-            "Chỉ tài khoản có vai trò Quản lý "
-            "được phê duyệt hoàn tiền."
+            "Chỉ nhân viên có vai trò Quản lý được phê duyệt hoàn tiền."
         )
 
     if quyet_dinh not in dict(ApprovalRecord.QUYET_DINH_CHOICES):
-        raise ValidationError(
-            "Quyết định không hợp lệ."
-        )
+        raise ValidationError("Quyết định không hợp lệ.")
 
-    if not isinstance(ly_do, str) or not ly_do.strip():
+    if not isinstance(ly_do, str):
+        raise ValidationError("Nhận xét / lý do không hợp lệ.")
+
+    ly_do = ly_do.strip()
+
+    if quyet_dinh == "TU_CHOI" and not ly_do:
         raise ValidationError(
-            "Bạn cần nhập nhận xét hoặc lý do."
+            "Bạn phải nhập lý do khi từ chối hoặc yêu cầu điều chỉnh."
         )
 
     thong_tin = DisputeCase.objects.filter(
@@ -136,11 +140,9 @@ def quyet_dinh_phuong_an(
     ).values("ma_ticket_id").first()
 
     if thong_tin is None:
-        raise ValidationError(
-            "Hồ sơ không tồn tại."
-        )
+        raise ValidationError("Hồ sơ không tồn tại.")
 
-    # Khóa Ticket trước, sau đó khóa hồ sơ và phương án.
+    # Thứ tự khóa thống nhất với các nghiệp vụ Module 4.
     ticket = Ticket.objects.select_for_update().get(
         pk=thong_tin["ma_ticket_id"]
     )
@@ -151,14 +153,7 @@ def quyet_dinh_phuong_an(
     )
 
     _kiem_tra_ticket_dang_cho_tham_dinh(ticket)
-
-    if (
-        ho_so.trang_thai != "DA_KET_LUAN"
-        or not ho_so.ket_luan.strip()
-    ):
-        raise ValidationError(
-            "Hồ sơ chưa đủ điều kiện phê duyệt."
-        )
+    _kiem_tra_ho_so_da_ket_luan(ho_so)
 
     phuong_an = (
         CompensationAction.objects.select_for_update()
@@ -169,14 +164,12 @@ def quyet_dinh_phuong_an(
 
     if phuong_an is None or phuong_an.pk != ma_phuong_an:
         raise ValidationError(
-            "Phiên bản phương án đã thay đổi. "
-            "Vui lòng tải lại trang."
+            "Phiên bản phương án đã thay đổi. Vui lòng tải lại trang."
         )
 
     if phuong_an.loai_phuong_an != "HOAN_TIEN":
         raise ValidationError(
-            "Quản lý chỉ xét duyệt phương án hoàn tiền. "
-            "Phương án này thuộc quyền nhân viên thẩm định."
+            "Quản lý chỉ xét duyệt phương án hoàn tiền."
         )
 
     if phuong_an.trang_thai != "CHO_DUYET":
@@ -184,24 +177,29 @@ def quyet_dinh_phuong_an(
             "Phương án không còn ở trạng thái Chờ phê duyệt."
         )
 
+    if phuong_an.nguoi_de_xuat_id == quan_ly.pk:
+        raise PermissionDenied(
+            "Bạn không được tự phê duyệt phương án mình đề xuất."
+        )
+
     if ApprovalRecord.objects.filter(
         ma_phuong_an=phuong_an
     ).exists():
-        raise ValidationError(
-            "Phương án đã có quyết định."
-        )
+        raise ValidationError("Phiên bản này đã có quyết định.")
+
+    # Kiểm tra lại tính hợp lệ của phương án trước khi quyết định.
+    phuong_an.full_clean()
 
     ket_qua = ApprovalRecord(
         ma_phuong_an=phuong_an,
         nguoi_phe_duyet=quan_ly,
         quyet_dinh=quyet_dinh,
-        ly_do=ly_do.strip(),
+        ly_do=ly_do,
     )
-
     ket_qua.full_clean()
 
     trang_thai_moi = (
-        "DA_DUYET"
+        "SAN_SANG_THUC_HIEN"
         if quyet_dinh == "PHE_DUYET"
         else "TU_CHOI"
     )
@@ -233,9 +231,12 @@ def quyet_dinh_phuong_an(
         noi_dung=(
             f"Quản lý {quan_ly.ho_ten} "
             f"{ket_qua.get_quyet_dinh_display().lower()} "
-            f"phương án hoàn tiền V{phuong_an.phien_ban} "
-            f"của hồ sơ #{ho_so.pk}.\n"
-            f"Nhận xét/lý do: {ket_qua.ly_do}"
+            f"phương án hoàn tiền V{phuong_an.phien_ban}, "
+            f"hồ sơ #{ho_so.pk}.\n"
+            f"Số tiền: {phuong_an.so_tien_hoan} "
+            f"{phuong_an.don_vi_tien_te}.\n"
+            f"Nhận xét/lý do: {ly_do or 'Không có nhận xét thêm'}.\n"
+            f"Trạng thái: CHO_DUYET → {trang_thai_moi}."
         ),
     )
 
@@ -250,9 +251,10 @@ def thu_hoi_gui_duyet_sai_nhanh(
     ma_phuong_an,
 ):
     """
-    Thu hồi phương án không phải hoàn tiền đã gửi quản lý nhầm.
-    Giữ nguyên phiên bản, nội dung và lịch sử trước đó.
+    Giữ lại công cụ sửa dữ liệu cũ đã gửi nhầm nhánh.
+    Không dùng cho luồng lập phương án hiện tại.
     """
+
     nhan_vien, ticket, ho_so = _lay_ho_so_de_xu_ly(
         user=user,
         ma_ho_so=ma_ho_so,
@@ -274,22 +276,19 @@ def thu_hoi_gui_duyet_sai_nhanh(
 
     if phuong_an.loai_phuong_an == "HOAN_TIEN":
         raise ValidationError(
-            "Hoàn tiền thuộc nhánh quản lý xét duyệt, "
-            "không thu hồi bằng thao tác sửa nhánh này."
+            "Không dùng thao tác sửa nhánh cho phương án hoàn tiền."
         )
 
     if ApprovalRecord.objects.filter(
         ma_phuong_an=phuong_an
     ).exists():
         raise ValidationError(
-            "Phương án đã có quyết định. "
-            "Cần xử lý riêng để giữ đúng lịch sử."
+            "Phương án đã có quyết định, cần xử lý riêng để giữ lịch sử."
         )
 
     if phuong_an.trang_thai != "CHO_DUYET":
         raise ValidationError(
-            "Chỉ sửa phương án đang bị đưa nhầm "
-            "vào Chờ phê duyệt."
+            "Phương án không ở trạng thái gửi nhầm Chờ phê duyệt."
         )
 
     so_ban_ghi = CompensationAction.objects.filter(
@@ -301,9 +300,7 @@ def thu_hoi_gui_duyet_sai_nhanh(
     )
 
     if so_ban_ghi != 1:
-        raise ValidationError(
-            "Trạng thái phương án đã thay đổi."
-        )
+        raise ValidationError("Trạng thái phương án đã thay đổi.")
 
     TicketLog.objects.create(
         ticket=ticket,
@@ -311,13 +308,10 @@ def thu_hoi_gui_duyet_sai_nhanh(
         hanh_dong="THU_HOI_GUI_DUYET",
         noi_dung=(
             f"Nhân viên {nhan_vien.ho_ten} thu hồi yêu cầu "
-            f"duyệt nhầm của phương án V{phuong_an.phien_ban}, "
+            f"duyệt nhầm phương án V{phuong_an.phien_ban}, "
             f"hồ sơ #{ho_so.pk}.\n"
-            f"Loại: {phuong_an.get_loai_phuong_an_display()}.\n"
-            "Lý do: sửa luồng theo BPMN TO-BE; "
-            "chỉ hoàn tiền cần quản lý xét duyệt. "
-            "Phương án này thuộc quyền quyết định "
-            "của nhân viên thẩm định.\n"
+            "Lý do: chỉ hoàn tiền cần quản lý phê duyệt; "
+            "phương án này thuộc quyền nhân viên thẩm định.\n"
             "Trạng thái: CHO_DUYET → DE_XUAT."
         ),
     )

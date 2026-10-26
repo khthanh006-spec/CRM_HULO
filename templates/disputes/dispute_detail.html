@@ -21,7 +21,6 @@
             <h1>📂 Hồ sơ thẩm định #{{ ho_so.pk }}</h1>
             <p>{{ ticket.ma_ticket }} · {{ ticket.tieu_de }}</p>
         </div>
-
         <span class="m4-detail__badge">
             ● {{ ho_so.get_trang_thai_display }}
         </span>
@@ -134,13 +133,38 @@
                             <dt>Trạng thái</dt>
                             <dd>{{ phuong_an_moi_nhat.get_trang_thai_display }}</dd>
                         </div>
-                        <div>
-                            <dt>Số tiền đề xuất hoàn</dt>
-                            <dd>
-                                {{ phuong_an_moi_nhat.so_tien_hoan|floatformat:2 }}
-                                {{ phuong_an_moi_nhat.don_vi_tien_te }}
-                            </dd>
-                        </div>
+
+                        {% if phuong_an_moi_nhat.loai_phuong_an == "HOAN_TIEN" %}
+                            <div>
+                                <dt>Số tiền đề xuất hoàn</dt>
+                                <dd>
+                                    {{ phuong_an_moi_nhat.so_tien_hoan|floatformat:2 }}
+                                    {{ phuong_an_moi_nhat.don_vi_tien_te }}
+                                </dd>
+                            </div>
+                        {% endif %}
+
+                        {% if phuong_an_moi_nhat.ma_chi_tiet_don %}
+                            <div>
+                                <dt>Sản phẩm xử lý</dt>
+                                <dd>
+                                    {{ phuong_an_moi_nhat.ma_chi_tiet_don.ten_san_pham_luc_mua }}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>Số lượng xử lý</dt>
+                                <dd>{{ phuong_an_moi_nhat.so_luong }}</dd>
+                            </div>
+                        {% endif %}
+
+                        {% if phuong_an_moi_nhat.dia_chi_nhan %}
+                            <div>
+                                <dt>Địa chỉ nhận</dt>
+                                <dd>
+                                    {{ phuong_an_moi_nhat.dia_chi_nhan|linebreaksbr }}
+                                </dd>
+                            </div>
+                        {% endif %}
                     </dl>
 
                     <h3>Nội dung phương án</h3>
@@ -152,6 +176,59 @@
                     <div class="m4-detail__text">
                         {{ phuong_an_moi_nhat.ly_do|linebreaksbr }}
                     </div>
+
+                    {% if phuong_an_moi_nhat.ly_do_tu_choi %}
+                        <h3>Lý do từ chối hỗ trợ</h3>
+                        <div class="m4-detail__text">
+                            {{ phuong_an_moi_nhat.ly_do_tu_choi|linebreaksbr }}
+                        </div>
+                    {% endif %}
+
+                    {% if phuong_an_moi_nhat.trang_thai == "CHO_DUYET" %}
+                        <p class="m4-detail__hint">
+                            ⏳ Phương án hoàn tiền đang chờ quản lý phê duyệt.
+                        </p>
+                    {% endif %}
+
+                    {% if phuong_an_moi_nhat.ket_qua_thuc_hien %}
+                        <h3>⚙️ Tiến độ / kết quả thực hiện</h3>
+                        <div class="m4-detail__text">
+                            {{ phuong_an_moi_nhat.ket_qua_thuc_hien|linebreaksbr }}
+                        </div>
+                    {% endif %}
+
+                    {% if phuong_an_moi_nhat.trang_thai == "DA_HOAN_TAT" %}
+                        <p class="m4-detail__message success">
+                            ✅ Đã hoàn tất phương án lúc
+                            {{ phuong_an_moi_nhat.thoi_diem_hoan_tat|date:"d/m/Y H:i" }}.
+                            Kết quả đã được trả về CSKH.
+                        </p>
+                    {% endif %}
+
+                    {% if user_role == "ASSESSOR" and ho_so.ma_nhan_vien_tham_dinh.ma_tai_khoan_id == request.user.pk %}
+                        {% if ho_so.trang_thai == "DA_KET_LUAN" and ticket.trang_thai == "IN_PROGRESS" and ticket.trang_thai_tham_dinh == "WAITING" %}
+                            {% if phuong_an_moi_nhat.trang_thai == "SAN_SANG_THUC_HIEN" or phuong_an_moi_nhat.trang_thai == "DANG_THUC_HIEN" %}
+                                <p>
+                                    <a href="{% url 'disputes:execute' ho_so.pk %}"
+                                       class="m4-detail__button">
+                                        {% if phuong_an_moi_nhat.trang_thai == "DANG_THUC_HIEN" %}
+                                            ⚙️ Tiếp tục thực hiện phương án
+                                        {% else %}
+                                            ⚙️ Thực hiện phương án
+                                        {% endif %}
+                                    </a>
+                                </p>
+                            {% elif phuong_an_moi_nhat.trang_thai == "DA_DUYET" and phuong_an_moi_nhat.loai_phuong_an == "HOAN_TIEN" %}
+                                <p>
+                                    <a href="{% url 'disputes:execute' ho_so.pk %}"
+                                       class="m4-detail__button">
+                                        ⚙️ Thực hiện phương án hoàn tiền
+                                    </a>
+                                </p>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+
                 {% else %}
                     <p class="m4-detail__muted">
                         Chưa có phương án xử lý.
@@ -160,10 +237,8 @@
 
                 {% if co_the_lap_phuong_an %}
                     <p>
-                        <a
-                            href="{% url 'disputes:plan' ho_so.pk %}"
-                            class="m4-detail__button"
-                        >
+                        <a href="{% url 'disputes:plan' ho_so.pk %}"
+                           class="m4-detail__button">
                             {% if phuong_an_moi_nhat %}
                                 ✍️ Điều chỉnh phương án
                             {% else %}
@@ -268,14 +343,14 @@
                     <p class="m4-detail__muted">
                         Ghi nhận kết quả sau khi kiểm tra hồ sơ và bằng chứng.
                     </p>
-                    <a
-                        href="{% url 'disputes:conclusion' ho_so.pk %}"
-                        class="m4-detail__button"
-                    >
+                    <a href="{% url 'disputes:conclusion' ho_so.pk %}"
+                       class="m4-detail__button">
                         ✍️ Ghi kết luận thẩm định
                     </a>
                 {% else %}
-                    <p class="m4-detail__muted">Chưa có kết luận thẩm định.</p>
+                    <p class="m4-detail__muted">
+                        Chưa có kết luận thẩm định.
+                    </p>
                 {% endif %}
             </section>
 
