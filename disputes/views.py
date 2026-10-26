@@ -239,6 +239,15 @@ def dispute_detail(request, pk):
             and duoc_phep_theo_loai
         )
 
+    # M4_RECONSIDERATION_CONTEXT
+    from .reconsideration_context import tao_context_xem_xet_lai
+
+    context_xem_xet = tao_context_xem_xet_lai(
+        user=request.user,
+        ho_so=ho_so,
+        phuong_an=phuong_an,
+    )
+
     ly_do_chua_the_tiep_nhan = ""
 
     if (
@@ -284,6 +293,7 @@ def dispute_detail(request, pk):
             "co_the_xem_phe_duyet": co_the_xem_phe_duyet,
             "co_the_thuc_hien": co_the_thuc_hien,
             "co_the_gui_phe_duyet": co_the_gui_phe_duyet,
+            **context_xem_xet,
         },
     )
 
