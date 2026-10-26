@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Phương án hồ sơ #{{ ho_so.pk }} | CRM HULO
+{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'disputes/css/dispute_plan.css' %}?v=2"
+>
+{% endblock %}
+
+{% block content %}
+<div class="m4-plan">
+
+    <a
+        class="m4-plan__back"
+        href="{% url 'disputes:detail' ho_so.pk %}"
+    >
+        ← Chi tiết hồ sơ
+    </a>
+
+    <section class="m4-plan__card">
+        <p class="m4-plan__eyebrow">PHỐI HỢP CHUYÊN MÔN</p>
+
+        <h1>
+            {% if phuong_an_moi_nhat %}
+                ✍️ Điều chỉnh phương án xử lý
+            {% else %}
+                📋 Lập phương án xử lý
+            {% endif %}
+        </h1>
+
+        <p class="m4-plan__muted">
+            Hồ sơ #{{ ho_so.pk }} · {{ ticket.ma_ticket }}
+            · Đơn hàng {{ don_hang.so_don_hang }}
+        </p>
+
+        <div class="m4-plan__summary">
+            <strong>⚖️ Kết luận thẩm định</strong>
+            <div>{{ ho_so.ket_luan|linebreaksbr }}</div>
+        </div>
+
+        {% if phuong_an_moi_nhat %}
+            <p class="m4-plan__notice">
+                Phiên bản hiện tại: V{{ phuong_an_moi_nhat.phien_ban }}.
+                Lưu điều chỉnh sẽ tạo phiên bản mới,
+                giữ nguyên nội dung phiên bản cũ.
+            </p>
+        {% endif %}
+
+        <form
+            id="plan-form"
+            method="post"
+            action="{% url 'disputes:plan' ho_so.pk %}"
+        >
+            {% csrf_token %}
+            {{ form.phien_ban_hien_tai }}
+
+            {% if form.non_field_errors or form.phien_ban_hien_tai.errors %}
+                <div class="m4-plan__error" role="alert">
+                    {{ form.non_field_errors }}
+                    {{ form.phien_ban_hien_tai.errors }}
+                </div>
+            {% endif %}
+
+            <fieldset class="m4-plan__choices">
+                <legend>Chọn hình thức xử lý</legend>
+
+                <div class="m4-plan__options">
+                    {% for value, label in form.loai_phuong_an.field.choices %}
+                        <label class="m4-plan__option">
+                            <input
+                                type="radio"
+                                name="loai_phuong_an"
+                                value="{{ value }}"
+                                required
+                                {% if form.loai_phuong_an.value == value %}checked{% endif %}
+                            >
+
+                            <span class="m4-plan__option-body">
+                                <span class="m4-plan__icon" aria-hidden="true">
+                                    {% if value == 'HOAN_TIEN' %}
+                                        💰
+                                    {% elif value == 'DOI_HANG' %}
+                                        📦
+                                    {% elif value == 'GIAO_BO_SUNG' %}
+                                        🚚
+                                    {% else %}
+                                        ⛔
+                                    {% endif %}
+                                </span>
+
+                                <span class="m4-plan__option-text">
+                                    <strong>{{ label }}</strong>
+
+                                    <small>
+                                        {% if value == 'HOAN_TIEN' %}
+                                            Gửi quản lý xét duyệt số tiền đề xuất.
+                                        {% elif value == 'DOI_HANG' %}
+                                            Đổi hoặc gửi sản phẩm thay thế.
+                                        {% elif value == 'GIAO_BO_SUNG' %}
+                                            Gửi bổ sung phần hàng còn thiếu.
+                                        {% else %}
+                                            Từ chối có căn cứ và lý do rõ ràng.
+                                        {% endif %}
+                                    </small>
+                                </span>
+
+                                <span class="m4-plan__check" aria-hidden="true">
+                                    ✓
+                                </span>
+                            </span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                {{ form.loai_phuong_an.errors }}
+            </fieldset>
+
+            <div data-types="HOAN_TIEN DOI_HANG GIAO_BO_SUNG">
+                <div class="m4-plan__field">
+                    <label for="{{ form.ma_chi_tiet_don.id_for_label }}">
+                        {{ form.ma_chi_tiet_don.label }}
+                    </label>
+                    {{ form.ma_chi_tiet_don }}
+                    {{ form.ma_chi_tiet_don.errors }}
+                </div>
+
+                <div class="m4-plan__field">
+                    <label for="{{ form.so_luong.id_for_label }}">
+                        {{ form.so_luong.label }}
+                    </label>
+                    {{ form.so_luong }}
+                    {{ form.so_luong.errors }}
+                    <small>
+                        Không vượt số lượng đã mua của sản phẩm được chọn.
+                    </small>
+                </div>
+            </div>
+
+            <div data-types="DOI_HANG GIAO_BO_SUNG">
+                <div class="m4-plan__field">
+                    <label for="{{ form.dia_chi_nhan.id_for_label }}">
+                        {{ form.dia_chi_nhan.label }}
+                    </label>
+                    {{ form.dia_chi_nhan }}
+                    {{ form.dia_chi_nhan.errors }}
+                </div>
+            </div>
+
+            <div data-types="HOAN_TIEN">
+                <div class="m4-plan__field">
+                    <label for="{{ form.so_tien_hoan.id_for_label }}">
+                        {{ form.so_tien_hoan.label }}
+                        ({{ don_hang.don_vi_tien_te }})
+                    </label>
+                    {{ form.so_tien_hoan }}
+                    {{ form.so_tien_hoan.errors }}
+                    <small>
+                        Không vượt giá trị phần hàng khiếu nại
+                        theo sản phẩm và số lượng đã chọn.
+                    </small>
+                </div>
+            </div>
+
+            <div data-types="TU_CHOI_HO_TRO">
+                <div class="m4-plan__field">
+                    <label for="{{ form.ly_do_tu_choi.id_for_label }}">
+                        {{ form.ly_do_tu_choi.label }}
+                    </label>
+                    {{ form.ly_do_tu_choi }}
+                    {{ form.ly_do_tu_choi.errors }}
+                </div>
+            </div>
+
+            <div class="m4-plan__field">
+                <label for="{{ form.noi_dung.id_for_label }}">
+                    {{ form.noi_dung.label }}
+                </label>
+                {{ form.noi_dung }}
+                {{ form.noi_dung.errors }}
+            </div>
+
+            <div class="m4-plan__field">
+                <label for="{{ form.ly_do.id_for_label }}">
+                    {{ form.ly_do.label }}
+                </label>
+                {{ form.ly_do }}
+                {{ form.ly_do.errors }}
+            </div>
+
+            <p id="plan-notice" class="m4-plan__notice" aria-live="polite">
+                Chỉ phương án hoàn tiền cần quản lý phê duyệt.
+                Các phương án còn lại do nhân viên thẩm định quyết định.
+            </p>
+
+            <div class="m4-plan__actions">
+                <a
+                    class="m4-plan__cancel"
+                    href="{% url 'disputes:detail' ho_so.pk %}"
+                >
+                    Hủy
+                </a>
+
+                <button
+                    id="plan-submit"
+                    type="submit"
+                    class="m4-plan__submit"
+                >
+                    ✓ Lưu phương án
+                </button>
+            </div>
+        </form>
+    </section>
+
+    {% if lich_su_phuong_an %}
+        <section class="m4-plan__card">
+            <h2>🕘 Lịch sử phương án</h2>
+
+            {% for pa in lich_su_phuong_an %}
+                <article class="m4-plan__version">
+                    <div class="m4-plan__version-heading">
+                        <strong>
+                            V{{ pa.phien_ban }}
+                            · {{ pa.get_loai_phuong_an_display }}
+                        </strong>
+                        <span>{{ pa.get_trang_thai_display }}</span>
+                    </div>
+
+                    <p class="m4-plan__muted">
+                        {{ pa.nguoi_de_xuat.ho_ten }}
+                        · {{ pa.thoi_diem_tao|date:"d/m/Y H:i" }}
+                    </p>
+
+                    <p>
+                        <strong>Số tiền hoàn:</strong>
+                        {{ pa.so_tien_hoan|floatformat:2 }}
+                        {{ pa.don_vi_tien_te }}
+                    </p>
+
+                    <div>{{ pa.noi_dung|linebreaksbr }}</div>
+
+                    <p><strong>Căn cứ / lý do:</strong></p>
+                    <div>{{ pa.ly_do|linebreaksbr }}</div>
+                </article>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const form = document.getElementById("plan-form");
+    const button = document.getElementById("plan-submit");
+    const notice = document.getElementById("plan-notice");
+
+    function updatePlan() {
+        const selected = form.querySelector(
+            'input[name="loai_phuong_an"]:checked'
+        );
+
+        const type = selected ? selected.value : "";
+
+        form.querySelectorAll("[data-types]").forEach(function (group) {
+            const visible = group.dataset.types.split(" ").includes(type);
+            group.hidden = !visible;
+
+            group.querySelectorAll("input, select, textarea").forEach(
+                function (field) {
+                    field.disabled = !visible;
+                    field.required = visible;
+                }
+            );
+        });
+
+        if (type === "HOAN_TIEN") {
+            button.textContent = "📨 Gửi đề xuất hoàn tiền";
+            notice.textContent =
+                "Đề xuất sẽ chuyển sang Chờ phê duyệt. " +
+                "Chưa được thực hiện hoàn tiền khi quản lý chưa chấp thuận.";
+        } else if (type) {
+            button.textContent = "✓ Lưu phương án";
+            notice.textContent =
+                "Lưu thành công sẽ chuyển phương án sang Sẵn sàng thực hiện. " +
+                "Không cần quản lý phê duyệt; chưa ghi nhận đã thực hiện.";
+        } else {
+            button.textContent = "✓ Lưu phương án";
+            notice.textContent =
+                "Chọn một phương án để nhập thông tin tương ứng.";
+        }
+    }
+
+    form.querySelectorAll('input[name="loai_phuong_an"]').forEach(
+        function (radio) {
+            radio.addEventListener("change", updatePlan);
+        }
+    );
+
+    updatePlan();
+})();
+</script>
+{% endblock %}

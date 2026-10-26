@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 {% load static %}
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -78,10 +78,15 @@
                     Hồ sơ thẩm định
                 </a>
 
-                <a href="{% url 'admin:index' %}">
-                    Quản trị hệ thống
-                </a>
+            {% endif %}
 
+            {% if request.user.is_authenticated %}
+                {% if request.user.is_staff or request.user.is_superuser %}
+                    <a href="{% url 'admin:index' %}">
+                        <span aria-hidden="true">⚙</span>
+                        Quản trị hệ thống
+                    </a>
+                {% endif %}
             {% endif %}
         </nav>
 
@@ -94,6 +99,7 @@
 
                 <form method="POST" action="{% url 'logout' %}">
                     {% csrf_token %}
+
                     <button type="submit" class="logout-button">
                         Đăng xuất
                     </button>

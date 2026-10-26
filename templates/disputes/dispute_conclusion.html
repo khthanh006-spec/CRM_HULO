@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Ghi kết luận hồ sơ #{{ ho_so.pk }} | CRM HULO
+{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'disputes/css/dispute_conclusion.css' %}"
+>
+{% endblock %}
+
+{% block content %}
+<div class="m4-conclusion">
+
+    <a
+        class="m4-conclusion__back"
+        href="{% url 'disputes:detail' ho_so.pk %}"
+    >
+        ← Quay lại hồ sơ
+    </a>
+
+    <section class="m4-conclusion__card">
+        <p class="m4-conclusion__eyebrow">
+            PHỐI HỢP CHUYÊN MÔN
+        </p>
+
+        <h1>
+            <span aria-hidden="true">⚖️</span>
+            Ghi nhận kết luận thẩm định
+        </h1>
+
+        <p class="m4-conclusion__subtitle">
+            Hồ sơ #{{ ho_so.pk }} · {{ ticket.ma_ticket }}
+        </p>
+
+        <div class="m4-conclusion__summary">
+            <strong>{{ ticket.tieu_de }}</strong>
+
+            <p>{{ ticket.noi_dung|linebreaksbr }}</p>
+        </div>
+
+        {% if loi %}
+        <p class="m4-conclusion__error" role="alert">
+            <span aria-hidden="true">⚠</span>
+            {{ loi }}
+        </p>
+        {% endif %}
+
+        <form
+            method="post"
+            action="{% url 'disputes:conclusion' ho_so.pk %}"
+        >
+            {% csrf_token %}
+
+            <label for="id_ket_luan">
+                Kết luận thẩm định
+                <span class="m4-conclusion__required">*</span>
+            </label>
+
+            <p id="ket-luan-help" class="m4-conclusion__help">
+                Nêu kết quả kiểm tra, căn cứ và đánh giá khiếu nại
+                có cơ sở hay không.
+            </p>
+
+            <textarea
+                id="id_ket_luan"
+                name="ket_luan"
+                rows="8"
+                required
+                aria-describedby="ket-luan-help"
+                placeholder="Nhập kết quả kiểm tra và căn cứ kết luận..."
+            >{{ ket_luan }}</textarea>
+
+            <p class="m4-conclusion__notice">
+                Kết luận sẽ được lưu vào lịch sử xử lý.
+                Hồ sơ chuyển sang Đã kết luận; Ticket tiếp tục
+                được xử lý ở các bước tiếp theo.
+            </p>
+
+            <div class="m4-conclusion__actions">
+                <a href="{% url 'disputes:detail' ho_so.pk %}">
+                    Hủy
+                </a>
+
+                <button type="submit">
+                    <span aria-hidden="true">✓</span>
+                    Lưu kết luận thẩm định
+                </button>
+            </div>
+        </form>
+    </section>
+
+</div>
+{% endblock %}
