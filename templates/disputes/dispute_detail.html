@@ -41,7 +41,6 @@
 
             <section class="m4-detail__card">
                 <h2>📝 Nội dung khiếu nại</h2>
-
                 <dl class="m4-detail__info">
                     <div>
                         <dt>Mã Ticket</dt>
@@ -69,7 +68,6 @@
 
             <section class="m4-detail__card">
                 <h2>📦 Đơn hàng liên quan</h2>
-
                 {% if don_hang %}
                     <dl class="m4-detail__info">
                         <div>
@@ -160,9 +158,7 @@
                         {% if phuong_an_moi_nhat.dia_chi_nhan %}
                             <div>
                                 <dt>Địa chỉ nhận</dt>
-                                <dd>
-                                    {{ phuong_an_moi_nhat.dia_chi_nhan|linebreaksbr }}
-                                </dd>
+                                <dd>{{ phuong_an_moi_nhat.dia_chi_nhan|linebreaksbr }}</dd>
                             </div>
                         {% endif %}
                     </dl>
@@ -190,6 +186,64 @@
                         </p>
                     {% endif %}
 
+                    {% if ket_qua_phe_duyet %}
+                        <h3>⚖️ Quyết định của quản lý</h3>
+
+                        {% if ket_qua_phe_duyet.quyet_dinh == "PHE_DUYET" %}
+                            <p class="m4-detail__message success">
+                                ✅ Đã phê duyệt phương án hoàn tiền
+                                V{{ phuong_an_moi_nhat.phien_ban }}.
+                            </p>
+                        {% else %}
+                            <p class="m4-detail__hint">
+                                ✍️ Quản lý yêu cầu điều chỉnh phương án
+                                V{{ phuong_an_moi_nhat.phien_ban }}.
+                            </p>
+                        {% endif %}
+
+                        <dl class="m4-detail__info">
+                            <div>
+                                <dt>Người quyết định</dt>
+                                <dd>{{ ket_qua_phe_duyet.nguoi_phe_duyet.ho_ten }}</dd>
+                            </div>
+                            <div>
+                                <dt>Thời điểm</dt>
+                                <dd>
+                                    {{ ket_qua_phe_duyet.thoi_diem_phe_duyet|date:"d/m/Y H:i" }}
+                                </dd>
+                            </div>
+                        </dl>
+
+                        <div class="m4-detail__text">
+                            {{ ket_qua_phe_duyet.ly_do|default:"Không có nhận xét thêm."|linebreaksbr }}
+                        </div>
+                    {% endif %}
+
+                    {% if co_the_xet_duyet %}
+                        <p>
+                            <a href="{% url 'disputes:review' ho_so.pk %}"
+                               class="m4-detail__button">
+                                ⚖️ Xét duyệt hoàn tiền
+                            </a>
+                        </p>
+                    {% elif co_the_xem_phe_duyet %}
+                        <p>
+                            <a href="{% url 'disputes:review' ho_so.pk %}"
+                               class="m4-detail__button">
+                                📄 Xem thông tin xét duyệt
+                            </a>
+                        </p>
+                    {% endif %}
+
+                    {% if co_the_gui_phe_duyet %}
+                        <p>
+                            <a href="{% url 'disputes:submit' ho_so.pk %}"
+                               class="m4-detail__button">
+                                📤 Gửi quản lý phê duyệt hoàn tiền
+                            </a>
+                        </p>
+                    {% endif %}
+
                     {% if phuong_an_moi_nhat.ket_qua_thuc_hien %}
                         <h3>⚙️ Tiến độ / kết quả thực hiện</h3>
                         <div class="m4-detail__text">
@@ -205,30 +259,18 @@
                         </p>
                     {% endif %}
 
-                    {% if user_role == "ASSESSOR" and ho_so.ma_nhan_vien_tham_dinh.ma_tai_khoan_id == request.user.pk %}
-                        {% if ho_so.trang_thai == "DA_KET_LUAN" and ticket.trang_thai == "IN_PROGRESS" and ticket.trang_thai_tham_dinh == "WAITING" %}
-                            {% if phuong_an_moi_nhat.trang_thai == "SAN_SANG_THUC_HIEN" or phuong_an_moi_nhat.trang_thai == "DANG_THUC_HIEN" %}
-                                <p>
-                                    <a href="{% url 'disputes:execute' ho_so.pk %}"
-                                       class="m4-detail__button">
-                                        {% if phuong_an_moi_nhat.trang_thai == "DANG_THUC_HIEN" %}
-                                            ⚙️ Tiếp tục thực hiện phương án
-                                        {% else %}
-                                            ⚙️ Thực hiện phương án
-                                        {% endif %}
-                                    </a>
-                                </p>
-                            {% elif phuong_an_moi_nhat.trang_thai == "DA_DUYET" and phuong_an_moi_nhat.loai_phuong_an == "HOAN_TIEN" %}
-                                <p>
-                                    <a href="{% url 'disputes:execute' ho_so.pk %}"
-                                       class="m4-detail__button">
-                                        ⚙️ Thực hiện phương án hoàn tiền
-                                    </a>
-                                </p>
-                            {% endif %}
-                        {% endif %}
+                    {% if co_the_thuc_hien %}
+                        <p>
+                            <a href="{% url 'disputes:execute' ho_so.pk %}"
+                               class="m4-detail__button">
+                                {% if phuong_an_moi_nhat.trang_thai == "DANG_THUC_HIEN" %}
+                                    ⚙️ Tiếp tục thực hiện phương án
+                                {% else %}
+                                    ⚙️ Thực hiện phương án
+                                {% endif %}
+                            </a>
+                        </p>
                     {% endif %}
-
                 {% else %}
                     <p class="m4-detail__muted">
                         Chưa có phương án xử lý.
@@ -258,8 +300,7 @@
                                 📄 {{ tep.ten_tep_goc|default:tep.tep_dinh_kem.name }}
                             </strong>
                             <small>
-                                Tải lên:
-                                {{ tep.thoi_diem_tai_len|date:"d/m/Y H:i" }}
+                                Tải lên: {{ tep.thoi_diem_tai_len|date:"d/m/Y H:i" }}
                             </small>
                         </li>
                     {% empty %}
@@ -292,7 +333,6 @@
         </div>
 
         <aside class="m4-detail__column m4-detail__sidebar">
-
             <section class="m4-detail__card">
                 <h2>🔍 Tiếp nhận thẩm định</h2>
                 <dl class="m4-detail__info m4-detail__info--single">
@@ -348,9 +388,7 @@
                         ✍️ Ghi kết luận thẩm định
                     </a>
                 {% else %}
-                    <p class="m4-detail__muted">
-                        Chưa có kết luận thẩm định.
-                    </p>
+                    <p class="m4-detail__muted">Chưa có kết luận thẩm định.</p>
                 {% endif %}
             </section>
 
@@ -415,7 +453,6 @@
                     </div>
                 </dl>
             </section>
-
         </aside>
     </div>
 </div>

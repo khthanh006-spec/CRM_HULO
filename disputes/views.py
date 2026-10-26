@@ -1,4 +1,3 @@
-from django import forms
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
@@ -8,64 +7,8 @@ from django.views.decorators.http import require_http_methods, require_POST
 from accounts.models import Staff
 from accounts.permissions import role_required
 
-from .models import CompensationAction, DisputeCase
-from .services import (
-    ghi_nhan_ket_luan,
-    lap_phuong_an,
-    tiep_nhan_ho_so,
-)
-
-
-class PhuongAnForm(forms.Form):
-    loai_phuong_an = forms.ChoiceField(
-        label="Loại phương án",
-        choices=CompensationAction.LOAI_PHUONG_AN_MOI_CHOICES,
-    )
-
-    so_tien_hoan = forms.DecimalField(
-        label="Số tiền đề xuất hoàn",
-        min_value=0,
-        max_digits=12,
-        decimal_places=2,
-        initial=0,
-        widget=forms.NumberInput(
-            attrs={
-                "step": "0.01",
-                "min": "0",
-            }
-        ),
-        help_text=(
-            "Chỉ nhập số tiền khi chọn Hoàn tiền. "
-            "Các phương án còn lại nhập 0."
-        ),
-    )
-
-    noi_dung = forms.CharField(
-        label="Nội dung phương án",
-        widget=forms.Textarea(
-            attrs={
-                "rows": 4,
-                "placeholder": "Mô tả cụ thể phương án xử lý...",
-            }
-        ),
-    )
-
-    ly_do = forms.CharField(
-        label="Căn cứ đề xuất hoặc lý do điều chỉnh",
-        widget=forms.Textarea(
-            attrs={
-                "rows": 3,
-                "placeholder": (
-                    "Nêu căn cứ từ kết luận, đơn hàng và bằng chứng..."
-                ),
-            }
-        ),
-    )
-
-    phien_ban_hien_tai = forms.IntegerField(
-        min_value=0,
-        widget=forms.HiddenInput(),
-    )
+from .models import ApprovalRecord, DisputeCase
+from .services import ghi_nhan_ket_luan, tiep_nhan_ho_so
 
 
 def _ho_so_duoc_phep_xem(user):
@@ -151,9 +94,7 @@ def dispute_home(request):
         )
 
     if trang_thai in dict(DisputeCase.TRANG_THAI_CHOICES):
-        ho_so_list = ho_so_list.filter(
-            trang_thai=trang_thai
-        )
+        ho_so_list = ho_so_list.filter(trang_thai=trang_thai)
     else:
         trang_thai = ""
 
@@ -196,30 +137,115 @@ def dispute_detail(request, pk):
             .order_by("pk")
         )
 
-    la_nguoi_duoc_phan_cong = _la_nguoi_tham_dinh(
-        request.user,
-        ho_so,
+    la_nguoi_duoc_phan_cong = (
+        request.user.is_active
+        and _la_nguoi_tham_dinh(request.user, ho_so)
+    )
+
+    ticket_dang_cho = _ticket_dang_cho_tham_dinh(ticket)
+
+    da_ket_luan = (
+        ho_so.trang_thai == "DA_KET_LUAN"
+        and bool(ho_so.ket_luan.strip())
     )
 
     co_the_tiep_nhan = (
         la_nguoi_duoc_phan_cong
         and ho_so.trang_thai == "CHO_TIEP_NHAN"
-        and _ticket_dang_cho_tham_dinh(ticket)
+        and ticket_dang_cho
     )
 
     co_the_ket_luan = (
         la_nguoi_duoc_phan_cong
         and ho_so.trang_thai == "DANG_THAM_DINH"
         and not ho_so.ket_luan
-        and _ticket_dang_cho_tham_dinh(ticket)
+        and ticket_dang_cho
     )
 
-    phuong_an_moi_nhat = (
+    phuong_an = (
         ho_so.phuong_an_xu_ly
-        .select_related("nguoi_de_xuat")
+        .select_related("nguoi_de_xuat", "ma_chi_tiet_don")
         .order_by("-phien_ban")
         .first()
     )
+
+    ket_qua_phe_duyet = None
+    co_the_xet_duyet = False
+    co_the_xem_phe_duyet = False
+    co_the_thuc_hien = False
+    co_the_gui_phe_duyet = False
+
+    quan_ly = Staff.objects.filter(
+        ma_tai_khoan=request.user,
+        vai_tro="MANAGER",
+    ).first()
+
+    if phuong_an is not None:
+        la_hoan_tien = phuong_an.loai_phuong_an == "HOAN_TIEN"
+
+        if la_hoan_tien:
+            ket_qua_phe_duyet = (
+                ApprovalRecord.objects
+                .select_related("nguoi_phe_duyet")
+                .filter(ma_phuong_an=phuong_an)
+                .first()
+            )
+
+        co_the_xem_phe_duyet = (
+            request.user.is_active
+            and quan_ly is not None
+            and la_hoan_tien
+        )
+
+        co_the_xet_duyet = (
+            co_the_xem_phe_duyet
+            and phuong_an.nguoi_de_xuat_id != quan_ly.pk
+            and phuong_an.trang_thai == "CHO_DUYET"
+            and ket_qua_phe_duyet is None
+            and da_ket_luan
+            and ticket_dang_cho
+        )
+
+        co_the_gui_phe_duyet = (
+            la_nguoi_duoc_phan_cong
+            and la_hoan_tien
+            and phuong_an.trang_thai == "DE_XUAT"
+            and ket_qua_phe_duyet is None
+            and da_ket_luan
+            and ticket_dang_cho
+        )
+
+        trang_thai_thuc_hien = {
+            "SAN_SANG_THUC_HIEN",
+            "DANG_THUC_HIEN",
+        }
+
+        if la_hoan_tien:
+            trang_thai_thuc_hien.add("DA_DUYET")
+
+        duoc_phep_theo_loai = phuong_an.loai_phuong_an in {
+            "DOI_HANG",
+            "GIAO_BO_SUNG",
+            "TU_CHOI_HO_TRO",
+        }
+
+        if la_hoan_tien:
+            duoc_phep_theo_loai = (
+                ket_qua_phe_duyet is not None
+                and ket_qua_phe_duyet.quyet_dinh == "PHE_DUYET"
+                and ket_qua_phe_duyet.nguoi_phe_duyet.vai_tro == "MANAGER"
+                and ket_qua_phe_duyet.nguoi_phe_duyet_id
+                != phuong_an.nguoi_de_xuat_id
+            )
+
+        co_the_thuc_hien = (
+            la_nguoi_duoc_phan_cong
+            and da_ket_luan
+            and ticket_dang_cho
+            and don_hang is not None
+            and phuong_an.trang_thai in trang_thai_thuc_hien
+            and duoc_phep_theo_loai
+        )
 
     ly_do_chua_the_tiep_nhan = ""
 
@@ -255,12 +281,17 @@ def dispute_detail(request, pk):
             "co_the_tiep_nhan": co_the_tiep_nhan,
             "co_the_ket_luan": co_the_ket_luan,
             "ly_do_chua_the_tiep_nhan": ly_do_chua_the_tiep_nhan,
-            "phuong_an_moi_nhat": phuong_an_moi_nhat,
+            "phuong_an_moi_nhat": phuong_an,
             "co_the_lap_phuong_an": _du_dieu_kien_lap_phuong_an(
                 request.user,
                 ho_so,
-                phuong_an_moi_nhat,
+                phuong_an,
             ),
+            "ket_qua_phe_duyet": ket_qua_phe_duyet,
+            "co_the_xet_duyet": co_the_xet_duyet,
+            "co_the_xem_phe_duyet": co_the_xem_phe_duyet,
+            "co_the_thuc_hien": co_the_thuc_hien,
+            "co_the_gui_phe_duyet": co_the_gui_phe_duyet,
         },
     )
 
@@ -311,8 +342,7 @@ def dispute_conclusion(request, pk):
     ):
         messages.error(
             request,
-            "Hồ sơ chưa đủ điều kiện ghi kết luận "
-            "hoặc đã có kết luận.",
+            "Hồ sơ chưa đủ điều kiện ghi kết luận hoặc đã có kết luận.",
         )
         return redirect("disputes:detail", pk=pk)
 
@@ -352,95 +382,7 @@ def dispute_conclusion(request, pk):
 @role_required("ASSESSOR")
 @require_http_methods(["GET", "POST"])
 def dispute_plan(request, pk):
-    ho_so = get_object_or_404(
-        _ho_so_duoc_phep_xem(request.user),
-        pk=pk,
-    )
+    # Import tại thời điểm gọi để tránh vòng lặp import.
+    from .plan_views import dispute_plan as plan_view
 
-    if not _la_nguoi_tham_dinh(request.user, ho_so):
-        raise PermissionDenied(
-            "Bạn không được phân công thẩm định hồ sơ này."
-        )
-
-    phuong_an_moi_nhat = (
-        ho_so.phuong_an_xu_ly
-        .order_by("-phien_ban")
-        .first()
-    )
-
-    if not _du_dieu_kien_lap_phuong_an(
-        request.user,
-        ho_so,
-        phuong_an_moi_nhat,
-    ):
-        messages.error(
-            request,
-            "Hồ sơ chưa đủ điều kiện lập phương án "
-            "hoặc phương án hiện tại không được phép điều chỉnh.",
-        )
-        return redirect("disputes:detail", pk=pk)
-
-    initial = {
-        "phien_ban_hien_tai": (
-            phuong_an_moi_nhat.phien_ban
-            if phuong_an_moi_nhat else 0
-        ),
-        "so_tien_hoan": 0,
-    }
-
-    if phuong_an_moi_nhat:
-        # Chuyển lựa chọn cũ sang ô tương ứng khi điều chỉnh.
-        loai_phuong_an = {
-            "GUI_LAI_HANG": "DOI_HANG",
-            "KHONG_BOI_THUONG": "PHUONG_AN_KHAC",
-        }.get(
-            phuong_an_moi_nhat.loai_phuong_an,
-            phuong_an_moi_nhat.loai_phuong_an,
-        )
-
-        initial.update(
-            {
-                "loai_phuong_an": loai_phuong_an,
-                "so_tien_hoan": phuong_an_moi_nhat.so_tien_hoan,
-                "noi_dung": phuong_an_moi_nhat.noi_dung,
-            }
-        )
-
-    if request.method == "POST":
-        form = PhuongAnForm(request.POST)
-
-        if form.is_valid():
-            try:
-                phuong_an = lap_phuong_an(
-                    user=request.user,
-                    ma_ho_so=pk,
-                    **form.cleaned_data,
-                )
-            except ValidationError as exc:
-                form.add_error(None, " ".join(exc.messages))
-            else:
-                messages.success(
-                    request,
-                    f"Đã lưu phương án V{phuong_an.phien_ban} "
-                    f"cho hồ sơ #{pk}.",
-                )
-                return redirect("disputes:detail", pk=pk)
-    else:
-        form = PhuongAnForm(initial=initial)
-
-    return render(
-        request,
-        "disputes/dispute_plan.html",
-        {
-            "ho_so": ho_so,
-            "ticket": ho_so.ma_ticket,
-            "don_hang": ho_so.ma_don_hang,
-            "form": form,
-            "phuong_an_moi_nhat": phuong_an_moi_nhat,
-            "lich_su_phuong_an": (
-                ho_so.phuong_an_xu_ly
-                .select_related("nguoi_de_xuat")
-                .order_by("-phien_ban")
-            ),
-        },
-    )
+    return plan_view(request, pk)
