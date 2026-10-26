@@ -552,3 +552,6 @@ class ApprovalRecord(models.Model):
             f"Phương án #{self.ma_phuong_an_id} - "
             f"{self.get_quyet_dinh_display()}"
         )
+
+
+from .reconsideration_models import ReconsiderationRecord

@@ -1,0 +1,59 @@
+{% if ticket.trang_thai_xac_nhan == "DISAGREED" %}
+<section class="m4-detail__card">
+    <h2>🔄 Khách hàng yêu cầu xem xét lại</h2>
+
+    <p class="m4-detail__hint">
+        Khách hàng chưa đồng ý với kết quả xử lý.
+        Cần kiểm tra phản hồi cùng kết quả đã thực hiện.
+    </p>
+
+    <dl class="m4-detail__info">
+        <div>
+            <dt>Thời điểm phản hồi</dt>
+            <dd>
+                {{ ticket.thoi_diem_xac_nhan|date:"d/m/Y H:i" }}
+            </dd>
+        </div>
+        <div>
+            <dt>Trạng thái Ticket</dt>
+            <dd>{{ ticket.get_trang_thai_display }}</dd>
+        </div>
+    </dl>
+
+    <h3>💬 Lý do không đồng ý</h3>
+    <div class="m4-detail__text">
+        {{ ticket.ly_do_khong_dong_y|default:"Chưa có nội dung phản hồi."|linebreaksbr }}
+    </div>
+
+    {% if ticket.trang_thai == "REOPENED" %}
+        <p class="m4-detail__hint">
+            ⏳ Chờ CSKH tiếp tục xử lý Ticket mở lại.
+        </p>
+
+    {% elif ticket.trang_thai == "IN_PROGRESS" %}
+        {% if ticket.trang_thai_tham_dinh == "COMPLETED" %}
+            {% if phuong_an_moi_nhat.trang_thai == "DA_HOAN_TAT" %}
+                {% if request.user.is_active and request.user.pk == ho_so.ma_nhan_vien_tham_dinh.ma_tai_khoan_id %}
+                    <p>
+                        <a
+                            href="{% url 'disputes:reconsider' ho_so.pk %}"
+                            class="m4-detail__button"
+                        >
+                            🔍 Xem xét lại phản hồi khách hàng
+                        </a>
+                    </p>
+                {% else %}
+                    <p class="m4-detail__muted">
+                        Nhân viên thẩm định được phân công
+                        sẽ kiểm tra lại phản hồi.
+                    </p>
+                {% endif %}
+            {% endif %}
+        {% elif ticket.trang_thai_tham_dinh == "WAITING" %}
+            <p class="m4-detail__hint">
+                ⏳ Ticket đang chờ kết quả từ bộ phận thẩm định.
+            </p>
+        {% endif %}
+    {% endif %}
+</section>
+{% endif %}

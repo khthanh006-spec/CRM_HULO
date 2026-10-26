@@ -121,9 +121,13 @@ def dispute_plan(request, pk):
             if phuong_an_moi_nhat else 0
         ),
         "so_tien_hoan": 0,
+        "loai_phuong_an": "",
     }
 
-    if phuong_an_moi_nhat:
+    if (
+        phuong_an_moi_nhat
+        and phuong_an_moi_nhat.trang_thai != "DA_HOAN_TAT"
+    ):
         loai = {
             "GUI_LAI_HANG": "DOI_HANG",
             "KHONG_BOI_THUONG": "TU_CHOI_HO_TRO",

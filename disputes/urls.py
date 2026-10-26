@@ -5,6 +5,7 @@ from . import (
     attachment_views,
     execution_views,
     plan_views,
+    reconsideration_views,
     views,
 )
 
@@ -62,5 +63,21 @@ urlpatterns = [
         "<int:pk>/thuc-hien/",
         execution_views.dispute_execute,
         name="execute",
+    ),
+    path(
+        "<int:pk>/xem-xet-lai/",
+        reconsideration_views.dispute_reconsider,
+        name="reconsider",
+    ),
+]
+
+
+from .reconsideration_result_views import dispute_reconsider_result
+
+urlpatterns += [
+    path(
+        "<int:pk>/ket-qua-xem-xet-lai/",
+        dispute_reconsider_result,
+        name="reconsider_result",
     ),
 ]

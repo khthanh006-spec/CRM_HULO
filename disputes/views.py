@@ -62,20 +62,12 @@ def _ticket_dang_cho_tham_dinh(ticket):
 
 
 def _du_dieu_kien_lap_phuong_an(user, ho_so, phuong_an):
-    return (
-        _la_nguoi_tham_dinh(user, ho_so)
-        and ho_so.trang_thai == "DA_KET_LUAN"
-        and bool(ho_so.ket_luan.strip())
-        and _ticket_dang_cho_tham_dinh(ho_so.ma_ticket)
-        and ho_so.ma_don_hang_id is not None
-        and (
-            ho_so.ma_don_hang.ma_khach_hang_id
-            == ho_so.ma_ticket.khach_hang_id
-        )
-        and (
-            phuong_an is None
-            or phuong_an.trang_thai in {"DE_XUAT", "TU_CHOI"}
-        )
+    from .plan_permissions import du_dieu_kien_lap_phuong_an
+
+    return du_dieu_kien_lap_phuong_an(
+        user,
+        ho_so,
+        phuong_an,
     )
 
 

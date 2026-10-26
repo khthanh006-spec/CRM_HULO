@@ -2,10 +2,12 @@ from decimal import Decimal, InvalidOperation, ROUND_DOWN
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Sum
 
 from tickets.models import TicketLog
 
 from .models import CompensationAction, Order, OrderItem
+from .reconsideration_models import ReconsiderationRecord
 from .services import (
     _kiem_tra_ticket_dang_cho_tham_dinh,
     _lay_ho_so_de_xu_ly,
@@ -36,7 +38,7 @@ def luu_phuong_an_theo_bpmn(
 
     if (
         ho_so.trang_thai != "DA_KET_LUAN"
-        or not ho_so.ket_luan.strip()
+        or not (ho_so.ket_luan or "").strip()
     ):
         raise ValidationError(
             "Hồ sơ phải có kết luận trước khi lập phương án."
@@ -47,6 +49,8 @@ def luu_phuong_an_theo_bpmn(
             "Hồ sơ cần được liên kết với đơn hàng."
         )
 
+    # Khóa đơn hàng để các thao tác lập phương án qua service
+    # kiểm tra cùng một dữ liệu về phần đã thực hiện.
     don_hang = Order.objects.select_for_update().get(
         pk=ho_so.ma_don_hang_id
     )
@@ -93,16 +97,46 @@ def luu_phuong_an_theo_bpmn(
             "Vui lòng tải lại trang."
         )
 
-    # DE_XUAT hỗ trợ các bản thử cũ chưa được xác nhận.
-    # TU_CHOI là phương án quản lý yêu cầu điều chỉnh.
-    if phuong_an_cu and phuong_an_cu.trang_thai not in {
-        "DE_XUAT",
-        "TU_CHOI",
-    }:
-        raise ValidationError(
-            "Phương án hiện tại không được phép điều chỉnh "
-            "trực tiếp ở bước này."
+    lan_xem_xet = (
+        ReconsiderationRecord.objects.select_for_update()
+        .filter(
+            ma_ho_so=ho_so,
+            trang_thai="DANG_XEM_XET",
         )
+        .first()
+    )
+
+    sau_hoan_tat = (
+        phuong_an_cu is not None
+        and phuong_an_cu.trang_thai == "DA_HOAN_TAT"
+    )
+
+    if sau_hoan_tat:
+        if (
+            lan_xem_xet is None
+            or lan_xem_xet.phuong_an_truoc_id != phuong_an_cu.pk
+            or ticket.trang_thai_xac_nhan != "DISAGREED"
+            or ticket.thoi_diem_xac_nhan
+            != lan_xem_xet.thoi_diem_phan_hoi
+        ):
+            raise ValidationError(
+                "Cần tiếp nhận đúng phản hồi xem xét lại "
+                "trước khi lập phiên bản phương án mới."
+            )
+    else:
+        if lan_xem_xet is not None:
+            raise ValidationError(
+                "Lần xem xét lại không khớp phương án hiện tại."
+            )
+
+        if phuong_an_cu and phuong_an_cu.trang_thai not in {
+            "DE_XUAT",
+            "TU_CHOI",
+        }:
+            raise ValidationError(
+                "Phương án hiện tại không được phép điều chỉnh "
+                "trực tiếp ở bước này."
+            )
 
     chi_tiet = None
 
@@ -162,15 +196,40 @@ def luu_phuong_an_theo_bpmn(
         if isinstance(ly_do_tu_choi, str) else ""
     )
 
+    # Bao gồm dữ liệu cũ có trạng thái DA_THUC_HIEN.
+    # Dựa thêm vào thời điểm hoàn tất để không bỏ sót
+    # bản ghi từng bị đổi trạng thái trong dữ liệu lịch sử.
+    da_thuc_hien = CompensationAction.objects.filter(
+        ma_ho_so__ma_don_hang=don_hang,
+    ).filter(
+        transaction_models_q_da_thuc_hien()
+    )
+
     if loai_phuong_an == "HOAN_TIEN":
         if so_tien <= 0:
             raise ValidationError(
                 "Số tiền đề xuất hoàn phải lớn hơn 0."
             )
 
-        # Tổng tiền dòng hàng được phân bổ theo số lượng khiếu nại.
-        # Làm tròn xuống để không vượt giá trị phần hàng này.
-        gioi_han = (
+        hoan_tien_cu = da_thuc_hien.filter(
+            loai_phuong_an="HOAN_TIEN"
+        )
+
+        if hoan_tien_cu.filter(
+            ma_chi_tiet_don__isnull=True
+        ).exists():
+            raise ValidationError(
+                "Đơn hàng có khoản hoàn tiền lịch sử chưa xác định "
+                "dòng sản phẩm. Cần đối soát khoản đó trước."
+            )
+
+        da_hoan = hoan_tien_cu.filter(
+            ma_chi_tiet_don=chi_tiet
+        ).aggregate(
+            tong=Sum("so_tien_hoan")
+        )["tong"] or Decimal("0")
+
+        gia_tri_phan_hang = (
             chi_tiet.gia_tri_da_thanh_toan
             * Decimal(so_luong)
             / Decimal(chi_tiet.so_luong)
@@ -179,10 +238,20 @@ def luu_phuong_an_theo_bpmn(
             rounding=ROUND_DOWN,
         )
 
+        # Với dữ liệu hiện tại chưa phân biệt từng đơn vị hàng,
+        # trừ toàn bộ khoản đã hoàn của cùng dòng sản phẩm.
+        gioi_han = max(
+            Decimal("0"),
+            gia_tri_phan_hang - da_hoan,
+        )
+
         if so_tien > gioi_han:
             raise ValidationError(
-                "Số tiền hoàn vượt giá trị phần hàng khiếu nại. "
-                f"Tối đa: {gioi_han} {don_hang.don_vi_tien_te}."
+                "Số tiền đề xuất vượt phần còn được hoàn. "
+                f"Giá trị phần hàng: {gia_tri_phan_hang}; "
+                f"đã hoàn cho dòng sản phẩm: {da_hoan}; "
+                f"tối đa đề xuất thêm: {gioi_han} "
+                f"{don_hang.don_vi_tien_te}."
             )
 
         trang_thai_moi = "CHO_DUYET"
@@ -202,6 +271,46 @@ def luu_phuong_an_theo_bpmn(
             if not dia_chi:
                 raise ValidationError(
                     "Bạn cần nhập địa chỉ nhận hàng."
+                )
+
+            hang_da_xu_ly = da_thuc_hien.filter(
+                loai_phuong_an__in=[
+                    "DOI_HANG",
+                    "GIAO_BO_SUNG",
+                    "GUI_LAI_HANG",
+                ],
+            )
+
+            if hang_da_xu_ly.filter(
+                ma_chi_tiet_don__isnull=True
+            ).exists():
+                raise ValidationError(
+                    "Đơn hàng có lần giao/đổi lịch sử chưa xác định "
+                    "dòng sản phẩm. Cần kiểm tra trước."
+                )
+
+            cung_dong = hang_da_xu_ly.filter(
+                ma_chi_tiet_don=chi_tiet
+            )
+
+            if cung_dong.filter(so_luong__isnull=True).exists():
+                raise ValidationError(
+                    "Có lần giao/đổi trước chưa ghi số lượng. "
+                    "Cần đối soát trước khi đề xuất thêm."
+                )
+
+            da_xu_ly = cung_dong.aggregate(
+                tong=Sum("so_luong")
+            )["tong"] or 0
+
+            con_lai = max(0, chi_tiet.so_luong - da_xu_ly)
+
+            if so_luong > con_lai:
+                raise ValidationError(
+                    f"Dòng hàng đã giao/đổi xử lý {da_xu_ly} "
+                    f"sản phẩm; còn tối đa {con_lai}. "
+                    "Nếu lần giao trước thất bại, cần xác minh "
+                    "kết quả lần đó trước khi tạo lần giao mới."
                 )
 
             ly_do_tu_choi_sach = ""
@@ -234,7 +343,9 @@ def luu_phuong_an_theo_bpmn(
 
     phuong_an.full_clean()
 
-    if phuong_an_cu:
+    # Chỉ đánh dấu thay thế bản chưa thực hiện.
+    # Bản đã hoàn tất phải giữ nguyên lịch sử thực hiện.
+    if phuong_an_cu and not sau_hoan_tat:
         phuong_an_cu.trang_thai = "DA_THAY_THE"
         phuong_an_cu.save(
             update_fields=["trang_thai", "thoi_diem_cap_nhat"]
@@ -242,12 +353,12 @@ def luu_phuong_an_theo_bpmn(
 
     phuong_an.save()
 
-    thong_tin_hang = ""
-
-    if chi_tiet:
-        thong_tin_hang = (
-            f"\nSản phẩm: {chi_tiet.ten_san_pham_luc_mua}."
-            f"\nSố lượng xử lý: {so_luong}."
+    if lan_xem_xet is not None:
+        lan_xem_xet.phuong_an_moi = phuong_an
+        lan_xem_xet.trang_thai = "DA_LAP_PHUONG_AN"
+        lan_xem_xet.full_clean()
+        lan_xem_xet.save(
+            update_fields=["phuong_an_moi", "trang_thai"]
         )
 
     TicketLog.objects.create(
@@ -259,12 +370,16 @@ def luu_phuong_an_theo_bpmn(
             f"Phương án V{phuong_an.phien_ban}.\n"
             f"Loại: {phuong_an.get_loai_phuong_an_display()}.\n"
             f"Trạng thái: {phuong_an.get_trang_thai_display()}.\n"
-            f"Số tiền hoàn: {so_tien} {don_hang.don_vi_tien_te}."
-            f"{thong_tin_hang}\n"
+            f"Số tiền đề xuất thêm: {so_tien} "
+            f"{don_hang.don_vi_tien_te}.\n"
+            f"Sản phẩm: {chi_tiet or 'Không áp dụng'}.\n"
+            f"Số lượng: {so_luong or 'Không áp dụng'}.\n"
             f"Địa chỉ nhận: {dia_chi}\n"
             f"Nội dung: {phuong_an.noi_dung}\n"
             f"Căn cứ/lý do: {phuong_an.ly_do}\n"
-            f"Lý do từ chối hỗ trợ: {ly_do_tu_choi_sach}"
+            f"Lý do từ chối hỗ trợ: {ly_do_tu_choi_sach}\n"
+            f"Lần xem xét lại: "
+            f"{lan_xem_xet.pk if lan_xem_xet else 'Không áp dụng'}."
         ),
     )
 
@@ -276,8 +391,19 @@ def luu_phuong_an_theo_bpmn(
             noi_dung=(
                 f"Đã gửi phương án hoàn tiền "
                 f"V{phuong_an.phien_ban} của hồ sơ #{ho_so.pk} "
-                "vào danh sách chờ quản lý xét duyệt."
+                "vào danh sách chờ quản lý xét duyệt. "
+                "Quyết định của phiên bản trước không được "
+                "dùng để phê duyệt phiên bản mới."
             ),
         )
 
     return phuong_an
+
+
+def transaction_models_q_da_thuc_hien():
+    from django.db.models import Q
+
+    return (
+        Q(trang_thai__in=["DA_HOAN_TAT", "DA_THUC_HIEN"])
+        | Q(thoi_diem_hoan_tat__isnull=False)
+    )
