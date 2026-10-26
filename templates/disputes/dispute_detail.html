@@ -291,23 +291,7 @@
                 {% endif %}
             </section>
 
-            <section class="m4-detail__card">
-                <h2>📎 Bằng chứng và tệp đính kèm</h2>
-                <ul class="m4-detail__files">
-                    {% for tep in tep_dinh_kem %}
-                        <li>
-                            <strong>
-                                📄 {{ tep.ten_tep_goc|default:tep.tep_dinh_kem.name }}
-                            </strong>
-                            <small>
-                                Tải lên: {{ tep.thoi_diem_tai_len|date:"d/m/Y H:i" }}
-                            </small>
-                        </li>
-                    {% empty %}
-                        <li>Chưa có tệp đính kèm.</li>
-                    {% endfor %}
-                </ul>
-            </section>
+            {% include "disputes/_attachment_gallery.html" %}
 
             <section class="m4-detail__card">
                 <h2>🕘 Lịch sử xử lý Ticket</h2>

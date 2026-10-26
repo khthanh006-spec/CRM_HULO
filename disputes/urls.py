@@ -1,6 +1,12 @@
 from django.urls import path
 
-from . import approval_views, execution_views, plan_views, views
+from . import (
+    approval_views,
+    attachment_views,
+    execution_views,
+    plan_views,
+    views,
+)
 
 
 app_name = "disputes"
@@ -16,6 +22,16 @@ urlpatterns = [
         "<int:pk>/",
         views.dispute_detail,
         name="detail",
+    ),
+    path(
+        "<int:pk>/bang-chung/<int:attachment_pk>/xem/",
+        attachment_views.dispute_attachment_preview,
+        name="attachment_preview",
+    ),
+    path(
+        "<int:pk>/bang-chung/<int:attachment_pk>/tai-ve/",
+        attachment_views.dispute_attachment_download,
+        name="attachment_download",
     ),
     path(
         "<int:pk>/tiep-nhan/",

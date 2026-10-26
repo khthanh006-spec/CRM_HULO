@@ -1,0 +1,289 @@
+<section class="m4-detail__card">
+    <h2>📎 Bằng chứng và tệp đính kèm</h2>
+
+    <div class="m4-gallery" id="m4-evidence-gallery">
+        {% for tep in tep_dinh_kem %}
+            <article class="m4-gallery__item">
+                {% if tep.tep_dinh_kem %}
+                    <button
+                        type="button"
+                        class="m4-gallery__thumbnail"
+                        data-preview="{% url 'disputes:attachment_preview' ho_so.pk tep.pk %}"
+                        data-name="{{ tep.ten_tep_goc|default:tep.tep_dinh_kem.name }}"
+                        aria-label="Phóng to bằng chứng {{ forloop.counter }}"
+                    >
+                        <img
+                            src="{% url 'disputes:attachment_preview' ho_so.pk tep.pk %}"
+                            alt="Bằng chứng {{ forloop.counter }}"
+                            loading="lazy"
+                        >
+                        <span class="m4-gallery__fallback" hidden>
+                            📄 Không có bản xem trước
+                        </span>
+                        <span class="m4-gallery__zoom">🔍 Xem ảnh</span>
+                    </button>
+
+                    <strong class="m4-gallery__name">
+                        {{ tep.ten_tep_goc|default:tep.tep_dinh_kem.name }}
+                    </strong>
+
+                    <small>
+                        {{ tep.thoi_diem_tai_len|date:"d/m/Y H:i" }}
+                    </small>
+
+                    <a href="{% url 'disputes:attachment_download' ho_so.pk tep.pk %}">
+                        Tải tệp
+                    </a>
+                {% else %}
+                    <strong>Tệp #{{ tep.pk }}</strong>
+                    <p>Tệp chưa có nội dung để xem.</p>
+                {% endif %}
+            </article>
+        {% empty %}
+            <p class="m4-detail__muted">
+                Chưa có bằng chứng đính kèm trong Ticket này.
+            </p>
+        {% endfor %}
+    </div>
+</section>
+
+<dialog class="m4-viewer" id="m4-evidence-viewer"
+        aria-labelledby="m4-viewer-title">
+    <div class="m4-viewer__toolbar">
+        <strong id="m4-viewer-title">Xem bằng chứng</strong>
+        <button type="button" id="m4-viewer-close" aria-label="Đóng ảnh">
+            ✕
+        </button>
+    </div>
+
+    <div class="m4-viewer__stage">
+        <img id="m4-viewer-image" alt="">
+        <p id="m4-viewer-error" hidden>
+            Không thể hiển thị ảnh. Tệp có thể không phải ảnh
+            hoặc nội dung không còn trong kho lưu trữ.
+        </p>
+    </div>
+
+    <div class="m4-viewer__navigation">
+        <button type="button" id="m4-viewer-previous">← Ảnh trước</button>
+        <span id="m4-viewer-counter" aria-live="polite"></span>
+        <button type="button" id="m4-viewer-next">Ảnh tiếp →</button>
+    </div>
+</dialog>
+
+<style>
+    .m4-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+    }
+
+    .m4-gallery__item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid #dbeafe;
+        border-radius: 14px;
+        background: #f8fbff;
+    }
+
+    .m4-gallery__thumbnail {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 150px;
+        padding: 0;
+        overflow: hidden;
+        border: 1px solid #dbeafe;
+        border-radius: 10px;
+        background: #eaf3ff;
+        cursor: zoom-in;
+    }
+
+    .m4-gallery__thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .m4-gallery__thumbnail:disabled {
+        cursor: default;
+    }
+
+    .m4-gallery__zoom {
+        position: absolute;
+        right: 6px;
+        bottom: 6px;
+        padding: 4px 8px;
+        border-radius: 7px;
+        background: #ffffffed;
+        color: #1d4ed8;
+        font-size: 12px;
+    }
+
+    .m4-gallery__name {
+        overflow-wrap: anywhere;
+        font-size: 14px;
+    }
+
+    .m4-gallery__item small {
+        color: #64748b;
+    }
+
+    .m4-gallery__item a {
+        align-self: flex-start;
+        color: #2563eb;
+        font-size: 13px;
+    }
+
+    .m4-viewer {
+        width: min(1000px, 94vw);
+        max-height: 92vh;
+        box-sizing: border-box;
+        padding: 18px;
+        border: none;
+        border-radius: 18px;
+        background: #fff;
+        color: #1e293b;
+    }
+
+    .m4-viewer::backdrop {
+        background: rgb(15 23 42 / 78%);
+    }
+
+    .m4-viewer__toolbar,
+    .m4-viewer__navigation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .m4-viewer__toolbar strong {
+        overflow-wrap: anywhere;
+    }
+
+    .m4-viewer button {
+        padding: 9px 12px;
+        border: 1px solid #bfdbfe;
+        border-radius: 9px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        cursor: pointer;
+    }
+
+    .m4-viewer button:disabled {
+        opacity: .45;
+        cursor: default;
+    }
+
+    .m4-viewer__stage {
+        display: grid;
+        place-items: center;
+        min-height: 200px;
+        margin: 16px 0;
+        border-radius: 12px;
+        background: #f1f5f9;
+    }
+
+    .m4-viewer__stage img {
+        max-width: 100%;
+        max-height: 65vh;
+        object-fit: contain;
+    }
+
+    .m4-viewer__stage p {
+        padding: 20px;
+        text-align: center;
+        color: #b45309;
+    }
+
+    .m4-gallery [hidden],
+    .m4-viewer [hidden] {
+        display: none !important;
+    }
+</style>
+
+<script>
+(() => {
+    const gallery = document.getElementById("m4-evidence-gallery");
+    const viewer = document.getElementById("m4-evidence-viewer");
+    if (!gallery || !viewer) return;
+
+    const buttons = [...gallery.querySelectorAll("[data-preview]")];
+    const picture = document.getElementById("m4-viewer-image");
+    const title = document.getElementById("m4-viewer-title");
+    const counter = document.getElementById("m4-viewer-counter");
+    const error = document.getElementById("m4-viewer-error");
+    const previous = document.getElementById("m4-viewer-previous");
+    const next = document.getElementById("m4-viewer-next");
+    let current = 0;
+
+    function show(index) {
+        current = index;
+        const button = buttons[current];
+        picture.hidden = false;
+        error.hidden = true;
+        title.textContent = button.dataset.name || "Xem bằng chứng";
+        picture.alt = title.textContent;
+        picture.src = button.dataset.preview;
+        counter.textContent = `${current + 1} / ${buttons.length}`;
+        previous.disabled = current === 0;
+        next.disabled = current === buttons.length - 1;
+    }
+
+    picture.addEventListener("error", () => {
+        picture.hidden = true;
+        error.hidden = false;
+    });
+
+    buttons.forEach((button, index) => {
+        const thumbnail = button.querySelector("img");
+
+        function failed() {
+            thumbnail.hidden = true;
+            button.querySelector(".m4-gallery__fallback").hidden = false;
+            button.querySelector(".m4-gallery__zoom").hidden = true;
+            button.disabled = true;
+        }
+
+        thumbnail.addEventListener("error", failed);
+        if (thumbnail.complete && thumbnail.naturalWidth === 0) failed();
+
+        button.addEventListener("click", () => {
+            show(index);
+            viewer.showModal();
+        });
+    });
+
+    previous.addEventListener("click", () => {
+        if (current > 0) show(current - 1);
+    });
+
+    next.addEventListener("click", () => {
+        if (current < buttons.length - 1) show(current + 1);
+    });
+
+    document.getElementById("m4-viewer-close")
+        .addEventListener("click", () => viewer.close());
+
+    viewer.addEventListener("keydown", event => {
+        if (event.key === "ArrowLeft" && current > 0) {
+            event.preventDefault();
+            show(current - 1);
+        }
+
+        if (event.key === "ArrowRight" && current < buttons.length - 1) {
+            event.preventDefault();
+            show(current + 1);
+        }
+    });
+
+    viewer.addEventListener("close", () => {
+        picture.removeAttribute("src");
+    });
+})();
+</script>
