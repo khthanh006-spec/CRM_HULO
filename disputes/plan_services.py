@@ -2,7 +2,7 @@ from decimal import Decimal, InvalidOperation, ROUND_DOWN
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Q, Sum
 
 from tickets.models import TicketLog
 
@@ -12,6 +12,41 @@ from .services import (
     _kiem_tra_ticket_dang_cho_tham_dinh,
     _lay_ho_so_de_xu_ly,
 )
+
+
+# Các trạng thái đang giữ phần tiền hoặc số lượng đề xuất.
+TRANG_THAI_DANG_GIU = [
+    "DE_XUAT",
+    "CHO_DUYET",
+    "SAN_SANG_THUC_HIEN",
+    "DANG_THUC_HIEN",
+    "DA_DUYET",  # Dữ liệu cũ.
+]
+
+
+def _cac_phuong_an_phai_tinh(*, don_hang, phuong_an_thay_the=None):
+    """
+    Các phương án đã hoàn tất hoặc đang giữ tiền/số lượng.
+
+    Khi điều chỉnh phiên bản chưa thực hiện, không cộng phiên bản
+    đang được thay thế. Phiên bản đã hoàn tất vẫn phải được tính.
+    """
+    queryset = CompensationAction.objects.filter(
+        ma_ho_so__ma_don_hang=don_hang,
+    ).filter(
+        Q(trang_thai__in=TRANG_THAI_DANG_GIU)
+        | Q(trang_thai__in=["DA_HOAN_TAT", "DA_THUC_HIEN"])
+        | Q(thoi_diem_hoan_tat__isnull=False)
+    )
+
+    if (
+        phuong_an_thay_the is not None
+        and phuong_an_thay_the.trang_thai in {"DE_XUAT", "TU_CHOI"}
+        and phuong_an_thay_the.thoi_diem_hoan_tat is None
+    ):
+        queryset = queryset.exclude(pk=phuong_an_thay_the.pk)
+
+    return queryset
 
 
 @transaction.atomic
@@ -49,8 +84,7 @@ def luu_phuong_an_theo_bpmn(
             "Hồ sơ cần được liên kết với đơn hàng."
         )
 
-    # Khóa đơn hàng để các thao tác lập phương án qua service
-    # kiểm tra cùng một dữ liệu về phần đã thực hiện.
+    # Các thao tác lập phương án phải khóa cùng đơn hàng.
     don_hang = Order.objects.select_for_update().get(
         pk=ho_so.ma_don_hang_id
     )
@@ -196,13 +230,9 @@ def luu_phuong_an_theo_bpmn(
         if isinstance(ly_do_tu_choi, str) else ""
     )
 
-    # Bao gồm dữ liệu cũ có trạng thái DA_THUC_HIEN.
-    # Dựa thêm vào thời điểm hoàn tất để không bỏ sót
-    # bản ghi từng bị đổi trạng thái trong dữ liệu lịch sử.
-    da_thuc_hien = CompensationAction.objects.filter(
-        ma_ho_so__ma_don_hang=don_hang,
-    ).filter(
-        transaction_models_q_da_thuc_hien()
+    phuong_an_phai_tinh = _cac_phuong_an_phai_tinh(
+        don_hang=don_hang,
+        phuong_an_thay_the=phuong_an_cu,
     )
 
     if loai_phuong_an == "HOAN_TIEN":
@@ -211,19 +241,20 @@ def luu_phuong_an_theo_bpmn(
                 "Số tiền đề xuất hoàn phải lớn hơn 0."
             )
 
-        hoan_tien_cu = da_thuc_hien.filter(
+        hoan_tien_khac = phuong_an_phai_tinh.filter(
             loai_phuong_an="HOAN_TIEN"
         )
 
-        if hoan_tien_cu.filter(
+        if hoan_tien_khac.filter(
             ma_chi_tiet_don__isnull=True
         ).exists():
             raise ValidationError(
-                "Đơn hàng có khoản hoàn tiền lịch sử chưa xác định "
-                "dòng sản phẩm. Cần đối soát khoản đó trước."
+                "Đơn hàng có phương án hoàn tiền đang giữ chỗ "
+                "hoặc lịch sử chưa xác định dòng sản phẩm. "
+                "Cần đối soát trước."
             )
 
-        da_hoan = hoan_tien_cu.filter(
+        da_hoac_dang_hoan = hoan_tien_khac.filter(
             ma_chi_tiet_don=chi_tiet
         ).aggregate(
             tong=Sum("so_tien_hoan")
@@ -238,18 +269,18 @@ def luu_phuong_an_theo_bpmn(
             rounding=ROUND_DOWN,
         )
 
-        # Với dữ liệu hiện tại chưa phân biệt từng đơn vị hàng,
-        # trừ toàn bộ khoản đã hoàn của cùng dòng sản phẩm.
+        # Chưa phân biệt từng đơn vị hàng; trừ toàn bộ khoản
+        # đã hoặc đang hoàn của cùng dòng sản phẩm.
         gioi_han = max(
             Decimal("0"),
-            gia_tri_phan_hang - da_hoan,
+            gia_tri_phan_hang - da_hoac_dang_hoan,
         )
 
         if so_tien > gioi_han:
             raise ValidationError(
                 "Số tiền đề xuất vượt phần còn được hoàn. "
                 f"Giá trị phần hàng: {gia_tri_phan_hang}; "
-                f"đã hoàn cho dòng sản phẩm: {da_hoan}; "
+                f"đã hoặc đang đề xuất hoàn: {da_hoac_dang_hoan}; "
                 f"tối đa đề xuất thêm: {gioi_han} "
                 f"{don_hang.don_vi_tien_te}."
             )
@@ -273,7 +304,7 @@ def luu_phuong_an_theo_bpmn(
                     "Bạn cần nhập địa chỉ nhận hàng."
                 )
 
-            hang_da_xu_ly = da_thuc_hien.filter(
+            hang_khac = phuong_an_phai_tinh.filter(
                 loai_phuong_an__in=[
                     "DOI_HANG",
                     "GIAO_BO_SUNG",
@@ -281,34 +312,39 @@ def luu_phuong_an_theo_bpmn(
                 ],
             )
 
-            if hang_da_xu_ly.filter(
+            if hang_khac.filter(
                 ma_chi_tiet_don__isnull=True
             ).exists():
                 raise ValidationError(
-                    "Đơn hàng có lần giao/đổi lịch sử chưa xác định "
-                    "dòng sản phẩm. Cần kiểm tra trước."
+                    "Đơn hàng có phương án giao/đổi đang giữ chỗ "
+                    "hoặc lịch sử chưa xác định dòng sản phẩm. "
+                    "Cần đối soát trước."
                 )
 
-            cung_dong = hang_da_xu_ly.filter(
+            cung_dong = hang_khac.filter(
                 ma_chi_tiet_don=chi_tiet
             )
 
             if cung_dong.filter(so_luong__isnull=True).exists():
                 raise ValidationError(
-                    "Có lần giao/đổi trước chưa ghi số lượng. "
+                    "Có phương án giao/đổi trước chưa ghi số lượng. "
                     "Cần đối soát trước khi đề xuất thêm."
                 )
 
-            da_xu_ly = cung_dong.aggregate(
+            da_hoac_dang_xu_ly = cung_dong.aggregate(
                 tong=Sum("so_luong")
             )["tong"] or 0
 
-            con_lai = max(0, chi_tiet.so_luong - da_xu_ly)
+            con_lai = max(
+                0,
+                chi_tiet.so_luong - da_hoac_dang_xu_ly,
+            )
 
             if so_luong > con_lai:
                 raise ValidationError(
-                    f"Dòng hàng đã giao/đổi xử lý {da_xu_ly} "
-                    f"sản phẩm; còn tối đa {con_lai}. "
+                    f"Dòng hàng đã hoặc đang giao/đổi xử lý "
+                    f"{da_hoac_dang_xu_ly} sản phẩm; "
+                    f"còn tối đa {con_lai}. "
                     "Nếu lần giao trước thất bại, cần xác minh "
                     "kết quả lần đó trước khi tạo lần giao mới."
                 )
@@ -343,8 +379,7 @@ def luu_phuong_an_theo_bpmn(
 
     phuong_an.full_clean()
 
-    # Chỉ đánh dấu thay thế bản chưa thực hiện.
-    # Bản đã hoàn tất phải giữ nguyên lịch sử thực hiện.
+    # Giữ nguyên lịch sử của phương án đã hoàn tất.
     if phuong_an_cu and not sau_hoan_tat:
         phuong_an_cu.trang_thai = "DA_THAY_THE"
         phuong_an_cu.save(
@@ -398,12 +433,3 @@ def luu_phuong_an_theo_bpmn(
         )
 
     return phuong_an
-
-
-def transaction_models_q_da_thuc_hien():
-    from django.db.models import Q
-
-    return (
-        Q(trang_thai__in=["DA_HOAN_TAT", "DA_THUC_HIEN"])
-        | Q(thoi_diem_hoan_tat__isnull=False)
-    )

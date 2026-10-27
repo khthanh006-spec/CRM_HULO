@@ -1,11 +1,159 @@
+from decimal import Decimal, ROUND_DOWN
+
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
+from django.db.models import Sum
 from django.utils import timezone
 
 from accounts.models import Staff
 from tickets.models import Ticket, TicketLog
 
-from .models import ApprovalRecord, CompensationAction, DisputeCase
+from .models import (
+    ApprovalRecord,
+    CompensationAction,
+    DisputeCase,
+    Order,
+    OrderItem,
+)
+from .plan_services import _cac_phuong_an_phai_tinh
+
+
+def _kiem_tra_gioi_han_truoc_khi_hoan_tat(*, don_hang, phuong_an):
+    """
+    Kiểm tra lại phương án trước khi ghi nhận hoàn tất.
+
+    Tính cả những phương án khác đã hoàn tất hoặc đang giữ phần
+    tiền/số lượng. Không cộng phương án hiện tại hai lần.
+
+    Hàm này được gọi trong transaction sau khi khóa đơn hàng.
+    """
+    loai = phuong_an.loai_phuong_an
+
+    if loai not in {"HOAN_TIEN", "DOI_HANG", "GIAO_BO_SUNG"}:
+        return
+
+    if phuong_an.ma_chi_tiet_don_id is None:
+        raise ValidationError(
+            "Phương án chưa xác định sản phẩm trong đơn. "
+            "Cần đối soát trước khi hoàn tất."
+        )
+
+    chi_tiet = (
+        OrderItem.objects.select_for_update()
+        .filter(
+            pk=phuong_an.ma_chi_tiet_don_id,
+            ma_don_hang=don_hang,
+        )
+        .first()
+    )
+
+    if chi_tiet is None:
+        raise ValidationError(
+            "Sản phẩm không thuộc đơn hàng của hồ sơ."
+        )
+
+    if (
+        phuong_an.so_luong is None
+        or phuong_an.so_luong < 1
+        or phuong_an.so_luong > chi_tiet.so_luong
+    ):
+        raise ValidationError(
+            "Số lượng xử lý không hợp lệ. "
+            "Cần đối soát trước khi hoàn tất."
+        )
+
+    phuong_an_khac = _cac_phuong_an_phai_tinh(
+        don_hang=don_hang,
+    ).exclude(pk=phuong_an.pk)
+
+    if loai == "HOAN_TIEN":
+        hoan_tien_khac = phuong_an_khac.filter(
+            loai_phuong_an="HOAN_TIEN",
+        )
+
+        if hoan_tien_khac.filter(
+            ma_chi_tiet_don__isnull=True
+        ).exists():
+            raise ValidationError(
+                "Đơn hàng có phương án hoàn tiền đang giữ chỗ "
+                "hoặc lịch sử chưa xác định dòng sản phẩm. "
+                "Cần đối soát trước khi hoàn tất."
+            )
+
+        da_hoac_dang_hoan = hoan_tien_khac.filter(
+            ma_chi_tiet_don=chi_tiet,
+        ).aggregate(
+            tong=Sum("so_tien_hoan")
+        )["tong"] or Decimal("0")
+
+        gia_tri_phan_hang = (
+            chi_tiet.gia_tri_da_thanh_toan
+            * Decimal(phuong_an.so_luong)
+            / Decimal(chi_tiet.so_luong)
+        ).quantize(
+            Decimal("0.01"),
+            rounding=ROUND_DOWN,
+        )
+
+        gioi_han = max(
+            Decimal("0"),
+            gia_tri_phan_hang - da_hoac_dang_hoan,
+        )
+
+        if (
+            phuong_an.so_tien_hoan is None
+            or phuong_an.so_tien_hoan <= 0
+            or phuong_an.so_tien_hoan > gioi_han
+        ):
+            raise ValidationError(
+                "Không thể hoàn tất: số tiền của phương án "
+                "vượt phần còn được hoàn sau khi tính các "
+                "phương án khác. Cần đối soát trước."
+            )
+
+    else:
+        hang_khac = phuong_an_khac.filter(
+            loai_phuong_an__in=[
+                "DOI_HANG",
+                "GIAO_BO_SUNG",
+                "GUI_LAI_HANG",
+            ],
+        )
+
+        if hang_khac.filter(
+            ma_chi_tiet_don__isnull=True
+        ).exists():
+            raise ValidationError(
+                "Đơn hàng có phương án giao/đổi đang giữ chỗ "
+                "hoặc lịch sử chưa xác định dòng sản phẩm. "
+                "Cần đối soát trước khi hoàn tất."
+            )
+
+        cung_dong = hang_khac.filter(
+            ma_chi_tiet_don=chi_tiet,
+        )
+
+        if cung_dong.filter(so_luong__isnull=True).exists():
+            raise ValidationError(
+                "Có phương án giao/đổi trước chưa ghi số lượng. "
+                "Cần đối soát trước khi hoàn tất."
+            )
+
+        da_hoac_dang_xu_ly = cung_dong.aggregate(
+            tong=Sum("so_luong")
+        )["tong"] or 0
+
+        con_lai = max(
+            0,
+            chi_tiet.so_luong - da_hoac_dang_xu_ly,
+        )
+
+        if phuong_an.so_luong > con_lai:
+            raise ValidationError(
+                "Không thể hoàn tất: tổng số lượng giao/đổi "
+                "vượt số lượng đã mua sau khi tính các "
+                "phương án khác. Cần đối soát trước."
+            )
 
 
 @transaction.atomic
@@ -25,9 +173,10 @@ def cap_nhat_thuc_hien(
     - Theo dõi thẩm định chuyển COMPLETED.
     - Ticket vẫn IN_PROGRESS để CSKH hoàn tất theo Module 3.
     """
-
     if not user.is_authenticated or not user.is_active:
-        raise PermissionDenied("Bạn cần đăng nhập tài khoản đang hoạt động.")
+        raise PermissionDenied(
+            "Bạn cần đăng nhập tài khoản đang hoạt động."
+        )
 
     nhan_vien = Staff.objects.filter(
         ma_tai_khoan=user,
@@ -40,7 +189,9 @@ def cap_nhat_thuc_hien(
         )
 
     if not isinstance(hoan_tat, bool):
-        raise ValidationError("Lựa chọn hoàn tất không hợp lệ.")
+        raise ValidationError(
+            "Lựa chọn hoàn tất không hợp lệ."
+        )
 
     if (
         not isinstance(ket_qua_thuc_hien, str)
@@ -62,7 +213,7 @@ def cap_nhat_thuc_hien(
             "Hồ sơ không tồn tại hoặc không được phân công cho bạn."
         )
 
-    # Giữ cùng thứ tự khóa: Ticket -> hồ sơ -> phương án.
+    # Thứ tự khóa: Ticket -> hồ sơ -> đơn hàng -> phương án.
     ticket = Ticket.objects.select_for_update().get(
         pk=thong_tin["ma_ticket_id"]
     )
@@ -78,7 +229,10 @@ def cap_nhat_thuc_hien(
             "Phân công hồ sơ đã thay đổi. Vui lòng tải lại trang."
         )
 
-    if ho_so.trang_thai != "DA_KET_LUAN" or not ho_so.ket_luan.strip():
+    if (
+        ho_so.trang_thai != "DA_KET_LUAN"
+        or not (ho_so.ket_luan or "").strip()
+    ):
         raise ValidationError(
             "Hồ sơ phải có kết luận trước khi thực hiện phương án."
         )
@@ -91,12 +245,17 @@ def cap_nhat_thuc_hien(
             "Ticket phải đang xử lý và đang chờ kết quả thẩm định."
         )
 
-    don_hang = ho_so.ma_don_hang
+    if not ho_so.ma_don_hang_id:
+        raise ValidationError(
+            "Hồ sơ cần liên kết đúng đơn hàng của khách hàng."
+        )
 
-    if (
-        don_hang is None
-        or don_hang.ma_khach_hang_id != ticket.khach_hang_id
-    ):
+    # Khóa cùng đơn hàng mà service lập phương án sử dụng.
+    don_hang = Order.objects.select_for_update().get(
+        pk=ho_so.ma_don_hang_id
+    )
+
+    if don_hang.ma_khach_hang_id != ticket.khach_hang_id:
         raise ValidationError(
             "Hồ sơ cần liên kết đúng đơn hàng của khách hàng."
         )
@@ -110,7 +269,8 @@ def cap_nhat_thuc_hien(
 
     if phuong_an is None or phuong_an.pk != ma_phuong_an:
         raise ValidationError(
-            "Phương án đã thay đổi. Chỉ được thực hiện phiên bản mới nhất."
+            "Phương án đã thay đổi. "
+            "Chỉ được thực hiện phiên bản mới nhất."
         )
 
     loai_hop_le = dict(
@@ -128,8 +288,8 @@ def cap_nhat_thuc_hien(
         "DANG_THUC_HIEN",
     ]
 
-    # Tương thích phương án hoàn tiền được duyệt bằng code cũ.
     if phuong_an.loai_phuong_an == "HOAN_TIEN":
+        # Tương thích phương án duyệt bằng code cũ.
         trang_thai_cho_phep.append("DA_DUYET")
 
         da_duoc_duyet = ApprovalRecord.objects.filter(
@@ -148,6 +308,13 @@ def cap_nhat_thuc_hien(
     if phuong_an.trang_thai not in trang_thai_cho_phep:
         raise ValidationError(
             "Phương án chưa được phép thực hiện hoặc đã hoàn tất."
+        )
+
+    # Chỉ đánh dấu hoàn tất khi giới hạn vẫn hợp lệ.
+    if hoan_tat:
+        _kiem_tra_gioi_han_truoc_khi_hoan_tat(
+            don_hang=don_hang,
+            phuong_an=phuong_an,
         )
 
     now = timezone.now()
@@ -178,7 +345,6 @@ def cap_nhat_thuc_hien(
         )
 
     if hoan_tat:
-        # Trả kết quả chuyên môn; CSKH vẫn phụ trách Ticket.
         so_ticket = Ticket.objects.filter(
             pk=ticket.pk,
             trang_thai="IN_PROGRESS",
