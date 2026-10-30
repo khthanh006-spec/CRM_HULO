@@ -1,5 +1,6 @@
 
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
 Trung tâm hỗ trợ - HULO
@@ -7,58 +8,35 @@ Trung tâm hỗ trợ - HULO
 
 {% block content %}
 
-<div class="content-container" style="max-width: 1150px; margin: 0 auto; padding: 25px 20px;">
+<link rel="stylesheet" href="{% static 'support/css/support_home.css' %}">
 
-    <!-- 1. BANNER TRUNG TÂM HỖ TRỢ -->
-    <section style="
-        background: #eaf3ff;
-        padding: 45px 30px;
-        border-radius: 12px;
-        text-align: center;
-        margin-bottom: 30px;
-    ">
-        <h1 style="color: #0b326b; margin-bottom: 12px;">
-            Trung tâm hỗ trợ HULO
-        </h1>
+<div class="support-container">
 
-        <p style="color: #425466; font-size: 16px;">
-            Tìm câu trả lời nhanh chóng cho những thắc mắc của bạn.
-        </p>
+    <!-- 1. BANNER -->
+    <section class="support-banner">
+        <h1>Trung tâm hỗ trợ HULO</h1>
+        <p>Tìm câu trả lời nhanh chóng cho những thắc mắc của bạn.</p>
     </section>
 
-    <!-- 2. FORM TÌM KIẾM FAQ -->
-    <section style="margin-bottom: 30px;">
+    <!-- 2. TÌM KIẾM VÀ LỌC FAQ -->
+    <section class="support-section">
 
-        <h2 style="color: #0b326b; margin-bottom: 15px;">
+        <h2 class="support-title">
             Tìm kiếm câu hỏi thường gặp
         </h2>
 
-        <form method="GET" action="{% url 'support:home' %}"
-              style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <form method="GET"
+              action="{% url 'support:home' %}"
+              class="support-search">
 
             <input
                 type="text"
                 name="q"
                 value="{{ keyword }}"
                 placeholder="Nhập câu hỏi hoặc từ khóa..."
-                style="
-                    flex: 2;
-                    min-width: 220px;
-                    padding: 12px;
-                    border: 1px solid #ccd8e5;
-                    border-radius: 8px;
-                    font-size: 15px;
-                "
             >
 
-            <select name="category" style="
-                flex: 1;
-                min-width: 180px;
-                padding: 12px;
-                border: 1px solid #ccd8e5;
-                border-radius: 8px;
-                background: white;
-            ">
+            <select name="category">
                 <option value="">Tất cả danh mục</option>
 
                 {% for category in categories %}
@@ -71,182 +49,145 @@ Trung tâm hỗ trợ - HULO
                 {% endfor %}
             </select>
 
-            <button type="submit" style="
-                padding: 12px 25px;
-                background: #1683ff;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-            ">
+            <button type="submit" class="support-button">
                 Tìm kiếm
             </button>
 
-            <a href="{% url 'support:home' %}" style="
-                padding: 12px 18px;
-                background: #eef2f7;
-                color: #344054;
-                border-radius: 8px;
-                text-decoration: none;
-            ">
+            <a href="{% url 'support:home' %}" class="support-reset">
                 Xóa lọc
             </a>
 
         </form>
+
     </section>
 
-    <!-- GỢI Ý FAQ CÁ NHÂN HÓA - UC01.07 -->
-<section style="margin-bottom: 35px;">
+    <!-- 3. GỢI Ý FAQ CÁ NHÂN HÓA - UC01.07 -->
+    <section class="support-section">
 
-    <h2 style="color: #0b326b; margin-bottom: 18px;">
-        {{ ten_goi_y }}
-    </h2>
+        <h2 class="support-title">
+            {{ ten_goi_y }}
+        </h2>
 
-    <div style="
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 15px;
-    ">
+        <div class="support-faq-grid">
 
-        {% for faq in faq_goi_y %}
-            <a href="{% url 'support:faq_detail' faq.id %}"
-               style="
-                   display: block;
-                   background: white;
-                   border: 1px solid #d9e6fa;
-                   border-radius: 10px;
-                   padding: 18px;
-                   text-decoration: none;
-                   color: #0b326b;
-               ">
+            {% for faq in faq_goi_y %}
+                <a href="{% url 'support:faq_detail' faq.id %}"
+                   class="support-faq-card">
 
-                <strong>{{ faq.cau_hoi }}</strong>
+                    <strong>{{ faq.cau_hoi }}</strong>
 
-                <p style="
-                    color: #667085;
-                    font-size: 14px;
-                    margin-top: 10px;
-                ">
-                    {{ faq.danh_muc.ten_danh_muc }}
-                </p>
+                    <p>
+                        Danh mục: {{ faq.danh_muc.ten_danh_muc }}
+                    </p>
 
-            </a>
-        {% empty %}
-            <p>Hiện chưa có câu hỏi gợi ý.</p>
-        {% endfor %}
+                </a>
+            {% empty %}
+                <div class="support-empty">
+                    Hiện chưa có câu hỏi gợi ý.
+                </div>
+            {% endfor %}
 
-    </div>
-</section>
-    <!-- 3. DANH SÁCH FAQ -->
-    <section style="margin-bottom: 35px;">
+        </div>
 
-        <h2 style="color: #0b326b; margin-bottom: 18px;">
+    </section>
+
+    <!-- 4. DANH SÁCH FAQ -->
+    <section class="support-section">
+
+        <h2 class="support-title">
             Câu hỏi thường gặp
         </h2>
 
         {% for faq in faqs %}
 
+            <a href="{% url 'support:faq_detail' faq.id %}"
+               class="support-faq-list">
 
-<a href="{% url 'support:faq_detail' faq.id %}"
-   style="
-       display: block;
-       background: white;
-       border: 1px solid #d9e6fa;
-       border-radius: 10px;
-       padding: 20px 22px;
-       margin-bottom: 12px;
-       text-decoration: none;
-       color: #0b326b;
-   ">
+                <div class="support-faq-question">
+                    {{ faq.cau_hoi }} →
+                </div>
 
-    <div style="
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 8px;
-    ">
-        {{ faq.cau_hoi }} →
-    </div>
+                <div class="support-faq-category">
+                    Danh mục: {{ faq.danh_muc.ten_danh_muc }}
+                </div>
 
-    <div style="
-        color: #667085;
-        font-size: 14px;
-    ">
-        Danh mục: {{ faq.danh_muc.ten_danh_muc }}
-    </div>
-
-</a>
-
+            </a>
 
         {% empty %}
 
-            <div style="
-                background: #f8fafc;
-                padding: 25px;
-                border: 1px dashed #ccd8e5;
-                border-radius: 10px;
-                text-align: center;
-                color: #667085;
-            ">
-                Không tìm thấy câu hỏi phù hợp.
-                Hãy thử từ khóa hoặc danh mục khác.
+            <div class="support-empty">
+
+                {% if keyword or selected_category %}
+
+                    <strong>Không tìm thấy câu hỏi phù hợp.</strong>
+
+                    <p>
+                        {% if keyword %}
+                            Không có FAQ phù hợp với từ khóa "{{ keyword }}".
+                        {% else %}
+                            Danh mục này hiện chưa có câu hỏi thường gặp.
+                        {% endif %}
+                    </p>
+
+                    <p>Hãy thử từ khóa khác hoặc chọn danh mục khác.</p>
+
+                    <a href="{% url 'support:home' %}" class="support-button">
+                        Xem tất cả câu hỏi
+                    </a>
+
+                {% else %}
+
+                    Hiện chưa có câu hỏi thường gặp.
+
+                {% endif %}
+
             </div>
 
         {% endfor %}
 
     </section>
 
-    <!-- 4. CÁC KÊNH HỖ TRỢ -->
-    <section>
-        <h2 style="color: #0b326b; margin-bottom: 18px;">
+    <!-- 5. CÁC KÊNH HỖ TRỢ -->
+    <section class="support-section">
+
+        <h2 class="support-title">
             Bạn vẫn cần hỗ trợ?
         </h2>
 
-        <div style="
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        ">
+        <div class="support-channel-grid">
 
             <!-- MODULE 2 -->
-            <div style="
-                background: white;
-                border: 1px solid #d9e6fa;
-                padding: 25px;
-                border-radius: 12px;
-            ">
-                <h3 style="color: #0b326b;">Chatbot HULO</h3>
+            <div class="support-channel">
 
-                <p style="color: #425466; margin: 15px 0;">
+                <h3>Chatbot HULO</h3>
+
+                <p>
                     Trò chuyện với Chatbot để được hỗ trợ nhanh chóng.
                 </p>
 
-                <a href="{% url 'chatbot:home' %}"
-                   style="color: #1683ff; font-weight: 600;">
+                <a href="{% url 'chatbot:home' %}">
                     Mở Chatbot →
                 </a>
+
             </div>
 
             <!-- MODULE 3 -->
-            <div style="
-                background: white;
-                border: 1px solid #d9e6fa;
-                padding: 25px;
-                border-radius: 12px;
-            ">
-                <h3 style="color: #0b326b;">Yêu cầu hỗ trợ</h3>
+            <div class="support-channel">
 
-                <p style="color: #425466; margin: 15px 0;">
+                <h3>Yêu cầu hỗ trợ</h3>
+
+                <p>
                     Gửi yêu cầu và theo dõi quá trình hỗ trợ từ HULO.
                 </p>
 
-                <a href="{% url 'tickets:home' %}"
-                   style="color: #1683ff; font-weight: 600;">
+                <a href="{% url 'tickets:home' %}">
                     Đến trang Ticket →
                 </a>
+
             </div>
 
         </div>
+
     </section>
 
 </div>
