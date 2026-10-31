@@ -281,13 +281,105 @@ Chăm sóc CSAT thấp - CRM HULO
 
             <h2>Ticket và CSAT liên quan</h2>
 
-            <div class="m5-care-notice">
-                Chưa tích hợp Ticket M3 và CSAT M5
-                vào hồ sơ chăm sóc này.
 
-                Chưa có đủ dữ liệu để xác nhận
-                khách hàng đang có đánh giá CSAT thấp.
+<!-- THÔNG TIN TICKET VÀ CSAT LIÊN QUAN -->
+
+{% if latest_csat and latest_ticket %}
+
+    <div style="
+        background: #f2f7ff;
+        border: 1px solid #d6e5fc;
+        border-radius: 12px;
+        padding: 18px;
+        color: #153f7b;
+    ">
+
+        <p style="margin-bottom: 12px;">
+            <strong>Mã Ticket:</strong>
+
+            <a href="/tickets/{{ latest_ticket.pk }}/"
+               style="color: #1971d9; font-weight: bold;">
+                {{ latest_ticket.ma_ticket }}
+            </a>
+        </p>
+
+        <p style="margin-bottom: 12px;">
+            <strong>Tiêu đề:</strong>
+            {{ latest_ticket.tieu_de }}
+        </p>
+
+        <p style="margin-bottom: 12px;">
+            <strong>Trạng thái Ticket:</strong>
+            {{ latest_ticket.get_trang_thai_display }}
+        </p>
+
+        <p style="margin-bottom: 12px;">
+            <strong>Xác nhận của khách hàng:</strong>
+            {{ latest_ticket.get_trang_thai_xac_nhan_display }}
+        </p>
+
+        <hr style="border: 0; border-top: 1px solid #d6e5fc; margin: 14px 0;">
+
+        <p style="margin-bottom: 12px;">
+            <strong>Điểm CSAT:</strong>
+            <span style="font-size: 20px; font-weight: bold;">
+                {{ latest_csat.score }}/5 ⭐
+            </span>
+        </p>
+
+        <p style="margin-bottom: 12px;">
+            <strong>Nhận xét:</strong>
+            {{ latest_csat.comment|default:"Không có nhận xét" }}
+        </p>
+
+        <p style="margin-bottom: 12px;">
+            <strong>Ngày đánh giá:</strong>
+            {{ latest_csat.created_at|date:"d/m/Y H:i" }}
+        </p>
+
+        {% if is_low_csat %}
+
+            <div style="
+                background: #fff0e6;
+                color: #c2410c;
+                padding: 12px;
+                border-radius: 8px;
+                font-weight: bold;
+                margin-top: 16px;
+            ">
+                ⚠ CSAT thấp – Cần chăm sóc khách hàng
             </div>
+
+        {% else %}
+
+            <div style="
+                background: #eaf8ee;
+                color: #16733d;
+                padding: 12px;
+                border-radius: 8px;
+                margin-top: 16px;
+            ">
+                ✅ Khách hàng có đánh giá hài lòng.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+{% else %}
+
+    <div style="
+        background: #f2f7ff;
+        color: #6685b2;
+        border-radius: 10px;
+        padding: 16px;
+        line-height: 1.6;
+    ">
+        Khách hàng hiện chưa có đánh giá CSAT
+        gắn với Ticket.
+    </div>
+
+{% endif %}
 
         </section>
 

@@ -1,164 +1,502 @@
+
 {% extends 'base.html' %}
+
 {% block title %}Hồ sơ Customer 360° - CRM HULO{% endblock %}
 
 {% block content %}
+
 <style>
-/* CSS riêng của Module 5, không sửa base.html hoặc module khác. */
-.m5-360, .m5-360 * { box-sizing: border-box; }
+/* ==========================================
+   MODULE 5 - CUSTOMER 360
+   CSS chỉ áp dụng trong .m5-360
+========================================== */
+
+.m5-360,
+.m5-360 * {
+    box-sizing: border-box;
+}
+
 .m5-360 {
-    width: 100%; max-width: 1460px; margin: 0 auto; padding: 22px 24px 36px;
-    font: 15px/1.55 'Segoe UI', Tahoma, Arial, sans-serif; color: #173866;
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 22px 22px 36px;
+    font: 14px/1.55 'Segoe UI', Tahoma, Arial, sans-serif;
+    color: #173866;
 }
-.m5-360 h1, .m5-360 h2, .m5-360 h3, .m5-360 p { margin-top: 0; }
-.m5-360 h1 { margin-bottom: 6px; color: #103a78; font-size: 29px; font-weight: 800; }
-.m5-360 .m5-subtitle { margin-bottom: 18px; color: #697d9b; font-size: 14px; }
-.m5-360 .m5-overview, .m5-360 .m5-card {
-    background: #fff; border: 1px solid #cfe0ff; border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(33,78,145,.06);
+
+.m5-360 h1,
+.m5-360 h2,
+.m5-360 h3,
+.m5-360 p {
+    margin-top: 0;
 }
+
+.m5-360 h1 {
+    font-size: 28px;
+    color: #103a78;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.m5-360 .m5-subtitle {
+    font-size: 14px;
+    color: #6e829f;
+    margin-bottom: 20px;
+}
+
+/* ==========================================
+   CARD DÙNG CHUNG
+========================================== */
+
+.m5-360 .m5-card,
 .m5-360 .m5-overview {
-    display: grid; grid-template-columns: minmax(270px,1.35fr) minmax(0,2fr);
-    gap: 15px; align-items: center; padding: 15px 17px; margin-bottom: 14px;
+    background: #ffffff;
+    border: 1px solid #d2e1fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(33,78,145,.05);
 }
-.m5-360 .m5-identity { display: flex; gap: 13px; align-items: center; min-width: 0; }
-.m5-360 .m5-avatar {
-    display: grid; place-items: center; width: 56px; height: 56px; flex-shrink: 0;
-    border-radius: 50%; background: #e6efff; font-size: 26px;
-}
-.m5-360 .m5-identity-text { min-width: 0; }
-.m5-360 .m5-person-name { color: #113c7c; font-size: 19px; font-weight: 800; }
-.m5-360 .m5-person-meta {
-    display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px;
-    font-size: 13px; color: #6a7d9b; overflow-wrap: anywhere;
-}
-.m5-360 .m5-tier-tag {
-    display: inline-block; margin-left: 5px; padding: 3px 9px;
-    border-radius: 20px; background: #fff0ce; color: #aa7100;
-    font-size: 12px; font-weight: 800;
-}
-.m5-360 .m5-kpis { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
-.m5-360 .m5-kpi {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 85px; padding: 11px 5px; text-align: center;
-    background: #f8fbff; border: 1px solid #dce8fc; border-radius: 9px;
-}
-.m5-360 .m5-kpi-icon { font-size: 19px; }
-.m5-360 .m5-kpi-value { color: #123c7d; font-size: 18px; font-weight: 800; overflow-wrap: anywhere; }
-.m5-360 .m5-kpi-label { color: #7286a6; font-size: 12px; margin-top: 4px; }
 
-/* Hai thẻ Loyalty/CSAT bằng chiều cao; hai bảng Order/Ticket bằng chiều cao. */
-.m5-360 .m5-grid {
+.m5-360 .m5-card {
+    min-width: 0;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 18px;
+    align-self: start;
+}
+
+.m5-360 .m5-card-title {
+    font-size: 17px;
+    color: #123e7d;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+
+.m5-360 .m5-muted,
+.m5-360 .m5-hint {
+    color: #7082a0;
+    font-size: 13px;
+}
+
+.m5-360 .m5-hint {
+    margin: 10px 0 0;
+}
+
+.m5-360 .m5-label {
+    display: block;
+    margin-bottom: 4px;
+    color: #7084a4;
+    font-size: 13px;
+}
+
+.m5-360 .m5-value {
+    color: #113c7c;
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================
+   TỔNG QUAN KHÁCH HÀNG
+========================================== */
+
+.m5-360 .m5-overview {
     display: grid;
-    grid-template-columns: minmax(235px,270px) minmax(0,1fr) minmax(0,1fr);
-    grid-template-areas:
-        'sidebar loyalty csat'
-        'sidebar orders tickets'
-        '. points points'
-        '. notes notes';
-    grid-template-rows: minmax(245px,auto) minmax(180px,auto) auto auto;
-    gap: 13px; align-items: stretch;
+    grid-template-columns: minmax(270px,1.15fr) minmax(0,1.5fr);
+    gap: 18px;
+    align-items: center;
+    padding: 16px 18px;
+    margin-bottom: 15px;
 }
-.m5-360 .m5-sidebar { grid-area: sidebar; display: flex; flex-direction: column; gap: 13px; min-width: 0; }
-.m5-360 .m5-loyalty { grid-area: loyalty; }
-.m5-360 .m5-csat { grid-area: csat; }
-.m5-360 .m5-orders { grid-area: orders; }
-.m5-360 .m5-tickets { grid-area: tickets; }
-.m5-360 .m5-points { grid-area: points; }
-.m5-360 .m5-notes { grid-area: notes; }
-.m5-360 .m5-card { min-width: 0; height: 100%; padding: 16px 17px; }
-.m5-360 .m5-sidebar .m5-card { height: auto; }
-.m5-360 .m5-card-title { margin-bottom: 13px; color: #123e7d; font-size: 17px; font-weight: 800; }
-.m5-360 .m5-detail-row { margin-bottom: 12px; }
-.m5-360 .m5-detail-row:last-child { margin-bottom: 0; }
-.m5-360 .m5-label { display: block; margin-bottom: 4px; color: #657a9c; font-size: 13px; }
-.m5-360 .m5-value { color: #113c7c; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
-.m5-360 .m5-muted, .m5-360 .m5-hint { color: #7082a0; font-size: 13px; }
-.m5-360 .m5-hint { margin: 9px 0 0; }
 
-/* Chăm sóc: nhãn radio có thể chọn, Voucher chưa nối nghiệp vụ. */
-.m5-360 .m5-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 10px 0 14px; }
-.m5-360 .m5-action-btn {
-    display: flex; gap: 4px; align-items: center; justify-content: center;
-    width: 100%; min-height: 39px; padding: 8px 5px;
-    border: 1px solid transparent; border-radius: 7px;
-    background: #2478e8; color: #fff;
-    font: 700 13px 'Segoe UI', Tahoma, Arial, sans-serif; text-align: center;
-    cursor: pointer;
+.m5-360 .m5-identity {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+    min-width: 0;
 }
-.m5-360 .m5-action-btn input[type='radio'] { accent-color: #fff; margin: 0; }
-.m5-360 .m5-action-btn:has(input:checked) { background: #104eac; border-color: #a8caff; }
-.m5-360 .m5-action-btn:focus-within { outline: 2px solid #9ac2ff; outline-offset: 2px; }
-.m5-360 .m5-action-btn:disabled { opacity: .65; cursor: not-allowed; }
-.m5-360 .m5-textarea {
-    display: block; width: 100%; min-height: 100px; padding: 10px 11px;
-    border: 1px solid #cdddf5; border-radius: 7px; background: #fbfdff;
-    color: #24446d; font: 14px/1.5 'Segoe UI', Tahoma, Arial, sans-serif;
-    resize: vertical;
+
+.m5-360 .m5-avatar {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #e6efff;
+    font-size: 26px;
 }
-.m5-360 .m5-textarea:focus { outline: 2px solid #a7caff; border-color: #2478e8; }
-.m5-360 .m5-note-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
-.m5-360 .m5-save-btn {
-    padding: 10px 17px; border: 0; border-radius: 7px;
-    background: #2478e8; color: #fff;
-    font: 800 13px 'Segoe UI', Tahoma, Arial, sans-serif; cursor: pointer;
+
+.m5-360 .m5-identity-text {
+    min-width: 0;
 }
-.m5-360 .m5-save-btn:hover { background: #1358bd; }
 
-/* Loyalty */
-.m5-360 .m5-loyalty-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
-.m5-360 .m5-loyalty-tier { padding: 6px 10px; border: 1px solid #f6dca2; border-radius: 7px; background: #fff4d9; color: #ac7500; font-weight: 800; }
-.m5-360 .m5-loyalty-balance { color: #123f83; font-size: 21px; font-weight: 800; }
-.m5-360 .m5-loyalty-metrics { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
-.m5-360 .m5-loyalty-metric { padding: 10px 12px; border-radius: 8px; background: #f4f8ff; }
-.m5-360 .m5-loyalty-metric strong { display: block; font-size: 20px; color: #123c7d; }
-.m5-360 .m5-progress-track { height: 10px; margin: 7px 0 8px; border-radius: 50px; background: #e5edf9; }
-.m5-360 .m5-benefits { padding: 10px 12px; border-radius: 8px; background: #f7faff; font-size: 14px; color: #38557d; overflow-wrap: anywhere; }
-.m5-360 .m5-separator { border: 0; border-top: 1px solid #e1e9f5; margin: 14px 0; }
-
-/* CSAT */
-.m5-360 .m5-csat-content { min-height: 175px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; }
-.m5-360 .m5-csat-face { font-size: 35px; line-height: 1; }
-.m5-360 .m5-csat-status { color: #315a8e; font-size: 16px; font-weight: 800; }
-.m5-360 .m5-csat-desc { color: #667b9b; font-size: 13px; max-width: 340px; }
-.m5-360 .m5-csat-chip { display: inline-block; padding: 5px 12px; border-radius: 30px; background: #edf4ff; color: #4f74ad; font-size: 12px; font-weight: 700; }
-
-/* Các bảng */
-.m5-360 .m5-table-wrap { width: 100%; overflow-x: auto; }
-.m5-360 .m5-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.m5-360 .m5-table th { padding: 10px 9px; background: #eaf2ff; text-align: left; white-space: nowrap; color: #143e7a; font-weight: 800; }
-.m5-360 .m5-table td { padding: 10px 9px; border-bottom: 1px solid #e9f0f9; color: #456082; vertical-align: top; }
-.m5-360 .m5-table-empty { padding: 17px 9px !important; text-align: center; color: #8598b0 !important; }
-.m5-360 .m5-positive { color: #138257; font-weight: 800; }
-.m5-360 .m5-negative { color: #b37617; font-weight: 800; }
-.m5-360 .m5-message { padding: 11px 13px; margin: 0 0 13px; border-radius: 8px; background: #ecf5ff; color: #174b8e; }
-.m5-360 .m5-message.error { background: #fff0f0; color: #a52929; }
-.m5-360 .m5-back { display: inline-block; margin-top: 18px; color: #164c9b; font-size: 14px; font-weight: 700; text-decoration: none; }
-
-@media (max-width: 1120px) {
-    .m5-360 .m5-overview { grid-template-columns: 1fr; }
-    .m5-360 .m5-grid {
-        grid-template-columns: minmax(230px,.8fr) minmax(0,1.2fr);
-        grid-template-areas: 'sidebar loyalty' 'sidebar csat' 'orders tickets' 'points points' 'notes notes';
-        grid-template-rows: auto;
-    }
+.m5-360 .m5-person-name {
+    font-size: 19px;
+    font-weight: 800;
+    color: #113c7c;
 }
-@media (max-width: 720px) {
-    .m5-360 { padding: 14px 12px 26px; }
-    .m5-360 h1 { font-size: 25px; }
-    .m5-360 .m5-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }
-    .m5-360 .m5-grid { grid-template-columns: minmax(0,1fr); grid-template-areas: 'sidebar' 'loyalty' 'csat' 'orders' 'tickets' 'points' 'notes'; }
-    .m5-360 .m5-card { height: auto; }
-}
-/* Nút dẫn tới trang chăm sóc CSAT */
 
-.m5-360 .m5-csat-care-link {
+.m5-360 .m5-person-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-top: 5px;
+    color: #7185a2;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.m5-360 .m5-tier-tag {
     display: inline-block;
-    padding: 11px 18px;
+    margin-left: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #fff0ce;
+    color: #aa7100;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* KPI */
+
+.m5-360 .m5-kpis {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: 8px;
+}
+
+.m5-360 .m5-kpi {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 90px;
+    padding: 10px 6px;
+    background: #f7faff;
+    border: 1px solid #dce8fc;
+    border-radius: 9px;
+    text-align: center;
+}
+
+.m5-360 .m5-kpi-icon {
+    font-size: 19px;
+}
+
+.m5-360 .m5-kpi-value {
+    color: #123c7d;
+    font-size: 19px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.m5-360 .m5-kpi-label {
+    margin-top: 4px;
+    color: #7286a6;
+    font-size: 12px;
+}
+
+/* ==========================================
+   BỐ CỤC MỚI: KHÔNG KÉO CAO CÁC KHUNG
+========================================== */
+
+/* Cột trái độc lập với các khung bên phải */
+.m5-360 .m5-layout {
+    display: grid;
+    grid-template-columns: minmax(240px,260px) minmax(0,1fr);
+    align-items: start;
+    gap: 14px;
+}
+
+/* Cột trái */
+.m5-360 .m5-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    min-width: 0;
+}
+
+/* Toàn bộ nội dung bên phải */
+.m5-360 .m5-main-column {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+/* Loyalty và CSAT */
+.m5-360 .m5-top-pair {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    gap: 14px;
+    align-items: start;
+}
+
+/* Lịch sử Order và Ticket */
+.m5-360 .m5-history-pair {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    gap: 14px;
+    align-items: start;
+}
+
+/* Các khung không bị ép cùng chiều cao */
+.m5-360 .m5-top-pair > .m5-card,
+.m5-360 .m5-history-pair > .m5-card {
+    height: auto;
+    min-height: 0;
+    align-self: start;
+}
+
+/* ==========================================
+   THÔNG TIN KHÁCH HÀNG
+========================================== */
+
+.m5-360 .m5-detail-row {
+    margin-bottom: 13px;
+}
+
+.m5-360 .m5-detail-row:last-child {
+    margin-bottom: 0;
+}
+
+/* ==========================================
+   FORM CHĂM SÓC
+========================================== */
+
+.m5-360 .m5-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    margin: 10px 0 14px;
+}
+
+.m5-360 .m5-action-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 5px;
     background: #2478e8;
     color: white;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    font: 700 12px 'Segoe UI', Tahoma, Arial, sans-serif;
+    cursor: pointer;
+    text-align: center;
+}
+
+.m5-360 .m5-action-btn input[type='radio'] {
+    margin: 0;
+    accent-color: #ffffff;
+}
+
+.m5-360 .m5-action-btn:has(input:checked) {
+    background: #104eac;
+    border-color: #a8caff;
+}
+
+.m5-360 .m5-action-btn:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+}
+
+.m5-360 .m5-textarea {
+    display: block;
+    width: 100%;
+    min-height: 95px;
+    padding: 11px;
+    background: #fbfdff;
+    border: 1px solid #cdddf5;
     border-radius: 8px;
+    color: #24446d;
+    font: 14px/1.5 'Segoe UI', Tahoma, Arial, sans-serif;
+    resize: vertical;
+}
+
+.m5-360 .m5-textarea:focus {
+    outline: 2px solid #a7caff;
+    border-color: #2478e8;
+}
+
+.m5-360 .m5-note-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 11px;
+}
+
+.m5-360 .m5-save-btn {
+    padding: 10px 17px;
+    border: 0;
+    border-radius: 8px;
+    background: #2478e8;
+    color: white;
+    font: 700 13px 'Segoe UI', Tahoma, Arial, sans-serif;
+    cursor: pointer;
+}
+
+.m5-360 .m5-save-btn:hover {
+    background: #155bb8;
+}
+
+/* ==========================================
+   LOYALTY
+========================================== */
+
+.m5-360 .m5-loyalty-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 13px;
+}
+
+.m5-360 .m5-loyalty-tier {
+    padding: 6px 11px;
+    border: 1px solid #f6dca2;
+    border-radius: 8px;
+    background: #fff4d9;
+    color: #ac7500;
+    font-weight: 800;
+}
+
+.m5-360 .m5-loyalty-balance {
+    font-size: 21px;
+    font-weight: 800;
+    color: #123f83;
+}
+
+.m5-360 .m5-loyalty-metrics {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 10px;
+}
+
+.m5-360 .m5-loyalty-metric {
+    padding: 12px;
+    border-radius: 9px;
+    background: #f4f8ff;
+}
+
+.m5-360 .m5-loyalty-metric strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 20px;
+    color: #123c7d;
+}
+
+/* Nút Loyalty căn giữa */
+
+.m5-360 .m5-loyalty-link-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 15px 0 17px;
+}
+
+.m5-360 .m5-loyalty-link {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 19px;
+    border-radius: 9px;
+    background: #2478e8;
+    color: white;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    transition: background .2s;
+}
+
+.m5-360 .m5-loyalty-link:hover {
+    background: #155bb8;
+    color: white;
+}
+
+.m5-360 .m5-progress-track {
+    height: 9px;
+    margin: 7px 0 8px;
+    background: #e5edf9;
+    border-radius: 50px;
+}
+
+.m5-360 .m5-benefits {
+    padding: 11px;
+    background: #f7faff;
+    border-radius: 8px;
+    color: #38557d;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.m5-360 .m5-separator {
+    border: 0;
+    border-top: 1px solid #e1e9f5;
+    margin: 13px 0;
+}
+
+/* ==========================================
+   CSAT
+========================================== */
+
+.m5-360 .m5-csat-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding: 3px 0 8px;
+    text-align: center;
+}
+
+.m5-360 .m5-csat-face {
+    font-size: 35px;
+    line-height: 1;
+}
+
+.m5-360 .m5-csat-status {
+    color: #315a8e;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.m5-360 .m5-csat-desc {
+    max-width: 350px;
+    color: #667b9b;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.m5-360 .m5-csat-desc p {
+    margin: 6px 0;
+}
+
+.m5-360 .m5-csat-chip {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 30px;
+    background: #edf4ff;
+    color: #4f74ad;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.m5-360 .m5-csat-care-link {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 42px;
+    margin-top: 5px;
+    padding: 0 18px;
+    border-radius: 9px;
+    background: #2478e8;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
     font-weight: 700;
     transition: background .2s;
 }
@@ -167,179 +505,1110 @@
     background: #155bb8;
     color: white;
 }
+
+/* ==========================================
+   BẢNG DỮ LIỆU
+========================================== */
+
+.m5-360 .m5-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.m5-360 .m5-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.m5-360 .m5-table th {
+    padding: 11px 9px;
+    background: #eaf2ff;
+    color: #143e7a;
+    text-align: left;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.m5-360 .m5-table td {
+    padding: 11px 9px;
+    border-bottom: 1px solid #e9f0f9;
+    color: #456082;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+
+.m5-360 .m5-table-empty {
+    padding: 20px 9px !important;
+    text-align: center;
+    color: #8598b0 !important;
+}
+
+.m5-360 .m5-positive {
+    color: #138257;
+    font-weight: 800;
+}
+
+.m5-360 .m5-negative {
+    color: #b37617;
+    font-weight: 800;
+}
+
+.m5-360 .m5-message {
+    padding: 11px 13px;
+    margin-bottom: 13px;
+    background: #ecf5ff;
+    border-radius: 8px;
+    color: #174b8e;
+}
+
+.m5-360 .m5-back {
+    display: inline-block;
+    margin-top: 20px;
+    color: #164c9b;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (max-width: 1100px) {
+
+    .m5-360 .m5-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .m5-360 .m5-layout {
+        grid-template-columns: minmax(220px,245px) minmax(0,1fr);
+    }
+
+    .m5-360 .m5-top-pair,
+    .m5-360 .m5-history-pair {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 760px) {
+
+    .m5-360 {
+        padding: 15px 12px 30px;
+    }
+
+    .m5-360 h1 {
+        font-size: 24px;
+    }
+
+    .m5-360 .m5-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .m5-360 .m5-sidebar {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .m5-360 .m5-kpis {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+
+    .m5-360 .m5-loyalty-metrics {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+
+    .m5-360 .m5-loyalty-metrics {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* =========================================
+   FIX: LOYALTY VÀ CSAT BẰNG CHIỀU CAO
+   ORDER VÀ TICKET CŨNG THẲNG HÀNG
+========================================= */
+
+@media (min-width: 1101px) {
+
+    .m5-360 .m5-dashboard-columns {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: auto auto;
+        gap: 14px;
+        align-items: stretch;
+    }
+
+    /* Hai cột dùng chung chiều cao của từng hàng */
+    .m5-360 .m5-dashboard-stack {
+        display: grid;
+        grid-template-rows: subgrid;
+        grid-row: 1 / span 2;
+        gap: 14px;
+        align-items: stretch;
+    }
+
+    .m5-360 .m5-dashboard-stack:first-child {
+        grid-column: 1;
+    }
+
+    .m5-360 .m5-dashboard-stack:last-child {
+        grid-column: 2;
+    }
+
+    /* Cho phép card giãn đầy chiều cao hàng */
+    .m5-360 .m5-dashboard-stack > .m5-card,
+    .m5-360 .m5-csat.m5-card {
+        height: auto;
+        min-height: 0;
+        align-self: stretch;
+    }
+}
+
+/* Màn hình nhỏ: mỗi khung tự co theo nội dung */
+@media (max-width: 1100px) {
+
+    .m5-360 .m5-dashboard-columns {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+
+    .m5-360 .m5-dashboard-stack {
+        display: flex;
+        flex-direction: column;
+        grid-column: auto;
+        grid-row: auto;
+        gap: 14px;
+    }
+
+    .m5-360 .m5-dashboard-stack > .m5-card,
+    .m5-360 .m5-csat.m5-card {
+        height: auto;
+        align-self: stretch;
+    }
+}
+
 </style>
 
-<div class="m5-360">
-    <h1>Hồ sơ Customer 360°</h1>
-    <p class="m5-subtitle">Thông tin tổng hợp khách hàng, Loyalty, CSAT và lịch sử tương tác trong CRM HULO.</p>
 
-    <div class="m5-overview">
+<div class="m5-360">
+
+    <!-- TIÊU ĐỀ -->
+    <h1>Hồ sơ Customer 360°</h1>
+
+    <p class="m5-subtitle">
+        Thông tin tổng hợp khách hàng, Loyalty, CSAT
+        và lịch sử tương tác trong CRM HULO.
+    </p>
+
+    <!-- THÔNG BÁO HỆ THỐNG -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="m5-message">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+    <!-- ======================================
+         KHUNG TỔNG QUAN KHÁCH HÀNG
+    ======================================= -->
+
+    <section class="m5-overview">
+
         <div class="m5-identity">
-            <div class="m5-avatar" aria-hidden="true">👤</div>
+
+            <div class="m5-avatar" aria-hidden="true">
+                👤
+            </div>
+
             <div class="m5-identity-text">
+
                 <div class="m5-person-name">
                     {{ customer.ho_ten }}
+
                     {% if loyalty_account and loyalty_account.tier %}
-                        <span class="m5-tier-tag">★ {{ loyalty_account.tier.get_code_display }}</span>
+                        <span class="m5-tier-tag">
+                            ★ {{ loyalty_account.tier.get_code_display }}
+                        </span>
                     {% endif %}
                 </div>
+
                 <div class="m5-person-meta">
-                    <span>KH{{ customer.ma_khach_hang|stringformat:"03d" }}</span>
+                    <span>
+                        KH{{ customer.ma_khach_hang|stringformat:"03d" }}
+                    </span>
+
                     <span>{{ customer.email }}</span>
-                    <span>{{ customer.so_dien_thoai|default:"Chưa cập nhật" }}</span>
+
+                    <span>
+                        {{ customer.so_dien_thoai|default:"Chưa cập nhật" }}
+                    </span>
                 </div>
+
             </div>
         </div>
+
+
         <div class="m5-kpis">
-            <div class="m5-kpi"><span class="m5-kpi-icon">🪙</span><span class="m5-kpi-value">{% if loyalty_account %}{{ loyalty_account.points_balance }}{% else %}—{% endif %}</span><span class="m5-kpi-label">Điểm khả dụng</span></div>
-            <div class="m5-kpi"><span class="m5-kpi-icon">👑</span><span class="m5-kpi-value">{% if loyalty_account and loyalty_account.tier %}{{ loyalty_account.tier.get_code_display }}{% else %}—{% endif %}</span><span class="m5-kpi-label">Hạng thành viên</span></div>
-            <div class="m5-kpi"><span class="m5-kpi-icon">📦</span><span class="m5-kpi-value">—</span><span class="m5-kpi-label">Đơn hàng chưa đồng bộ</span></div>
-            <div class="m5-kpi"><span class="m5-kpi-icon">🎫</span><span class="m5-kpi-value">—</span><span class="m5-kpi-label">Ticket chưa đồng bộ</span></div>
+
+            <div class="m5-kpi">
+                <span class="m5-kpi-icon">🪙</span>
+                <span class="m5-kpi-value">
+                    {% if loyalty_account %}
+                        {{ loyalty_account.points_balance }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </span>
+                <span class="m5-kpi-label">Điểm khả dụng</span>
+            </div>
+
+            <div class="m5-kpi">
+                <span class="m5-kpi-icon">👑</span>
+                <span class="m5-kpi-value">
+                    {% if loyalty_account and loyalty_account.tier %}
+                        {{ loyalty_account.tier.get_code_display }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </span>
+                <span class="m5-kpi-label">Hạng thành viên</span>
+            </div>
+
+            <div class="m5-kpi">
+                <span class="m5-kpi-icon">📦</span>
+                <span class="m5-kpi-value">—</span>
+                <span class="m5-kpi-label">Đơn hàng chưa đồng bộ</span>
+            </div>
+
+            <div class="m5-kpi">
+                <span class="m5-kpi-icon">🎫</span>
+                <span class="m5-kpi-value">
+                    {{ ticket_count }}
+                </span>
+                <span class="m5-kpi-label">Tổng số Ticket</span>
+            </div>
+
         </div>
-    </div>
+    </section>
 
-    <div class="m5-grid">
+
+    <!-- ======================================
+         BỐ CỤC CHÍNH
+    ======================================= -->
+
+    <div class="m5-layout">
+
+        <!-- CỘT TRÁI -->
         <aside class="m5-sidebar">
+
+            <!-- THÔNG TIN KHÁCH HÀNG -->
             <section class="m5-card">
-                <h2 class="m5-card-title">Thông tin khách hàng</h2>
-                <div class="m5-detail-row"><div class="m5-label">Mã khách hàng</div><div class="m5-value">KH{{ customer.ma_khach_hang|stringformat:"03d" }}</div></div>
-                <div class="m5-detail-row"><div class="m5-label">Họ và tên</div><div class="m5-value">{{ customer.ho_ten }}</div></div>
-                <div class="m5-detail-row"><div class="m5-label">Email</div><div class="m5-value">{{ customer.email }}</div></div>
-                <div class="m5-detail-row"><div class="m5-label">Số điện thoại</div><div class="m5-value">{{ customer.so_dien_thoai|default:"Chưa cập nhật" }}</div></div>
-                <div class="m5-detail-row"><div class="m5-label">Địa chỉ</div><div class="m5-value">{{ customer.dia_chi_mac_dinh|default:"Chưa cập nhật" }}</div></div>
-                <div class="m5-detail-row"><div class="m5-label">Ngày tạo hồ sơ</div><div class="m5-value">{{ customer.thoi_diem_tao|date:"d/m/Y" }}</div></div>
+
+                <h2 class="m5-card-title">
+                    Thông tin khách hàng
+                </h2>
+
+                <div class="m5-detail-row">
+                    <span class="m5-label">Mã khách hàng</span>
+                    <div class="m5-value">
+                        KH{{ customer.ma_khach_hang|stringformat:"03d" }}
+                    </div>
+                </div>
+
+                <div class="m5-detail-row">
+                    <span class="m5-label">Họ và tên</span>
+                    <div class="m5-value">
+                        {{ customer.ho_ten }}
+                    </div>
+                </div>
+
+                <div class="m5-detail-row">
+                    <span class="m5-label">Email</span>
+                    <div class="m5-value">
+                        {{ customer.email }}
+                    </div>
+                </div>
+
+                <div class="m5-detail-row">
+                    <span class="m5-label">Số điện thoại</span>
+                    <div class="m5-value">
+                        {{ customer.so_dien_thoai|default:"Chưa cập nhật" }}
+                    </div>
+                </div>
+
+                <div class="m5-detail-row">
+                    <span class="m5-label">Địa chỉ</span>
+                    <div class="m5-value">
+                        {{ customer.dia_chi_mac_dinh|default:"Chưa cập nhật" }}
+                    </div>
+                </div>
+
+                <div class="m5-detail-row">
+                    <span class="m5-label">Ngày tạo hồ sơ</span>
+                    <div class="m5-value">
+                        {{ customer.thoi_diem_tao|date:"d/m/Y" }}
+                    </div>
+                </div>
+
             </section>
 
+
+            <!-- CHĂM SÓC CSAT THẤP -->
             <section class="m5-card">
-                <h2 class="m5-card-title">Chăm sóc CSAT thấp</h2>
-                <form method="post" action="{% url 'customers:add_care_record' customer.ma_khach_hang %}">
+
+                <h2 class="m5-card-title">
+                    Chăm sóc CSAT thấp
+                </h2>
+
+                <form
+                    method="post"
+                    action="{% url 'customers:add_care_record' customer.ma_khach_hang %}"
+                >
                     {% csrf_token %}
-                    <div class="m5-label">Hình thức chăm sóc</div>
-                    <div class="m5-actions" role="group" aria-label="Hình thức chăm sóc">
-                        <label class="m5-action-btn"><input type="radio" name="care_type" value="CALL" checked> 📞 Gọi điện</label>
-                        <label class="m5-action-btn"><input type="radio" name="care_type" value="MESSAGE"> 💬 Nhắn tin</label>
-                        <button type="button" class="m5-action-btn" disabled title="Chưa tích hợp Voucher">🎁 Voucher</button>
-                        <label class="m5-action-btn"><input type="radio" name="care_type" value="OTHER"> ➜ Khác</label>
+
+                    <div class="m5-label">
+                        Hình thức chăm sóc
                     </div>
-                    <label class="m5-label" for="m5-care-content">Nội dung chăm sóc</label>
-                    <textarea class="m5-textarea" id="m5-care-content" name="content" maxlength="500" required placeholder="Nhập nội dung trao đổi, kết quả chăm sóc..."></textarea>
-                    <div class="m5-note-actions"><button class="m5-save-btn" type="submit">Lưu hoạt động</button></div>
+
+                    <div class="m5-actions">
+
+                        <label class="m5-action-btn">
+                            <input
+                                type="radio"
+                                name="care_type"
+                                value="CALL"
+                                checked
+                            >
+                            📞 Gọi điện
+                        </label>
+
+                        <label class="m5-action-btn">
+                            <input
+                                type="radio"
+                                name="care_type"
+                                value="MESSAGE"
+                            >
+                            💬 Nhắn tin
+                        </label>
+
+                        <button
+                            type="button"
+                            class="m5-action-btn"
+                            disabled
+                            title="Chưa tích hợp Voucher"
+                        >
+                            🎁 Voucher
+                        </button>
+
+                        <label class="m5-action-btn">
+                            <input
+                                type="radio"
+                                name="care_type"
+                                value="OTHER"
+                            >
+                            ➜ Khác
+                        </label>
+
+                    </div>
+
+                    <label
+                        class="m5-label"
+                        for="m5-care-content"
+                    >
+                        Nội dung chăm sóc
+                    </label>
+
+                    <textarea
+                        class="m5-textarea"
+                        id="m5-care-content"
+                        name="content"
+                        maxlength="500"
+                        required
+                        placeholder="Nhập nội dung trao đổi, kết quả chăm sóc..."
+                    ></textarea>
+
+                    <div class="m5-note-actions">
+                        <button
+                            class="m5-save-btn"
+                            type="submit"
+                        >
+                            Lưu hoạt động
+                        </button>
+                    </div>
+
                 </form>
-                <p class="m5-hint">Lưu hành động và nội dung chăm sóc vào hồ sơ khách hàng.</p>
+
+                <p class="m5-hint">
+                    Lưu hành động và nội dung chăm sóc
+                    vào hồ sơ khách hàng.
+                </p>
+
             </section>
+
         </aside>
 
-        <section class="m5-card m5-loyalty">
-            <h2 class="m5-card-title">Loyalty &amp; Hạng thành viên</h2>
-            {% if loyalty_account %}
-                <div class="m5-loyalty-head">
-                    <div class="m5-loyalty-tier">👑 {% if loyalty_account.tier %}{{ loyalty_account.tier.get_code_display }}{% else %}Chưa xếp hạng{% endif %}</div>
-                    <div class="m5-loyalty-balance">{{ loyalty_account.points_balance }} điểm</div>
-                </div>
-                <div class="m5-loyalty-metrics">
-                    <div class="m5-loyalty-metric"><div class="m5-label">Điểm khả dụng</div><strong>{{ loyalty_account.points_balance }}</strong></div>
-                    <div class="m5-loyalty-metric"><div class="m5-label">Tổng điểm tích lũy</div><strong>{{ loyalty_account.total_points_earned }}</strong></div>
-                </div>
-                <div class="m5-label" style="margin-top:13px;">Tiến độ nâng hạng</div>
-                <div class="m5-progress-track" aria-label="Chưa có cấu hình ngưỡng nâng hạng"></div>
-                <p class="m5-muted">Chưa có ngưỡng nâng hạng được thống nhất.</p>
-                <hr class="m5-separator">
-                <h3 class="m5-value" style="margin-bottom:8px;">Quyền lợi thành viên</h3>
-                <div class="m5-benefits">
-                    {% if loyalty_account.tier %}
-                        {{ loyalty_account.tier.benefits|default:"Chưa có thông tin quyền lợi."|linebreaksbr }}
+
+        <!-- ==================================
+             CỘT NỘI DUNG BÊN PHẢI
+        =================================== -->
+
+        <div class="m5-main-column">
+
+            <!-- LOYALTY + CSAT -->
+            <div class="m5-top-pair">
+
+                <!-- LOYALTY -->
+                <section class="m5-card m5-loyalty">
+
+                    <h2 class="m5-card-title">
+                        Loyalty &amp; Hạng thành viên
+                    </h2>
+
+                    {% if loyalty_account %}
+
+                        <div class="m5-loyalty-head">
+
+                            <div class="m5-loyalty-tier">
+                                👑
+                                {% if loyalty_account.tier %}
+                                    {{ loyalty_account.tier.get_code_display }}
+                                {% else %}
+                                    Chưa xếp hạng
+                                {% endif %}
+                            </div>
+
+                            <div class="m5-loyalty-balance">
+                                {{ loyalty_account.points_balance }} điểm
+                            </div>
+
+                        </div>
+
+                        <div class="m5-loyalty-metrics">
+
+                            <div class="m5-loyalty-metric">
+                                <div class="m5-label">Điểm khả dụng</div>
+                                <strong>
+                                    {{ loyalty_account.points_balance }}
+                                </strong>
+                            </div>
+
+                            <div class="m5-loyalty-metric">
+                                <div class="m5-label">Tổng điểm tích lũy</div>
+                                <strong>
+                                    {{ loyalty_account.total_points_earned }}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        <!-- NÚT LOYALTY -->
+                        <div class="m5-loyalty-link-wrap">
+
+                            <a
+                                href="{% url 'customers:loyalty_detail' customer.ma_khach_hang %}"
+                                class="m5-loyalty-link"
+                            >
+                                ⭐ Xem chi tiết Loyalty →
+                            </a>
+
+                        </div>
+
+                        <div class="m5-label">
+                            Tiến độ nâng hạng
+                        </div>
+
+                        <div
+                            class="m5-progress-track"
+                            aria-label="Chưa có cấu hình ngưỡng nâng hạng"
+                        ></div>
+
+                        <p class="m5-muted">
+                            Chưa có ngưỡng nâng hạng được thống nhất.
+                        </p>
+
+                        <hr class="m5-separator">
+
+                        <h3
+                            class="m5-value"
+                            style="margin-bottom:8px;"
+                        >
+                            Quyền lợi thành viên
+                        </h3>
+
+                        <div class="m5-benefits">
+
+                            {% if loyalty_account.tier %}
+
+                                {{ loyalty_account.tier.benefits|default:"Chưa có thông tin quyền lợi."|linebreaksbr }}
+
+                            {% else %}
+
+                                Chưa có thông tin quyền lợi.
+
+                            {% endif %}
+
+                        </div>
+
                     {% else %}
-                        Chưa có thông tin quyền lợi.
+
+                        <p class="m5-muted">
+                            Khách hàng chưa có tài khoản Loyalty.
+                        </p>
+
                     {% endif %}
+
+                </section>
+
+
+                <!-- CSAT -->
+                <section class="m5-card m5-csat">
+
+                    <h2 class="m5-card-title">
+                        Trạng thái CSAT gần nhất
+                    </h2>
+
+                    <div class="m5-csat-content">
+
+                        {% if latest_csat %}
+
+                            <div class="m5-csat-face">
+                                {% if latest_csat.is_low_score %}
+                                    😞
+                                {% else %}
+                                    😊
+                                {% endif %}
+                            </div>
+
+                            <div class="m5-csat-status">
+                                {{ latest_csat.score }}/5 sao
+                            </div>
+
+                            <div class="m5-csat-desc">
+
+                                <div>
+                                    <strong>Ticket:</strong>
+                                    {{ latest_csat.ticket.ma_ticket }}
+                                </div>
+
+                                <p>
+                                    <strong>Nhận xét:</strong>
+                                    {{ latest_csat.comment|default:"Không có nhận xét." }}
+                                </p>
+
+                                <p>
+                                    <strong>Ngày đánh giá:</strong>
+                                    {{ latest_csat.created_at|date:"d/m/Y H:i" }}
+                                </p>
+
+                            </div>
+
+                            {% if latest_csat.is_low_score %}
+
+                                <span class="m5-csat-chip">
+                                    CSAT thấp - Cần chăm sóc
+                                </span>
+
+                                <a
+                                    href="{% url 'customers:csat_care' customer.ma_khach_hang %}"
+                                    class="m5-csat-care-link"
+                                >
+                                    Mở trang chăm sóc →
+                                </a>
+
+                            {% else %}
+
+                                <span class="m5-csat-chip">
+                                    Khách hàng hài lòng
+                                </span>
+
+                            {% endif %}
+
+                        {% else %}
+
+                            <div class="m5-csat-face">😐</div>
+
+                            <div class="m5-csat-status">
+                                Chưa có đánh giá CSAT
+                            </div>
+
+                            <p class="m5-csat-desc">
+                                Khách hàng chưa gửi đánh giá
+                                cho Ticket nào.
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- ==================================
+                 LỊCH SỬ ĐƠN HÀNG + TICKET
+            =================================== -->
+
+            <div class="m5-history-pair">
+
+                <!-- ĐƠN HÀNG -->
+                <section class="m5-card m5-orders">
+
+                    <h2 class="m5-card-title">
+                        Lịch sử đơn hàng
+                    </h2>
+
+                    <div class="m5-table-wrap">
+
+                        <table class="m5-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" class="m5-table-empty">
+                                        Chưa tích hợp dữ liệu Order từ M4.
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+
+                <!-- TICKET -->
+                <section class="m5-card m5-tickets">
+
+                    <h2 class="m5-card-title">
+                        Lịch sử Ticket
+                    </h2>
+
+                    <div class="m5-table-wrap">
+
+                        <table class="m5-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Mã Ticket</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for ticket in tickets %}
+
+                                    <tr>
+
+                                        <td>
+                                            {% if ticket.ma_ticket %}
+                                                {{ ticket.ma_ticket }}
+                                            {% else %}
+                                                #{{ ticket.pk }}
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {{ ticket.tieu_de }}
+                                        </td>
+
+                                        <td>
+                                            {{ ticket.thoi_diem_tao|date:"d/m/Y" }}
+                                        </td>
+
+                                        <td>
+                                            {{ ticket.get_trang_thai_display }}
+                                        </td>
+
+                                    </tr>
+
+                                {% empty %}
+
+                                    <tr>
+                                        <td
+                                            colspan="4"
+                                            class="m5-table-empty"
+                                        >
+                                            Khách hàng chưa có Ticket.
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+
+<!-- ==================================
+     LỊCH SỬ GIAO DỊCH ĐIỂM LOYALTY
+=================================== -->
+
+<section class="m5-card m5-points">
+
+    <h2 class="m5-card-title">
+        Lịch sử giao dịch điểm Loyalty
+    </h2>
+
+    <div class="m5-table-wrap">
+
+        <table class="m5-table">
+
+            <thead>
+                <tr>
+                    <th>Thời gian</th>
+                    <th>Loại giao dịch</th>
+                    <th>Số điểm</th>
+                    <th>Nội dung</th>
+                    <th>Người thực hiện</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for transaction in transactions %}
+
+                    <tr>
+
+                        <!-- Thời gian -->
+                        <td>
+                            {{ transaction.created_at|date:"d/m/Y H:i" }}
+                        </td>
+
+                        <!-- Loại giao dịch -->
+                        <td>
+                            {{ transaction.get_transaction_type_display }}
+                        </td>
+
+                        <!-- Số điểm -->
+                        <td>
+
+                            {% if transaction.transaction_type == 'EARN' %}
+
+                                <span class="m5-positive">
+                                    +{{ transaction.points }}
+                                </span>
+
+                            {% elif transaction.transaction_type == 'REDEEM' %}
+
+                                <span class="m5-negative">
+                                    -{{ transaction.points }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <!-- Nội dung -->
+                        <td>
+                            {{ transaction.description|default:"Không có ghi chú" }}
+                        </td>
+
+                        <!-- Nhân viên thực hiện -->
+                        <td>
+
+                            {% if transaction.performed_by %}
+
+                                {{ transaction.performed_by.get_username }}
+
+                            {% else %}
+
+                                <span class="m5-muted">
+                                    Chưa ghi nhận
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="5" class="m5-table-empty">
+                            Chưa có lịch sử giao dịch điểm.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- ==================================
+     MODULE 5 - LICH SU DANH GIA CSAT
+=================================== -->
+
+<section class="m5-card m5-csat-history">
+
+    <h2 class="m5-card-title">
+        Lịch sử đánh giá CSAT
+    </h2>
+
+    <p class="m5-muted">
+        Tổng hợp các đánh giá của khách hàng
+        sau khi xử lý yêu cầu hỗ trợ.
+    </p>
+
+    <div class="m5-table-wrap">
+
+        <table class="m5-table">
+
+            <thead>
+                <tr>
+                    <th>Thời gian</th>
+                    <th>Mã Ticket</th>
+                    <th>Điểm đánh giá</th>
+                    <th>Nhận xét</th>
+                    <th>Đánh giá</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for csat in csat_history %}
+
+                    <tr>
+
+                        <td>
+                            {{ csat.created_at|date:"d/m/Y H:i" }}
+                        </td>
+
+                        <td>
+                            {% if csat.ticket.ma_ticket %}
+                                {{ csat.ticket.ma_ticket }}
+                            {% else %}
+                                #{{ csat.ticket.pk }}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ csat.score }}/5 ⭐
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ csat.comment|default:"Không có nhận xét." }}
+                        </td>
+
+                        <td>
+
+                            {% if csat.is_low_score %}
+
+                                <span style="
+                                    display:inline-block;
+                                    padding:5px 10px;
+                                    border-radius:20px;
+                                    background:#fff0f0;
+                                    color:#b52e2e;
+                                    font-weight:700;
+                                    white-space:nowrap;
+                                ">
+                                    CSAT thấp
+                                </span>
+
+                            {% else %}
+
+                                <span style="
+                                    display:inline-block;
+                                    padding:5px 10px;
+                                    border-radius:20px;
+                                    background:#e8f8ee;
+                                    color:#16834b;
+                                    font-weight:700;
+                                    white-space:nowrap;
+                                ">
+                                    CSAT tích cực
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="5" class="m5-table-empty">
+                            Khách hàng chưa có đánh giá CSAT.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+            <!-- ==================================
+                 GHI CHÚ VÀ LỊCH SỬ CHĂM SÓC
+            =================================== -->
+
+            <section class="m5-card m5-notes">
+
+                <h2 class="m5-card-title">
+                    Ghi chú nội bộ / Kết quả chăm sóc
+                </h2>
+
+                <form
+                    method="post"
+                    action="{% url 'customers:add_care_record' customer.ma_khach_hang %}"
+                >
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="care_type"
+                        value="NOTE"
+                    >
+
+                    <label
+                        class="m5-label"
+                        for="m5-note-content"
+                    >
+                        Nội dung ghi chú
+                    </label>
+
+                    <textarea
+                        class="m5-textarea"
+                        id="m5-note-content"
+                        name="content"
+                        maxlength="500"
+                        required
+                        placeholder="Ghi chú nội bộ, kết quả chăm sóc, hướng xử lý tiếp theo..."
+                    ></textarea>
+
+                    <div class="m5-note-actions">
+
+                        <button
+                            class="m5-save-btn"
+                            type="submit"
+                        >
+                            Lưu ghi chú
+                        </button>
+
+                    </div>
+
+                </form>
+
+
+                <hr class="m5-separator">
+
+                <h3 class="m5-card-title">
+                    Lịch sử ghi chú và chăm sóc
+                </h3>
+
+                <div class="m5-table-wrap">
+
+                    <table class="m5-table">
+
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Hình thức</th>
+                                <th>Nội dung</th>
+                                <th>Nhân viên</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for record in care_records %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ record.created_at|date:"d/m/Y H:i" }}
+                                    </td>
+
+                                    <td>
+                                        {{ record.get_care_type_display }}
+                                    </td>
+
+                                    <td>
+                                        {{ record.content|linebreaksbr }}
+                                    </td>
+
+                                    <td>
+                                        {% if record.created_by %}
+                                            {{ record.created_by.get_username }}
+                                        {% else %}
+                                            Không xác định
+                                        {% endif %}
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+                                    <td colspan="4" class="m5-table-empty">
+                                        Chưa có lịch sử ghi chú hoặc chăm sóc.
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
                 </div>
-            {% else %}
-                <p class="m5-muted">Khách hàng chưa có tài khoản Loyalty.</p>
-            {% endif %}
-        </section>
 
-        <section class="m5-card m5-csat">
-            <h2 class="m5-card-title">Trạng thái CSAT gần nhất</h2>
-            <div class="m5-csat-content">
-                <div class="m5-csat-face" aria-hidden="true">😐</div>
-                <div class="m5-csat-status">Chưa có đánh giá CSAT</div>
-                <div class="m5-csat-desc">Chưa liên kết dữ liệu CSAT với Ticket. Khu vực này sẽ hiển thị điểm, nhận xét và tình trạng chăm sóc sau khi UC5.2–UC5.3 được tích hợp.</div>
-                <span class="m5-csat-chip">Chờ đồng bộ CSAT</span>
-                <div style="margin-top: 15px; text-align: center;">
+            </section>
 
-    <a href="{% url 'customers:csat_care' customer.ma_khach_hang %}"
-       class="m5-csat-care-link">
-        Xem trang chăm sóc CSAT →
+        </div>
+
+    </div>
+
+
+    <!-- QUAY VỀ DANH SÁCH -->
+    <a
+        class="m5-back"
+        href="{% url 'customers:list' %}"
+    >
+        ← Quay về danh sách khách hàng
     </a>
 
 </div>
-            </div>
-        </section>
 
-        <section class="m5-card m5-orders">
-            <h2 class="m5-card-title">Lịch sử đơn hàng</h2>
-            <div class="m5-table-wrap"><table class="m5-table">
-                <thead><tr><th>Mã đơn</th><th>Ngày tạo</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead>
-                <tbody><tr><td colspan="4" class="m5-table-empty">Chưa tích hợp dữ liệu Order từ M4.</td></tr></tbody>
-            </table></div>
-        </section>
-
-        <section class="m5-card m5-tickets">
-            <h2 class="m5-card-title">Lịch sử Ticket</h2>
-            <div class="m5-table-wrap"><table class="m5-table">
-                <thead><tr><th>Mã Ticket</th><th>Tiêu đề</th><th>Ngày tạo</th><th>Trạng thái</th></tr></thead>
-                <tbody><tr><td colspan="4" class="m5-table-empty">Chưa tích hợp dữ liệu Ticket từ M3.</td></tr></tbody>
-            </table></div>
-        </section>
-
-        <section class="m5-card m5-points">
-            <h2 class="m5-card-title">Lịch sử giao dịch điểm Loyalty</h2>
-            <div class="m5-table-wrap"><table class="m5-table">
-                <thead><tr><th>Ngày giao dịch</th><th>Loại</th><th>Số điểm</th><th>Nội dung</th></tr></thead>
-                <tbody>
-                {% for transaction in transactions %}
-                    <tr>
-                        <td>{{ transaction.created_at|date:"d/m/Y H:i" }}</td>
-                        <td>{{ transaction.get_transaction_type_display }}</td>
-                        <td>{% if transaction.transaction_type == 'EARN' %}<span class="m5-positive">+{{ transaction.points }}</span>{% else %}<span class="m5-negative">-{{ transaction.points }}</span>{% endif %}</td>
-                        <td>{{ transaction.description|default:"Không có ghi chú" }}</td>
-                    </tr>
-                {% empty %}
-                    <tr><td colspan="4" class="m5-table-empty">Chưa có lịch sử giao dịch điểm.</td></tr>
-                {% endfor %}
-                </tbody>
-            </table></div>
-        </section>
-
-        <section class="m5-card m5-notes">
-            <h2 class="m5-card-title">Ghi chú nội bộ / Kết quả chăm sóc</h2>
-            <form method="post" action="{% url 'customers:add_care_record' customer.ma_khach_hang %}">
-                {% csrf_token %}
-                <input type="hidden" name="care_type" value="NOTE">
-                <label class="m5-label" for="m5-note-content">Nội dung ghi chú</label>
-                <textarea class="m5-textarea" id="m5-note-content" name="content" maxlength="500" required placeholder="Ghi chú nội bộ, kết quả chăm sóc, hướng xử lý tiếp theo..."></textarea>
-                <div class="m5-note-actions"><button class="m5-save-btn" type="submit">Lưu ghi chú</button></div>
-            </form>
-
-            <hr class="m5-separator">
-            <h3 class="m5-card-title">Lịch sử ghi chú và chăm sóc</h3>
-            <div class="m5-table-wrap"><table class="m5-table">
-                <thead><tr><th>Thời gian</th><th>Hình thức</th><th>Nội dung</th><th>Nhân viên</th></tr></thead>
-                <tbody>
-                {% for record in care_records %}
-                    <tr>
-                        <td>{{ record.created_at|date:"d/m/Y H:i" }}</td>
-                        <td>{{ record.get_care_type_display }}</td>
-                        <td>{{ record.content|linebreaksbr }}</td>
-                        <td>{% if record.created_by %}{{ record.created_by.get_username }}{% else %}Không xác định{% endif %}</td>
-                    </tr>
-                {% empty %}
-                    <tr><td colspan="4" class="m5-table-empty">Chưa có lịch sử ghi chú hoặc chăm sóc.</td></tr>
-                {% endfor %}
-                </tbody>
-            </table></div>
-        </section>
-    </div>
-
-    <a class="m5-back" href="{% url 'customers:list' %}">← Quay về danh sách khách hàng</a>
-</div>
 {% endblock %}
