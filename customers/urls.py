@@ -38,5 +38,20 @@ urlpatterns = [
          views.csat_care,
          name='csat_care'
 ),
+path(
+    "tickets/<int:ticket_id>/csat/",
+    views.submit_csat,
+    name="submit_csat"
+),
+path(
+    '<int:customer_id>/loyalty/',
+    views.loyalty_detail,
+    name='loyalty_detail'
+),
+path(
+    '<int:customer_id>/loyalty/adjust-demo/',
+    views.loyalty_adjust_demo,
+    name='loyalty_adjust_demo'
+),
 ]
 

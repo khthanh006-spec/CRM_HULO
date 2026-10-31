@@ -1,0 +1,359 @@
+
+{% extends "base.html" %}
+
+{% block title %}Quản lý Loyalty - CRM HULO{% endblock %}
+
+{% block content %}
+
+<style>
+.m5-loyalty-page,
+.m5-loyalty-page * {
+    box-sizing: border-box;
+}
+
+.m5-loyalty-page {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px 45px;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    color: #143f7c;
+}
+
+.m5-loyalty-page h1 {
+    font-size: 30px;
+    margin-bottom: 8px;
+    font-weight: 800;
+}
+
+.m5-loyalty-page .subtitle {
+    color: #7790b1;
+    margin-bottom: 25px;
+    font-size: 15px;
+}
+
+.m5-loyalty-page .panel {
+    background: #ffffff;
+    border: 1px solid #d3e2fa;
+    border-radius: 14px;
+    padding: 25px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 9px rgba(30, 75, 135, 0.04);
+}
+
+.m5-loyalty-page .profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.m5-loyalty-page .name {
+    font-size: 24px;
+    font-weight: 800;
+    color: #103d7e;
+}
+
+.m5-loyalty-page .customer-meta {
+    color: #7890b1;
+    font-size: 14px;
+    margin-top: 7px;
+}
+
+.m5-loyalty-page .tier {
+    padding: 10px 17px;
+    border-radius: 9px;
+    border: 1px solid #ffe0a0;
+    background: #fff3d8;
+    color: #ad7300;
+    font-weight: 800;
+}
+
+.m5-loyalty-page .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 24px;
+}
+
+.m5-loyalty-page .stat {
+    background: #f0f5fd;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    color: #184782;
+}
+
+.m5-loyalty-page .stat strong {
+    display: block;
+    font-size: 32px;
+    color: #103e82;
+    margin-bottom: 6px;
+}
+
+.m5-loyalty-page .button-area {
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+}
+
+.m5-loyalty-page .primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 11px 22px;
+    border-radius: 9px;
+    background: #2478e8;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background .2s;
+}
+
+.m5-loyalty-page .primary-button:hover {
+    background: #155bb8;
+    color: #ffffff;
+}
+
+.m5-loyalty-page h2 {
+    font-size: 21px;
+    color: #103e82;
+    margin: 0 0 20px;
+}
+
+.m5-loyalty-page .table-wrap {
+    overflow-x: auto;
+}
+
+.m5-loyalty-page table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.m5-loyalty-page th {
+    text-align: left;
+    padding: 15px;
+    background: #e9f2ff;
+    color: #164780;
+    font-size: 14px;
+}
+
+.m5-loyalty-page td {
+    padding: 15px;
+    color: #4e6789;
+    border-bottom: 1px solid #e4edfa;
+    font-size: 14px;
+}
+
+.m5-loyalty-page .earn {
+    color: #13864d;
+    font-weight: 800;
+}
+
+.m5-loyalty-page .redeem {
+    color: #cb503f;
+    font-weight: 800;
+}
+
+.m5-loyalty-page .notice {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 9px;
+    background: #f0f5fd;
+    color: #6683aa;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.m5-loyalty-page .back-link {
+    display: inline-block;
+    color: #206cda;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+@media (max-width: 650px) {
+    .m5-loyalty-page .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .m5-loyalty-page .panel {
+        padding: 18px;
+    }
+}
+</style>
+
+<div class="m5-loyalty-page">
+
+    <h1>Quản lý Loyalty</h1>
+
+    <p class="subtitle">
+        Theo dõi điểm thưởng, hạng thành viên và
+        lịch sử giao dịch khách hàng HULO.
+    </p>
+
+    <!-- THÔNG TIN KHÁCH HÀNG -->
+    <section class="panel">
+
+        <div class="profile">
+
+            <div>
+                <div class="name">
+                    {{ customer.ho_ten }}
+                </div>
+
+                <div class="customer-meta">
+                    KH{{ customer.ma_khach_hang|stringformat:"03d" }}
+                    · {{ customer.email }}
+                </div>
+            </div>
+
+            <div class="tier">
+                👑
+                {% if loyalty_account and loyalty_account.tier %}
+                    {{ loyalty_account.tier.get_code_display }}
+                {% else %}
+                    Chưa phân hạng
+                {% endif %}
+            </div>
+
+        </div>
+
+        {% if loyalty_account %}
+
+            <!-- THỐNG KÊ ĐIỂM -->
+            <div class="stats">
+
+                <div class="stat">
+                    <strong>
+                        {{ loyalty_account.points_balance }}
+                    </strong>
+                    Điểm khả dụng
+                </div>
+
+                <div class="stat">
+                    <strong>
+                        {{ loyalty_account.total_points_earned }}
+                    </strong>
+                    Tổng điểm tích lũy
+                </div>
+
+            </div>
+
+            <!-- NÚT MỞ CHỨC NĂNG DEMO -->
+            <div class="button-area">
+
+                <a
+                    href="{% url 'customers:loyalty_adjust_demo' customer.ma_khach_hang %}"
+                    class="primary-button"
+                >
+                    🪙 Kiểm thử cộng / đổi điểm
+                </a>
+
+            </div>
+
+        {% else %}
+
+            <div class="notice">
+                Khách hàng chưa có tài khoản Loyalty.
+            </div>
+
+        {% endif %}
+
+    </section>
+
+    <!-- LỊCH SỬ GIAO DỊCH -->
+    <section class="panel">
+
+        <h2>📋 Lịch sử giao dịch điểm</h2>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Loại giao dịch</th>
+                        <th>Số điểm</th>
+                        <th>Lý do</th>
+                        <th>Người thực hiện</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for tx in transactions %}
+
+                        <tr>
+
+                            <td>
+                                {{ tx.created_at|date:"d/m/Y H:i" }}
+                            </td>
+
+                            <td>
+                                {{ tx.get_transaction_type_display }}
+                            </td>
+
+                            <td>
+                                {% if tx.transaction_type == 'EARN' %}
+                                    <span class="earn">
+                                        +{{ tx.points }}
+                                    </span>
+                                {% else %}
+                                    <span class="redeem">
+                                        -{{ tx.points }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ tx.description|default:"Không có mô tả" }}
+                            </td>
+                            <td>
+    {% if tx.performed_by %}
+        {{ tx.performed_by.get_username }}
+    {% else %}
+        Giao dịch cũ
+    {% endif %}
+</td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="4" style="text-align:center;">
+                                Chưa có giao dịch Loyalty.
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="notice">
+            Chức năng cộng và đổi điểm đang ở chế độ
+            kiểm thử nội bộ. Chính sách tích điểm,
+            nâng hạng và đổi thưởng chính thức
+            chưa được nhóm thống nhất.
+        </div>
+
+    </section>
+
+    <a
+        href="{% url 'customers:detail' customer.ma_khach_hang %}"
+        class="back-link"
+    >
+        ← Quay về Customer 360°
+    </a>
+
+</div>
+
+{% endblock %}
