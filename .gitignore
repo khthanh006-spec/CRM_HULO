@@ -40,3 +40,9 @@ htmlcov/
 
 # Uploaded media (if used later)
 media/
+
+# Local database backups
+backups/
+
+# Ticket evidence attachments
+ticket_attachments/

@@ -104,6 +104,42 @@ Xác nhận kết quả Ticket - HULOECOM
 
     </section>
 
+    <!-- 5. LỊCH SỬ TRAO ĐỔI CÔNG KHAI -->
+    <section class="customer-ticket-card">
+
+        <h3 class="customer-ticket-section-title">
+            💬 Trao đổi với HULOECOM
+        </h3>
+
+        {% for item in public_messages %}
+
+            <div class="customer-ticket-content">
+
+                <div class="customer-ticket-message-heading">
+                    <strong>Nhân viên HULOECOM</strong>
+
+                    <small>
+                        {{ item.thoi_diem_gui|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
+
+                <p>
+                    {{ item.noi_dung|linebreaksbr }}
+                </p>
+
+            </div>
+
+        {% empty %}
+
+            <p class="customer-ticket-muted">
+                Hiện chưa có phản hồi công khai từ HULOECOM.
+            </p>
+
+        {% endfor %}
+
+    </section>
+
+
     <!-- 5. PHẢN HỒI KHÁCH HÀNG -->
     <section class="customer-ticket-card">
 

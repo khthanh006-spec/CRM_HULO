@@ -110,6 +110,7 @@
             </div>
         </div>
 
+
         <!-- THÔNG TIN SLA -->
         <div class="ticket-detail-sla">
 
@@ -123,6 +124,32 @@
                 <strong>Chưa thiết lập</strong>
             {% endif %}
 
+            {% if ticket.sla_status == 'OVERDUE' %}
+                <p style="color: #dc2626; margin-top: 8px;">
+                    🚨 {{ ticket.sla_remaining }}
+                </p>
+
+            {% elif ticket.sla_status == 'WARNING' %}
+                <p style="color: #d97706; margin-top: 8px;">
+                    ⏳ {{ ticket.sla_remaining }} - Sắp quá hạn
+                </p>
+
+            {% elif ticket.sla_status == 'ON_TIME' %}
+                <p style="color: #15803d; margin-top: 8px;">
+                    ✓ {{ ticket.sla_remaining }}
+                </p>
+
+            {% elif ticket.sla_status == 'DONE' %}
+                <p style="color: #15803d; margin-top: 8px;">
+                    ✓ Đã giải quyết
+                </p>
+
+            {% else %}
+                <p style="margin-top: 8px;">
+                    Chưa thiết lập SLA
+                </p>
+            {% endif %}
+
             {% if ticket.sla_config %}
                 <small>
                     SLA cấu hình:
@@ -131,6 +158,7 @@
             {% endif %}
 
         </div>
+
 
     </section>
 

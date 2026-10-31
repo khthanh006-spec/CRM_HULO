@@ -97,10 +97,12 @@ def ticket_home(request):
 
     tickets = tickets.order_by('-thoi_diem_tao')
 
-    # UC3.6 - Xác định trạng thái SLA cho từng Ticket
+
+    # UC3.6 - Xác định trạng thái và thời gian SLA cho từng Ticket
     tickets = list(tickets)
 
     for ticket in tickets:
+        ticket.sla_remaining = None
 
         if ticket.trang_thai in ['RESOLVED', 'CLOSED']:
             ticket.sla_status = 'DONE'
@@ -108,14 +110,35 @@ def ticket_home(request):
         elif ticket.sla_deadline is None:
             ticket.sla_status = 'NO_SLA'
 
-        elif ticket.sla_deadline <= now:
-            ticket.sla_status = 'OVERDUE'
-
-        elif ticket.sla_deadline <= warning_limit:
-            ticket.sla_status = 'WARNING'
-
         else:
-            ticket.sla_status = 'ON_TIME'
+            delta = ticket.sla_deadline - now
+            total_minutes = int(abs(delta.total_seconds()) // 60)
+
+            days, remaining_minutes = divmod(total_minutes, 1440)
+            hours, minutes = divmod(remaining_minutes, 60)
+
+            parts = []
+            if days:
+                parts.append(f"{days} ngày")
+            if hours:
+                parts.append(f"{hours} giờ")
+            if minutes or not parts:
+                parts.append(f"{minutes} phút")
+
+            duration_text = " ".join(parts)
+
+            if delta.total_seconds() <= 0:
+                ticket.sla_status = 'OVERDUE'
+                ticket.sla_remaining = f"Quá hạn {duration_text}"
+
+            elif ticket.sla_deadline <= warning_limit:
+                ticket.sla_status = 'WARNING'
+                ticket.sla_remaining = f"Còn {duration_text}"
+
+            else:
+                ticket.sla_status = 'ON_TIME'
+                ticket.sla_remaining = f"Còn {duration_text}"
+
 
 
     categories = TicketCategory.objects.filter(
@@ -140,6 +163,7 @@ def ticket_home(request):
 # ==========================================================
 # UC-3.2 - CHI TIẾT TICKET DÀNH CHO NHÂN VIÊN
 # ==========================================================
+
 
 @login_required(login_url='login')
 @role_required('CSKH', 'MANAGER', 'ADMIN')
@@ -178,6 +202,56 @@ def ticket_detail(request, pk):
             vai_tro='CSKH'
         ).order_by('ho_ten')
 
+    # ==========================================
+    # UC-3.6 - TRẠNG THÁI VÀ THỜI GIAN SLA
+    # ==========================================
+
+    now = timezone.now()
+    warning_limit = now + timedelta(hours=4)
+
+    ticket.sla_remaining = None
+
+    if ticket.trang_thai in ['RESOLVED', 'CLOSED']:
+        ticket.sla_status = 'DONE'
+
+    elif ticket.sla_deadline is None:
+        ticket.sla_status = 'NO_SLA'
+
+    else:
+        delta = ticket.sla_deadline - now
+        total_minutes = int(abs(delta.total_seconds()) // 60)
+
+        days, remaining_minutes = divmod(total_minutes, 1440)
+        hours, minutes = divmod(remaining_minutes, 60)
+
+        parts = []
+
+        if days:
+            parts.append(f"{days} ngày")
+
+        if hours:
+            parts.append(f"{hours} giờ")
+
+        if minutes or not parts:
+            parts.append(f"{minutes} phút")
+
+        duration_text = " ".join(parts)
+
+        if delta.total_seconds() <= 0:
+            ticket.sla_status = 'OVERDUE'
+            ticket.sla_remaining = f"Quá hạn {duration_text}"
+
+        elif ticket.sla_deadline <= warning_limit:
+            ticket.sla_status = 'WARNING'
+            ticket.sla_remaining = f"Còn {duration_text}"
+
+        else:
+            ticket.sla_status = 'ON_TIME'
+            ticket.sla_remaining = f"Còn {duration_text}"
+
+    # ==========================================
+    # LỊCH SỬ XỬ LÝ TICKET
+    # ==========================================
 
     logs = ticket.logs.select_related(
         'nguoi_thuc_hien'
@@ -476,15 +550,23 @@ def ticket_customer_result(request, pk):
         pk=pk
     )
 
+    # Chỉ lấy phản hồi công khai
+    public_messages = (
+        ticket.messages
+        .filter(loai_tin_nhan='PUBLIC')
+        .select_related('nguoi_gui')
+        .order_by('thoi_diem_gui')
+    )
+
     return render(
         request,
         'tickets/customer_result.html',
         {
             'ticket': ticket,
             'confirmation_form': TicketConfirmationForm(),
+            'public_messages': public_messages,
         }
     )
-
 
 # ==========================================================
 # UC-3.5 - KHÁCH HÀNG XÁC NHẬN KẾT QUẢ
