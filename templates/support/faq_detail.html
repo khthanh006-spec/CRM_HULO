@@ -1,0 +1,225 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+{{ faq.cau_hoi }} - HULO
+{% endblock %}
+
+{% block content %}
+
+<div style="
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+">
+
+    <!-- QUAY LẠI HELP CENTER -->
+    <a href="{% url 'support:home' %}" style="
+        color: #1683ff;
+        text-decoration: none;
+        font-weight: 600;
+    ">
+        ← Quay lại Trung tâm hỗ trợ
+    </a>
+
+    <!-- NỘI DUNG CHI TIẾT FAQ -->
+    <article style="
+        background: white;
+        border: 1px solid #d9e6fa;
+        border-radius: 12px;
+        padding: 35px;
+        margin-top: 25px;
+    ">
+
+        <!-- DANH MỤC -->
+        <p style="
+            color: #1683ff;
+            font-weight: 600;
+            margin-bottom: 15px;
+        ">
+            {{ faq.danh_muc.ten_danh_muc }}
+        </p>
+
+        <!-- CÂU HỎI -->
+        <h1 style="
+            color: #0b326b;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        ">
+            {{ faq.cau_hoi }}
+        </h1>
+
+        <hr style="
+            border: none;
+            border-top: 1px solid #e5eaf0;
+            margin-bottom: 25px;
+        ">
+
+        <!-- CÂU TRẢ LỜI -->
+        <div style="
+            color: #425466;
+            font-size: 16px;
+            line-height: 1.8;
+        ">
+            {{ faq.cau_tra_loi|linebreaks }}
+        </div>
+
+    </article>
+
+    <!-- ĐÁNH GIÁ MỨC HỮU ÍCH FAQ -->
+    <section style="
+        background: white;
+        border: 1px solid #d9e6fa;
+        border-radius: 12px;
+        padding: 30px;
+        margin-top: 25px;
+        text-align: center;
+    ">
+
+        <h2 style="
+            color: #0b326b;
+            margin-bottom: 12px;
+        ">
+            Câu trả lời này có hữu ích với bạn không?
+        </h2>
+
+        {% if da_danh_gia %}
+
+            <p style="color: #16803c; font-weight: 600;">
+                Cảm ơn bạn! Chúng tôi đã ghi nhận đánh giá của bạn.
+            </p>
+
+        {% else %}
+
+            <p style="color: #667085; margin-bottom: 20px;">
+                Đánh giá của bạn giúp HULO cải thiện nội dung hỗ trợ.
+            </p>
+
+            <form
+                method="POST"
+                action="{% url 'support:faq_feedback' faq.id %}"
+                style="
+                    display: flex;
+                    justify-content: center;
+                    gap: 15px;
+                    flex-wrap: wrap;
+                "
+            >
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    name="huu_ich"
+                    value="true"
+                    style="
+                        padding: 12px 25px;
+                        background: #e7f7ee;
+                        color: #16803c;
+                        border: 1px solid #b7e4c7;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    "
+                >
+                    👍 Hữu ích
+                </button>
+
+                <button
+                    type="submit"
+                    name="huu_ich"
+                    value="false"
+                    style="
+                        padding: 12px 25px;
+                        background: #fff0f0;
+                        color: #b42318;
+                        border: 1px solid #f5c2c7;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    "
+                >
+                    👎 Không hữu ích
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </section>
+
+
+
+<!-- GỢI Ý FAQ LIÊN QUAN - UC01.07 -->
+{% if faq_lien_quan %}
+<section style="
+    background: white;
+    border: 1px solid #d9e6fa;
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: 25px;
+">
+    <h2 style="
+        color: #0b326b;
+        margin-bottom: 20px;
+    ">
+        Có thể bạn cũng quan tâm
+    </h2>
+
+    {% for item in faq_lien_quan %}
+        <div style="
+            padding: 15px 0;
+            border-bottom: 1px solid #e5eaf0;
+        ">
+            <a href="{% url 'support:faq_detail' item.id %}"
+               style="
+                   color: #1683ff;
+                   text-decoration: none;
+                   font-weight: 600;
+               ">
+                {{ item.cau_hoi }} →
+            </a>
+        </div>
+    {% endfor %}
+</section>
+{% endif %}
+<!-- KÊNH HỖ TRỢ KHÁC -->
+    <div style="
+        background: #eaf3ff;
+        padding: 25px;
+        border-radius: 12px;
+        margin-top: 25px;
+        text-align: center;
+    ">
+
+        <h2 style="color: #0b326b;">
+            Bạn vẫn cần hỗ trợ?
+        </h2>
+
+        <p style="
+            color: #425466;
+            margin: 15px 0;
+        ">
+            Nếu câu trả lời chưa giải quyết được vấn đề,
+            bạn có thể liên hệ HULO để được hỗ trợ thêm.
+        </p>
+
+        <a href="{% url 'chatbot:home' %}" style="
+            color: #1683ff;
+            font-weight: 600;
+            margin-right: 20px;
+        ">
+            Mở Chatbot →
+        </a>
+
+        <a href="{% url 'tickets:home' %}" style="
+            color: #1683ff;
+            font-weight: 600;
+        ">
+            Gửi yêu cầu hỗ trợ →
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

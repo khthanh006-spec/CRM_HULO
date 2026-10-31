@@ -1,79 +1,1036 @@
 
 {% extends 'base.html' %}
 
-{% block title %}
-Trung tâm hỗ trợ - HULO
-{% endblock %}
+{% block title %}Trung tâm hỗ trợ - CRM HULO{% endblock %}
 
 {% block content %}
 
-<div class="content-container">
+<style>
+    /* =========================================
+       GIAO DIEN GOC HULO ASSISTANT - M2
+       GIU NGUYEN BO CUC DA CHOT
+    ========================================= */
 
-    <div style="
-        background: #eaf3ff;
-        padding: 45px 30px;
-        border-radius: 12px;
+    .hulo-page {
+        max-width: 1250px;
+        margin: 25px auto;
+        padding: 0 20px 35px;
+        font-family: Arial, sans-serif;
+        color: #173a67;
+    }
+
+    .hulo-page * {
+        box-sizing: border-box;
+    }
+
+    .hulo-banner {
+        background: linear-gradient(110deg, #e9f4ff, #c9e4ff);
+        border-radius: 15px;
+        padding: 35px;
+        margin-bottom: 25px;
+    }
+
+    .hulo-banner h1 {
+        font-size: 32px;
+        color: #0756a5;
+        margin: 0 0 10px;
+    }
+
+    .hulo-banner p {
+        color: #496784;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .hulo-title {
         text-align: center;
-        margin-bottom: 30px;
-    ">
-        <h1>Trung tâm hỗ trợ HULO</h1>
+        font-size: 23px;
+        margin: 25px 0;
+    }
 
+    .hulo-topics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .hulo-topic {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 62px;
+        background: white;
+        border: 1px solid #d6e4f2;
+        border-radius: 12px;
+        padding: 20px 12px;
+        color: #1262b0;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .hulo-topic:hover,
+    .hulo-topic.active {
+        background: #eaf5ff;
+        border-color: #1680e5;
+    }
+
+    .hulo-main {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .hulo-panel {
+        min-width: 0;
+        background: white;
+        border: 1px solid #dce7f2;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(0, 65, 130, .06);
+    }
+
+    .hulo-panel-title {
+        padding: 18px;
+        background: #f0f7ff;
+        font-weight: bold;
+        color: #145da8;
+        font-size: 16px;
+    }
+
+    .hulo-help-content {
+        padding: 20px;
+    }
+
+    .hulo-help-content p {
+        color: #56708c;
+        line-height: 1.6;
+    }
+
+    /* =========================================
+       FAQ M1 - KHONG THAY DOI BO CUC
+    ========================================= */
+
+    .hulo-search {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .hulo-search input {
+        flex: 1;
+        min-width: 0;
+        padding: 11px;
+        border: 1px solid #cbdbea;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: Arial, sans-serif;
+    }
+
+    .hulo-search button {
+        background: #1677d2;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+    }
+
+    .hulo-search button:hover {
+        background: #075ba8;
+    }
+
+    .hulo-reset {
+        display: inline-block;
+        color: #1677d2;
+        font-size: 13px;
+        text-decoration: none;
+        margin-bottom: 12px;
+    }
+
+    .hulo-small-title {
+        font-size: 14px;
+        font-weight: bold;
+        color: #145da8;
+        margin: 16px 0 12px;
+    }
+
+    .hulo-faq-item {
+        margin-bottom: 10px;
+        border: 1px solid #e1ebf5;
+        border-radius: 8px;
+        background: #f8fbff;
+        overflow: hidden;
+    }
+
+    .hulo-faq-item summary {
+        padding: 13px;
+        cursor: pointer;
+        color: #17436f;
+        font-size: 14px;
+        line-height: 1.5;
+        font-weight: 600;
+    }
+
+    .hulo-faq-item[open] summary {
+        background: #eaf5ff;
+    }
+
+    .hulo-faq-answer {
+        padding: 14px;
+        background: white;
+        border-top: 1px solid #e1ebf5;
+        color: #34516e;
+        font-size: 14px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    /* DANH GIA FAQ */
+
+    .hulo-feedback {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid #e1ebf5;
+    }
+
+    .hulo-feedback p {
+        margin: 0 0 10px;
+        font-size: 13px;
+    }
+
+    .hulo-feedback-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .hulo-feedback-btn {
+        background: #f0f7ff;
+        color: #145da8;
+        border: 1px solid #cbdbea;
+        border-radius: 7px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 13px;
+        font-family: Arial, sans-serif;
+    }
+
+    .hulo-feedback-btn:hover {
+        background: #dceeff;
+    }
+
+    .hulo-empty {
+        padding: 14px;
+        background: #f8fbff;
+        border-radius: 8px;
+        color: #56708c;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* =========================================
+       THONG BAO SAU KHI DANH GIA
+       CHI THAY DOI MAU VA NOI DUNG THONG BAO
+    ========================================= */
+
+    .hulo-notice {
+        padding: 18px 22px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.6;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, .05);
+    }
+
+    /* HUU ICH - XANH LA */
+
+    .hulo-notice-success {
+        background: #dcfce7;
+        border: 1px solid #86efac;
+        color: #166534;
+    }
+
+    .hulo-notice-success .notice-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 17px;
+        font-weight: bold;
+        color: #15803d;
+        margin-bottom: 7px;
+    }
+
+    .hulo-notice-success .notice-icon {
+        font-size: 22px;
+    }
+
+    .hulo-notice-success .notice-content {
+        margin: 0;
+        color: #166534;
+        font-size: 15px;
+    }
+
+    /* KHONG HUU ICH - VANG CAM */
+
+    .hulo-notice-warning {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        color: #92400e;
+    }
+
+    .hulo-notice-warning .notice-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 17px;
+        font-weight: bold;
+        color: #92400e;
+        margin-bottom: 7px;
+    }
+
+    .hulo-notice-warning .notice-icon {
+        font-size: 22px;
+    }
+
+    .hulo-notice-warning .notice-content {
+        margin: 0 0 10px;
+        color: #92400e;
+        font-size: 15px;
+    }
+
+    .hulo-notice-warning .notice-chat-link {
+        display: block;
+        padding: 10px 13px;
+        border-radius: 8px;
+        background: #fde7b0;
+        color: #92400e;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: background .2s ease;
+    }
+
+    .hulo-notice-warning .notice-chat-link:hover {
+        background: #fcd98a;
+    }
+
+    /* THONG BAO LOI */
+
+    .hulo-notice-error {
+        background: #fee2e2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+    }
+
+    /* THONG BAO TRUNG LAP */
+
+    .hulo-notice-info {
+        background: #eaf5ff;
+        border: 1px solid #bfdbfe;
+        color: #145da8;
+    }
+
+    /* =========================================
+       CHATBOT - GIU NGUYEN GIAO DIEN M2
+    ========================================= */
+
+    .hulo-chat-header {
+        background: #176cc1;
+        color: white;
+        padding: 17px 20px;
+    }
+
+    .hulo-chat-header h2 {
+        margin: 0 0 6px;
+        font-size: 20px;
+    }
+
+    .hulo-chat-header small {
+        color: #e0f3ff;
+    }
+
+    .hulo-messages {
+        height: 355px;
+        overflow-y: auto;
+        padding: 20px;
+        background: #fafcff;
+    }
+
+    .hulo-message {
+        width: fit-content;
+        max-width: 85%;
+        padding: 12px 15px;
+        margin-bottom: 12px;
+        border-radius: 14px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+        font-size: 14px;
+    }
+
+    .hulo-bot {
+        background: #e5f1ff;
+        color: #173b68;
+        margin-right: auto;
+    }
+
+    .hulo-customer {
+        background: #1776d1;
+        color: white;
+        margin-left: auto;
+    }
+
+    .hulo-chat-form {
+        display: flex;
+        gap: 10px;
+        padding: 15px;
+        border-top: 1px solid #e0ebf5;
+    }
+
+    .hulo-chat-input {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid #cbdbea;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 14px;
+        font-family: Arial, sans-serif;
+    }
+
+    .hulo-send {
+        background: #1677d2;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+    }
+
+    .hulo-send:hover {
+        background: #075ba8;
+    }
+
+    .hulo-send:disabled {
+        opacity: .6;
+        cursor: wait;
+    }
+
+    /* =========================================
+       KHU VUC HO TRO NHAN VIEN
+    ========================================= */
+
+    .hulo-bottom {
+        text-align: center;
+        margin-top: 22px;
+        padding: 22px;
+        background: #eef6ff;
+        border-radius: 12px;
+    }
+
+    .hulo-bottom p {
+        margin: 0 0 16px;
+    }
+
+    .hulo-support-btn {
+        display: inline-block;
+        background: #1677d2;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 22px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .hulo-support-btn:hover {
+        background: #075ba8;
+    }
+
+    /* RESPONSIVE - GIU NGUYEN THIET KE M2 */
+
+    @media (max-width: 750px) {
+        .hulo-main {
+            grid-template-columns: 1fr;
+        }
+
+        .hulo-topics {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .hulo-banner {
+            padding: 22px;
+        }
+
+        .hulo-banner h1 {
+            font-size: 25px;
+        }
+    }
+
+    @media (max-width: 450px) {
+        .hulo-search {
+            flex-direction: column;
+        }
+
+        .hulo-chat-form {
+            padding: 10px;
+        }
+
+        .hulo-send {
+            padding: 10px 13px;
+        }
+    }
+</style>
+
+
+<div class="hulo-page">
+
+    <!-- BANNER -->
+    <section class="hulo-banner">
+        <h1>HULO có thể giúp gì cho bạn?</h1>
         <p>
+            Tìm câu trả lời hoặc trò chuyện cùng HULO Assistant.
             Chúng tôi luôn sẵn sàng hỗ trợ bạn!
         </p>
+    </section>
 
-        <p>
-            Tìm câu trả lời nhanh chóng hoặc
-            liên hệ bộ phận chăm sóc khách hàng.
-        </p>
+
+    <!-- THONG BAO SAU KHI DANH GIA -->
+    {% if messages %}
+        {% for message in messages %}
+
+            {% if 'success' in message.tags %}
+
+                <div class="hulo-notice hulo-notice-success"
+                     role="status">
+
+                    <div class="notice-heading">
+                        <span class="notice-icon">✓</span>
+                        <span>Đánh giá thành công!</span>
+                    </div>
+
+                    <p class="notice-content">
+                        {{ message }}
+                    </p>
+
+                </div>
+
+            {% elif 'warning' in message.tags %}
+
+                <div class="hulo-notice hulo-notice-warning"
+                     role="alert">
+
+                    <div class="notice-heading">
+                        <span class="notice-icon">⚠️</span>
+                        <span>
+                            Chúng tôi rất tiếc vì câu trả lời chưa hữu ích!
+                        </span>
+                    </div>
+
+                    <p class="notice-content">
+                        {{ message }}
+                    </p>
+
+                    <a href="#hulo-chat-form"
+                       class="notice-chat-link">
+                        🤖 Bạn vẫn cần hỗ trợ?
+                        Tiếp tục với HULO Assistant để được giải đáp
+                        chi tiết hơn nhé!
+                    </a>
+
+                </div>
+
+            {% elif 'error' in message.tags %}
+
+                <div class="hulo-notice hulo-notice-error"
+                     role="alert">
+                    {{ message }}
+                </div>
+
+            {% else %}
+
+                <div class="hulo-notice hulo-notice-info"
+                     role="status">
+                    {{ message }}
+                </div>
+
+            {% endif %}
+
+        {% endfor %}
+    {% endif %}
+
+
+    <!-- BON CHU DE HO TRO -->
+    <h2 class="hulo-title">
+        Các chủ đề hỗ trợ phổ biến
+    </h2>
+
+    <div class="hulo-topics">
+
+        {% for category in categories %}
+
+            <a
+                href="{% url 'support:home' %}?category={{ category.id }}"
+                class="hulo-topic
+                {% if selected_category == category.id|stringformat:'s' %}
+                    active
+                {% endif %}"
+            >
+
+                {% if category.ten_danh_muc == "Đơn hàng" %}
+                    📦
+                {% elif category.ten_danh_muc == "Giao hàng" %}
+                    🚚
+                {% elif category.ten_danh_muc == "Đổi trả" %}
+                    🔄
+                {% elif category.ten_danh_muc == "Thanh toán" %}
+                    💳
+                {% else %}
+                    ❓
+                {% endif %}
+
+                &nbsp;{{ category.ten_danh_muc }}
+
+            </a>
+
+        {% empty %}
+
+            <div class="hulo-empty">
+                Chưa có danh mục FAQ đang hiển thị.
+            </div>
+
+        {% endfor %}
+
     </div>
 
-    <div style="
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-    ">
 
-        <!-- LIÊN KẾT MODULE 2 -->
-        <div style="
-            background: white;
-            border: 1px solid #d9e6fa;
-            padding: 30px;
-            border-radius: 12px;
-        ">
-            <h2>FAQ / Chatbot</h2>
+    <!-- FAQ M1 BEN TRAI - CHATBOT M2 BEN PHAI -->
+    <div class="hulo-main">
 
-            <p>
-                Tra cứu câu trả lời tự động
-                và trò chuyện với Chatbot HULO.
-            </p>
 
-            <a href="{% url 'chatbot:home' %}">
-                Mở Chatbot →
-            </a>
-        </div>
+        <!-- FAQ M1 -->
+        <section class="hulo-panel">
 
-        <!-- LIÊN KẾT MODULE 3 -->
-        <div style="
-            background: white;
-            border: 1px solid #d9e6fa;
-            padding: 30px;
-            border-radius: 12px;
-        ">
-            <h2>Yêu cầu hỗ trợ</h2>
+            <div class="hulo-panel-title">
+                ❓ Câu hỏi thường gặp
+            </div>
 
-            <p>
-                Gửi yêu cầu và theo dõi
-                quá trình hỗ trợ từ HULO.
-            </p>
+            <div class="hulo-help-content">
 
-            <a href="{% url 'tickets:home' %}">
-                Đến trang Ticket →
-            </a>
-        </div>
+                <p>
+                    Chọn một câu hỏi để xem câu trả lời nhanh.
+                    Nếu cần hỗ trợ thêm, bạn có thể trò chuyện
+                    cùng HULO Assistant bên cạnh.
+                </p>
+
+
+                <!-- TIM KIEM FAQ -->
+                <form
+                    method="GET"
+                    action="{% url 'support:home' %}"
+                    class="hulo-search"
+                >
+
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ keyword }}"
+                        placeholder="Tìm kiếm câu hỏi..."
+                        aria-label="Tìm kiếm câu hỏi thường gặp"
+                    >
+
+                    {% if selected_category %}
+                        <input
+                            type="hidden"
+                            name="category"
+                            value="{{ selected_category }}"
+                        >
+                    {% endif %}
+
+                    <button type="submit">
+                        Tìm kiếm
+                    </button>
+
+                </form>
+
+
+                {% if keyword or selected_category %}
+
+                    <a
+                        href="{% url 'support:home' %}"
+                        class="hulo-reset"
+                    >
+                        Xóa bộ lọc
+                    </a>
+
+                {% endif %}
+
+
+                <!-- DANH SACH FAQ -->
+                <h3 class="hulo-small-title">
+                    Danh sách câu hỏi
+                </h3>
+
+                {% if not selected_category and not keyword %}
+
+                    <div class="hulo-empty">
+                        Vui lòng chọn một trong bốn chủ đề hỗ trợ
+                        phía trên để xem các câu hỏi thường gặp.
+                    </div>
+
+                {% else %}
+
+                    {% for faq in faqs %}
+
+                        <details
+                            class="hulo-faq-item"
+                            {% if selected_faq and selected_faq.id == faq.id %}
+                                open
+                            {% endif %}
+                        >
+
+                            <summary>
+                                {{ faq.cau_hoi }}
+                            </summary>
+
+                            <div class="hulo-faq-answer">
+
+                                <div>
+                                    {{ faq.cau_tra_loi|linebreaksbr }}
+                                </div>
+
+
+                                <!-- DANH GIA FAQ -->
+                                <div class="hulo-feedback">
+
+                                    <p>
+                                        Nội dung này có giải quyết được
+                                        vấn đề của bạn không?
+                                    </p>
+
+                                    <form
+                                        method="POST"
+                                        action="{% url 'support:faq_feedback' faq.id %}"
+                                        class="hulo-feedback-form"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <input
+                                            type="hidden"
+                                            name="category"
+                                            value="{{ selected_category }}"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="q"
+                                            value="{{ keyword }}"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            name="huu_ich"
+                                            value="true"
+                                            class="hulo-feedback-btn"
+                                        >
+                                            👍 Hữu ích
+                                        </button>
+
+                                        <button
+                                            type="submit"
+                                            name="huu_ich"
+                                            value="false"
+                                            class="hulo-feedback-btn"
+                                        >
+                                            👎 Không hữu ích
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </details>
+
+                    {% empty %}
+
+                        <div class="hulo-empty">
+
+                            <strong>
+                                Không tìm thấy câu hỏi phù hợp.
+                            </strong>
+
+                            <p>
+                                Bạn có thể thay đổi từ khóa
+                                hoặc chọn danh mục khác.
+                            </p>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- CHATBOT M2 - GIU NGUYEN CAU TRUC -->
+        <section class="hulo-panel">
+
+            <div class="hulo-chat-header">
+
+                <h2>🤖 HULO Assistant</h2>
+
+                <small>● Hỗ trợ tự động</small>
+
+            </div>
+
+
+            <!-- KHUNG TIN NHAN -->
+            <div
+                class="hulo-messages"
+                id="hulo-messages"
+                aria-live="polite"
+            >
+
+                <div class="hulo-message hulo-bot">
+                    Xin chào {{ request.user.username|default:"bạn" }}!
+                    Mình là HULO Assistant.
+                    Bạn cần hỗ trợ vấn đề gì hôm nay?
+                </div>
+
+
+                <!-- LICH SU CHATBOT -->
+                {% for msg in tin_nhan %}
+
+                    {% if msg.ben_gui == 'KHACH_HANG' %}
+
+                        <div class="hulo-message hulo-customer">
+                            {{ msg.noi_dung }}
+                        </div>
+
+                    {% else %}
+
+                        <div class="hulo-message hulo-bot">
+                            {{ msg.noi_dung }}
+                        </div>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- FORM GUI TIN NHAN -->
+            <form
+                id="hulo-chat-form"
+                class="hulo-chat-form"
+            >
+
+                {% csrf_token %}
+
+                <input
+                    type="text"
+                    id="hulo-input"
+                    class="hulo-chat-input"
+                    placeholder="Nhập câu hỏi của bạn..."
+                    maxlength="1000"
+                    autocomplete="off"
+                    required
+                >
+
+                <button
+                    type="submit"
+                    id="hulo-send"
+                    class="hulo-send"
+                >
+                    Gửi
+                </button>
+
+            </form>
+
+        </section>
+
+    </div>
+
+
+    <!-- CHUYEN NHAN VIEN HO TRO -->
+    <div class="hulo-bottom">
+
+        <p>
+            Thông tin trên đã giải quyết được vấn đề của bạn chưa?
+        </p>
+
+        <a
+            href="{% url 'chatbot:chuyen_ho_tro' %}"
+            class="hulo-support-btn"
+        >
+            Cần nhân viên hỗ trợ
+        </a>
 
     </div>
 
 </div>
+
+
+<!-- JAVASCRIPT CHATBOT M2 -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const chatForm = document.getElementById("hulo-chat-form");
+    const chatInput = document.getElementById("hulo-input");
+    const chatBox = document.getElementById("hulo-messages");
+    const sendButton = document.getElementById("hulo-send");
+
+    if (!chatForm || !chatInput || !chatBox || !sendButton) {
+        return;
+    }
+
+    const sendUrl = "{% url 'chatbot:send_message' %}";
+
+
+    function addMessage(content, sender) {
+
+        const message = document.createElement("div");
+
+        message.className = "hulo-message " +
+            (sender === "customer"
+                ? "hulo-customer"
+                : "hulo-bot");
+
+        message.textContent = content;
+
+        chatBox.appendChild(message);
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+
+    async function sendMessage(question) {
+
+        question = question.trim();
+
+        if (!question || sendButton.disabled) {
+            return;
+        }
+
+        sendButton.disabled = true;
+
+        try {
+
+            const response = await fetch(sendUrl, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": chatForm.querySelector(
+                        "[name=csrfmiddlewaretoken]"
+                    ).value
+                },
+
+                body: JSON.stringify({
+                    cau_hoi: question
+                })
+
+            });
+
+
+            const contentType =
+                response.headers.get("content-type") || "";
+
+            if (!contentType.includes("application/json")) {
+
+                throw new Error(
+                    "Phiên đăng nhập hoặc phản hồi máy chủ không hợp lệ."
+                );
+
+            }
+
+
+            const result = await response.json();
+
+            if (!response.ok) {
+
+                throw new Error(
+                    result.error ||
+                    result.message ||
+                    "Không gửi được câu hỏi."
+                );
+
+            }
+
+
+            addMessage(question, "customer");
+
+            addMessage(
+                result.cau_tra_loi ||
+                "Mình chưa có câu trả lời phù hợp.",
+                "bot"
+            );
+
+            chatInput.value = "";
+
+        } catch (error) {
+
+            addMessage(
+                "Không thể gửi tin nhắn: " + error.message,
+                "bot"
+            );
+
+        } finally {
+
+            sendButton.disabled = false;
+            chatInput.focus();
+
+        }
+
+    }
+
+
+    chatForm.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        sendMessage(chatInput.value);
+
+    });
+
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+
+    /* Bam nut tiep tuc voi HULO Assistant */
+    const noticeChatLink = document.querySelector(
+        ".notice-chat-link"
+    );
+
+    if (noticeChatLink) {
+
+        noticeChatLink.addEventListener("click", function () {
+
+            setTimeout(function () {
+                chatInput.focus();
+            }, 100);
+
+        });
+
+    }
+
+});
+</script>
 
 {% endblock %}
