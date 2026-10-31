@@ -2,7 +2,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 from accounts.models import Staff
@@ -65,13 +65,40 @@ def _kiem_tra_ticket_dang_cho_tham_dinh(ticket):
         )
 
 
+def _chon_nhan_vien_tham_dinh():
+    nhan_vien = (
+        Staff.objects
+        .filter(
+            vai_tro="ASSESSOR",
+            san_sang_nhan_viec=True,
+            ma_tai_khoan__is_active=True,
+        )
+        .annotate(
+            so_ho_so_dang_mo=Count(
+                "ho_so_tham_dinh",
+                filter=Q(
+                    ho_so_tham_dinh__trang_thai__in=[
+                        "CHO_TIEP_NHAN",
+                        "DANG_THAM_DINH",
+                        "CHO_BO_SUNG",
+                    ]
+                ),
+            )
+        )
+        .order_by("so_ho_so_dang_mo", "pk")
+        .first()
+    )
+
+    if nhan_vien is None:
+        raise ValidationError(
+            "Hiện không có nhân viên thẩm định sẵn sàng nhận hồ sơ."
+        )
+
+    return nhan_vien
+
+
 @transaction.atomic
-def tao_hoac_lay_ho_so(
-    *,
-    ticket,
-    nhan_vien_tham_dinh,
-    ma_don_hang=None,
-):
+def tao_hoac_lay_ho_so(*, ticket, ma_don_hang=None):
     ticket = Ticket.objects.select_for_update().get(pk=ticket.pk)
 
     if (
@@ -80,11 +107,6 @@ def tao_hoac_lay_ho_so(
     ):
         raise ValidationError(
             "Ticket phải đang xử lý và chờ kết quả thẩm định."
-        )
-
-    if nhan_vien_tham_dinh.vai_tro != "ASSESSOR":
-        raise ValidationError(
-            "Nhân viên được phân công phải thuộc bộ phận thẩm định."
         )
 
     if ma_don_hang is not None:
@@ -102,17 +124,10 @@ def tao_hoac_lay_ho_so(
     if ho_so is not None:
         cap_nhat_fields = []
 
-        if (
-                ho_so.ma_nhan_vien_tham_dinh_id
-                != nhan_vien_tham_dinh.pk
-        ):
-            if ho_so.trang_thai == "DANG_THAM_DINH":
-                raise ValidationError(
-                    "Không thể đổi người thẩm định khi hồ sơ "
-                    "đang được xử lý."
-                )
-
-            ho_so.ma_nhan_vien_tham_dinh = nhan_vien_tham_dinh
+        if ho_so.ma_nhan_vien_tham_dinh_id is None:
+            ho_so.ma_nhan_vien_tham_dinh = (
+                _chon_nhan_vien_tham_dinh()
+            )
             cap_nhat_fields.append("ma_nhan_vien_tham_dinh")
 
         if ma_don_hang is not None:
@@ -137,7 +152,7 @@ def tao_hoac_lay_ho_so(
 
     ho_so = DisputeCase(
         ma_ticket=ticket,
-        ma_nhan_vien_tham_dinh=nhan_vien_tham_dinh,
+        ma_nhan_vien_tham_dinh=_chon_nhan_vien_tham_dinh(),
         ma_don_hang=ma_don_hang,
     )
     ho_so.full_clean()
@@ -362,7 +377,8 @@ def lap_phuong_an(
         )
 
     if phuong_an_cu and phuong_an_cu.trang_thai not in {
-        "DE_XUAT", "TU_CHOI"
+        "DE_XUAT",
+        "TU_CHOI",
     }:
         raise ValidationError(
             "Chỉ được điều chỉnh phương án đang đề xuất "
