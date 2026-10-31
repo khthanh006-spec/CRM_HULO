@@ -6,7 +6,7 @@ from django.views.decorators.http import require_http_methods
 
 from accounts.permissions import role_required
 
-from .models import CompensationAction, OrderItem
+from .models import CompensationAction, Order, OrderItem
 from .plan_services import luu_phuong_an_theo_bpmn
 from .views import (
     _du_dieu_kien_lap_phuong_an,
@@ -19,6 +19,13 @@ class PhuongAnBPMNForm(forms.Form):
     loai_phuong_an = forms.ChoiceField(
         label="Loại phương án",
         choices=CompensationAction.LOAI_PHUONG_AN_MOI_CHOICES,
+    )
+
+    ma_don_hang = forms.ModelChoiceField(
+        label="Đơn hàng liên quan",
+        queryset=Order.objects.none(),
+        required=False,
+        empty_label="Chọn đơn hàng của khách hàng",
     )
 
     ma_chi_tiet_don = forms.ModelChoiceField(
@@ -76,9 +83,43 @@ class PhuongAnBPMNForm(forms.Form):
     def __init__(self, *args, ho_so, **kwargs):
         super().__init__(*args, **kwargs)
 
+        khach_hang_id = ho_so.ma_ticket.khach_hang_id
+
+        self.fields["ma_don_hang"].queryset = (
+            Order.objects
+            .filter(ma_khach_hang_id=khach_hang_id)
+            .order_by("pk")
+        )
+
+        self.fields["ma_don_hang"].required = (
+            ho_so.ma_don_hang_id is None
+        )
+
+        don_hang_id = ho_so.ma_don_hang_id
+
+        if don_hang_id:
+            self.fields["ma_don_hang"].initial = don_hang_id
+            self.fields["ma_don_hang"].disabled = True
+        elif self.is_bound:
+            ma_don_hang_gui_len = self.data.get(
+                self.add_prefix("ma_don_hang"),
+                "",
+            )
+
+            if str(ma_don_hang_gui_len).isdigit():
+                ma_don_hang_gui_len = int(ma_don_hang_gui_len)
+
+                if self.fields["ma_don_hang"].queryset.filter(
+                    pk=ma_don_hang_gui_len
+                ).exists():
+                    don_hang_id = ma_don_hang_gui_len
+
         self.fields["ma_chi_tiet_don"].queryset = (
             OrderItem.objects
-            .filter(ma_don_hang_id=ho_so.ma_don_hang_id)
+            .filter(
+                ma_don_hang_id=don_hang_id,
+                ma_don_hang__ma_khach_hang_id=khach_hang_id,
+            )
             .select_related("ma_don_hang", "ma_san_pham")
             .order_by("pk")
         )
@@ -136,7 +177,6 @@ def dispute_plan(request, pk):
             phuong_an_moi_nhat.loai_phuong_an,
         )
 
-        # Mã "Phương án khác" cũ cần chọn lại rõ loại.
         if loai == "PHUONG_AN_KHAC":
             loai = ""
 
@@ -144,7 +184,9 @@ def dispute_plan(request, pk):
             "loai_phuong_an": loai,
             "noi_dung": phuong_an_moi_nhat.noi_dung,
             "so_tien_hoan": phuong_an_moi_nhat.so_tien_hoan,
-            "ma_chi_tiet_don": phuong_an_moi_nhat.ma_chi_tiet_don_id,
+            "ma_chi_tiet_don": (
+                phuong_an_moi_nhat.ma_chi_tiet_don_id
+            ),
             "so_luong": phuong_an_moi_nhat.so_luong,
             "dia_chi_nhan": phuong_an_moi_nhat.dia_chi_nhan,
             "ly_do_tu_choi": phuong_an_moi_nhat.ly_do_tu_choi,
@@ -158,17 +200,27 @@ def dispute_plan(request, pk):
 
         if form.is_valid():
             du_lieu = form.cleaned_data.copy()
-            chi_tiet = du_lieu["ma_chi_tiet_don"]
-
-            du_lieu["ma_chi_tiet_don"] = (
-                chi_tiet.pk if chi_tiet else None
-            )
-
-            du_lieu["so_tien_hoan"] = (
-                du_lieu["so_tien_hoan"] or 0
-            )
+            don_hang = du_lieu.pop("ma_don_hang")
 
             try:
+                if ho_so.ma_don_hang_id is None:
+                    ho_so.ma_don_hang = don_hang
+                    ho_so.full_clean()
+                    ho_so.save(
+                        update_fields=[
+                            "ma_don_hang",
+                            "thoi_diem_cap_nhat",
+                        ]
+                    )
+
+                chi_tiet = du_lieu["ma_chi_tiet_don"]
+                du_lieu["ma_chi_tiet_don"] = (
+                    chi_tiet.pk if chi_tiet else None
+                )
+                du_lieu["so_tien_hoan"] = (
+                    du_lieu["so_tien_hoan"] or 0
+                )
+
                 phuong_an = luu_phuong_an_theo_bpmn(
                     user=request.user,
                     ma_ho_so=pk,

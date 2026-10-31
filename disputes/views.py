@@ -239,7 +239,6 @@ def dispute_detail(request, pk):
             and duoc_phep_theo_loai
         )
 
-    # M4_RECONSIDERATION_CONTEXT
     from .reconsideration_context import tao_context_xem_xet_lai
 
     context_xem_xet = tao_context_xem_xet_lai(
@@ -384,7 +383,6 @@ def dispute_conclusion(request, pk):
 @role_required("ASSESSOR")
 @require_http_methods(["GET", "POST"])
 def dispute_plan(request, pk):
-    # Import tại thời điểm gọi để tránh vòng lặp import.
     from .plan_views import dispute_plan as plan_view
 
     return plan_view(request, pk)

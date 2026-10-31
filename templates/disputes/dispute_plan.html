@@ -35,7 +35,11 @@
 
         <p class="m4-plan__muted">
             Hồ sơ #{{ ho_so.pk }} · {{ ticket.ma_ticket }}
-            · Đơn hàng {{ don_hang.so_don_hang }}
+            {% if don_hang %}
+                · Đơn hàng {{ don_hang.so_don_hang }}
+            {% else %}
+                · Chưa liên kết đơn hàng
+            {% endif %}
         </p>
 
         <div class="m4-plan__summary">
@@ -66,6 +70,18 @@
                 </div>
             {% endif %}
 
+            <div class="m4-plan__field">
+                <label for="{{ form.ma_don_hang.id_for_label }}">
+                    {{ form.ma_don_hang.label }}
+                </label>
+                {{ form.ma_don_hang }}
+                {{ form.ma_don_hang.errors }}
+                <small>
+                    Chọn đơn hàng thuộc khách hàng của Ticket.
+                    Sau khi liên kết, đơn hàng sẽ được giữ cho hồ sơ này.
+                </small>
+            </div>
+
             <fieldset class="m4-plan__choices">
                 <legend>Chọn hình thức xử lý</legend>
 
@@ -77,16 +93,18 @@
                                 name="loai_phuong_an"
                                 value="{{ value }}"
                                 required
-                                {% if form.loai_phuong_an.value == value %}checked{% endif %}
+                                {% if form.loai_phuong_an.value == value %}
+                                    checked
+                                {% endif %}
                             >
 
                             <span class="m4-plan__option-body">
                                 <span class="m4-plan__icon" aria-hidden="true">
-                                    {% if value == 'HOAN_TIEN' %}
+                                    {% if value == "HOAN_TIEN" %}
                                         💰
-                                    {% elif value == 'DOI_HANG' %}
+                                    {% elif value == "DOI_HANG" %}
                                         📦
-                                    {% elif value == 'GIAO_BO_SUNG' %}
+                                    {% elif value == "GIAO_BO_SUNG" %}
                                         🚚
                                     {% else %}
                                         ⛔
@@ -97,11 +115,11 @@
                                     <strong>{{ label }}</strong>
 
                                     <small>
-                                        {% if value == 'HOAN_TIEN' %}
+                                        {% if value == "HOAN_TIEN" %}
                                             Gửi quản lý xét duyệt số tiền đề xuất.
-                                        {% elif value == 'DOI_HANG' %}
+                                        {% elif value == "DOI_HANG" %}
                                             Đổi hoặc gửi sản phẩm thay thế.
-                                        {% elif value == 'GIAO_BO_SUNG' %}
+                                        {% elif value == "GIAO_BO_SUNG" %}
                                             Gửi bổ sung phần hàng còn thiếu.
                                         {% else %}
                                             Từ chối có căn cứ và lý do rõ ràng.
