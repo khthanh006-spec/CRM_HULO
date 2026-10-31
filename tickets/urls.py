@@ -1,6 +1,7 @@
 
 from django.urls import path
 from . import views
+from . import attachment_views
 
 # Namespace của Module 3 - Ticket Management & SLA
 app_name = 'tickets'
@@ -104,6 +105,24 @@ urlpatterns = [
         '<int:pk>/assign/',
         views.ticket_assign,
         name='assign'
+    ),
+
+    # ==================================================
+    # UC-3.x - XEM ANH BANG CHUNG
+    # ==================================================
+    path(
+        "attachments/<int:pk>/view/",
+        attachment_views.ticket_attachment_view,
+        name="attachment_view"
+    ),
+
+    # ==================================================
+    # UC-3.x - TAI ANH BANG CHUNG
+    # ==================================================
+    path(
+        "attachments/<int:pk>/download/",
+        attachment_views.ticket_attachment_download,
+        name="attachment_download"
     ),
 
 

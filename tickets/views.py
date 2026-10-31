@@ -187,6 +187,17 @@ def ticket_detail(request, pk):
         'nguoi_gui'
     ).order_by('thoi_diem_gui', 'pk')
 
+    # ==========================================
+    # DANH SÁCH BẰNG CHỨNG ĐÍNH KÈM
+    # ==========================================
+
+    danh_sach_bang_chung = (
+        ticket.attachments.all().order_by(
+            'thoi_diem_tai_len',
+            'pk'
+        )
+    )
+
     return render(
         request,
         'tickets/ticket_detail.html',
@@ -198,6 +209,7 @@ def ticket_detail(request, pk):
             'resolve_form': TicketResolveForm(),
             'user_role': user_role,
             'staff_options': staff_options,
+            'danh_sach_bang_chung': danh_sach_bang_chung,
         }
     )
 

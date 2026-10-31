@@ -304,3 +304,20 @@ class TicketAttachment(models.Model):
             f"{self.ticket} - "
             f"{self.ten_tep_goc or self.tep_dinh_kem.name}"
         )
+
+    # Mã nhận diện ảnh nguồn từ Module 2.
+    # Để trống với file không được gửi từ M2.
+    ma_anh_nguon = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ticket", "ma_anh_nguon"],
+                name="unique_ticket_attachment_source",
+            )
+        ]
