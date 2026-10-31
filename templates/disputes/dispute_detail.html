@@ -361,6 +361,14 @@
 
             <section class="m4-detail__card">
                 <h2>⚖️ Kết luận thẩm định</h2>
+
+                {% if ho_so.ket_qua_tham_dinh %}
+                    <p>
+                        <strong>Kết quả:</strong>
+                        {{ ho_so.get_ket_qua_tham_dinh_display }}
+                    </p>
+                {% endif %}
+
                 {% if ho_so.ket_luan %}
                     <div class="m4-detail__text">
                         {{ ho_so.ket_luan|linebreaksbr }}

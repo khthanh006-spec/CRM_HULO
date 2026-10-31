@@ -208,7 +208,13 @@ def tiep_nhan_ho_so(*, user, ma_ho_so):
 
 
 @transaction.atomic
-def ghi_nhan_ket_luan(*, user, ma_ho_so, ket_luan):
+def ghi_nhan_ket_luan(
+    *,
+    user,
+    ma_ho_so,
+    ket_qua_tham_dinh,
+    ket_luan,
+):
     nhan_vien, ticket, ho_so = _lay_ho_so_de_xu_ly(
         user=user,
         ma_ho_so=ma_ho_so,
@@ -221,12 +227,26 @@ def ghi_nhan_ket_luan(*, user, ma_ho_so, ket_luan):
 
     _kiem_tra_ticket_dang_cho_tham_dinh(ticket)
 
+    cac_ket_qua_hop_le = dict(
+        DisputeCase.KET_QUA_THAM_DINH_CHOICES
+    )
+
+    if (
+        not isinstance(ket_qua_tham_dinh, str)
+        or ket_qua_tham_dinh not in cac_ket_qua_hop_le
+    ):
+        raise ValidationError(
+            "Bạn cần chọn Có cơ sở hoặc Không có cơ sở."
+        )
+
     if not isinstance(ket_luan, str) or not ket_luan.strip():
-        raise ValidationError("Bạn cần nhập kết luận thẩm định.")
+        raise ValidationError(
+            "Bạn cần nhập căn cứ thẩm định."
+        )
 
     ket_luan = ket_luan.strip()
 
-    if ho_so.ket_luan:
+    if ho_so.ket_luan or ho_so.ket_qua_tham_dinh:
         raise ValidationError(
             "Hồ sơ đã có kết luận. Không được ghi đè kết luận cũ."
         )
@@ -236,10 +256,12 @@ def ghi_nhan_ket_luan(*, user, ma_ho_so, ket_luan):
         ma_ticket_id=ticket.pk,
         ma_nhan_vien_tham_dinh=nhan_vien,
         trang_thai="DANG_THAM_DINH",
+        ket_qua_tham_dinh="",
         ket_luan="",
         ma_ticket__trang_thai="IN_PROGRESS",
         ma_ticket__trang_thai_tham_dinh="WAITING",
     ).update(
+        ket_qua_tham_dinh=ket_qua_tham_dinh,
         ket_luan=ket_luan,
         trang_thai="DA_KET_LUAN",
         thoi_diem_cap_nhat=timezone.now(),
@@ -250,13 +272,17 @@ def ghi_nhan_ket_luan(*, user, ma_ho_so, ket_luan):
             "Hồ sơ đã thay đổi. Vui lòng tải lại trang."
         )
 
+    ket_qua_hien_thi = cac_ket_qua_hop_le[ket_qua_tham_dinh]
+
     TicketLog.objects.create(
         ticket=ticket,
         nguoi_thuc_hien=user,
         hanh_dong="KET_LUAN_THAM_DINH",
         noi_dung=(
             f"Nhân viên {nhan_vien.ho_ten} ghi kết luận "
-            f"hồ sơ #{ho_so.pk}:\n{ket_luan}"
+            f"hồ sơ #{ho_so.pk}.\n"
+            f"Kết quả: {ket_qua_hien_thi}.\n"
+            f"Căn cứ: {ket_luan}"
         ),
     )
 

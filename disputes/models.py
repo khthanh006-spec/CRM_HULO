@@ -120,6 +120,11 @@ class DisputeCase(models.Model):
         ("DA_KET_LUAN", "Đã kết luận"),
     ]
 
+    KET_QUA_THAM_DINH_CHOICES = [
+        ("CO_CO_SO", "Có cơ sở"),
+        ("KHONG_CO_CO_SO", "Không có cơ sở"),
+    ]
+
     ma_ho_so = models.AutoField(primary_key=True)
 
     ma_ticket = models.OneToOneField(
@@ -153,6 +158,14 @@ class DisputeCase(models.Model):
         choices=TRANG_THAI_CHOICES,
         default="CHO_TIEP_NHAN",
         verbose_name="Trạng thái hồ sơ",
+    )
+
+    ket_qua_tham_dinh = models.CharField(
+        max_length=20,
+        choices=KET_QUA_THAM_DINH_CHOICES,
+        blank=True,
+        default="",
+        verbose_name="Kết quả thẩm định",
     )
 
     ket_luan = models.TextField(

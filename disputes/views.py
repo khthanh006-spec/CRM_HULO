@@ -151,6 +151,7 @@ def dispute_detail(request, pk):
         la_nguoi_duoc_phan_cong
         and ho_so.trang_thai == "DANG_THAM_DINH"
         and not ho_so.ket_luan
+        and not ho_so.ket_qua_tham_dinh
         and ticket_dang_cho
     )
 
@@ -339,6 +340,7 @@ def dispute_conclusion(request, pk):
     if (
         ho_so.trang_thai != "DANG_THAM_DINH"
         or ho_so.ket_luan
+        or ho_so.ket_qua_tham_dinh
         or not _ticket_dang_cho_tham_dinh(ticket)
     ):
         messages.error(
@@ -347,16 +349,22 @@ def dispute_conclusion(request, pk):
         )
         return redirect("disputes:detail", pk=pk)
 
+    ket_qua_tham_dinh = ""
     ket_luan = ""
     loi = ""
 
     if request.method == "POST":
+        ket_qua_tham_dinh = request.POST.get(
+            "ket_qua_tham_dinh",
+            "",
+        )
         ket_luan = request.POST.get("ket_luan", "")
 
         try:
             ghi_nhan_ket_luan(
                 user=request.user,
                 ma_ho_so=pk,
+                ket_qua_tham_dinh=ket_qua_tham_dinh,
                 ket_luan=ket_luan,
             )
         except ValidationError as exc:
@@ -374,6 +382,10 @@ def dispute_conclusion(request, pk):
         {
             "ho_so": ho_so,
             "ticket": ticket,
+            "ket_qua_tham_dinh": ket_qua_tham_dinh,
+            "ket_qua_tham_dinh_choices": (
+                DisputeCase.KET_QUA_THAM_DINH_CHOICES
+            ),
             "ket_luan": ket_luan,
             "loi": loi,
         },

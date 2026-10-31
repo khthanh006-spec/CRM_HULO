@@ -23,9 +23,11 @@ def du_dieu_kien_lap_phuong_an(user, ho_so, phuong_an):
         or not (ho_so.ket_luan or "").strip()
         or ticket.trang_thai != "IN_PROGRESS"
         or ticket.trang_thai_tham_dinh != "WAITING"
-        or not ho_so.ma_don_hang_id
-        or ho_so.ma_don_hang.ma_khach_hang_id
-        != ticket.khach_hang_id
+        or (
+            ho_so.ma_don_hang_id
+            and ho_so.ma_don_hang.ma_khach_hang_id
+            != ticket.khach_hang_id
+        )
     ):
         return False
 

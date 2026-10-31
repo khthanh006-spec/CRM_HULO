@@ -38,15 +38,14 @@
 
         <div class="m4-conclusion__summary">
             <strong>{{ ticket.tieu_de }}</strong>
-
             <p>{{ ticket.noi_dung|linebreaksbr }}</p>
         </div>
 
         {% if loi %}
-        <p class="m4-conclusion__error" role="alert">
-            <span aria-hidden="true">⚠</span>
-            {{ loi }}
-        </p>
+            <p class="m4-conclusion__error" role="alert">
+                <span aria-hidden="true">⚠</span>
+                {{ loi }}
+            </p>
         {% endif %}
 
         <form
@@ -55,14 +54,36 @@
         >
             {% csrf_token %}
 
+            <fieldset class="m4-conclusion__result">
+                <legend>
+                    Kết quả thẩm định
+                    <span class="m4-conclusion__required">*</span>
+                </legend>
+
+                {% for value, label in ket_qua_tham_dinh_choices %}
+                    <label>
+                        <input
+                            type="radio"
+                            name="ket_qua_tham_dinh"
+                            value="{{ value }}"
+                            required
+                            {% if ket_qua_tham_dinh == value %}
+                                checked
+                            {% endif %}
+                        >
+                        {{ label }}
+                    </label>
+                {% endfor %}
+            </fieldset>
+
             <label for="id_ket_luan">
-                Kết luận thẩm định
+                Căn cứ thẩm định
                 <span class="m4-conclusion__required">*</span>
             </label>
 
             <p id="ket-luan-help" class="m4-conclusion__help">
-                Nêu kết quả kiểm tra, căn cứ và đánh giá khiếu nại
-                có cơ sở hay không.
+                Ghi rõ sự cố đã xác minh, thông tin đối chiếu và lý do
+                dẫn đến kết quả thẩm định.
             </p>
 
             <textarea
@@ -71,13 +92,12 @@
                 rows="8"
                 required
                 aria-describedby="ket-luan-help"
-                placeholder="Nhập kết quả kiểm tra và căn cứ kết luận..."
+                placeholder="Nhập căn cứ và giải thích kết quả thẩm định..."
             >{{ ket_luan }}</textarea>
 
             <p class="m4-conclusion__notice">
-                Kết luận sẽ được lưu vào lịch sử xử lý.
-                Hồ sơ chuyển sang Đã kết luận; Ticket tiếp tục
-                được xử lý ở các bước tiếp theo.
+                Kết quả và căn cứ sẽ được lưu vào hồ sơ cùng lịch sử xử lý.
+                Sau khi lưu, kết luận không thể ghi đè.
             </p>
 
             <div class="m4-conclusion__actions">

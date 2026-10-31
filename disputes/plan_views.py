@@ -114,12 +114,23 @@ class PhuongAnBPMNForm(forms.Form):
                 ).exists():
                     don_hang_id = ma_don_hang_gui_len
 
-        self.fields["ma_chi_tiet_don"].queryset = (
-            OrderItem.objects
-            .filter(
+        if don_hang_id:
+            chi_tiet_queryset = OrderItem.objects.filter(
                 ma_don_hang_id=don_hang_id,
                 ma_don_hang__ma_khach_hang_id=khach_hang_id,
             )
+        else:
+            # Hồ sơ chưa liên kết đơn hàng: hiển thị các sản phẩm
+            # của khách hàng để có thể chọn trong biểu mẫu.
+            self.fields["ma_chi_tiet_don"].help_text = (
+                "Chọn sản phẩm thuộc đơn hàng đã chọn ở trên."
+            )
+            chi_tiet_queryset = OrderItem.objects.filter(
+                ma_don_hang__ma_khach_hang_id=khach_hang_id,
+            )
+
+        self.fields["ma_chi_tiet_don"].queryset = (
+            chi_tiet_queryset
             .select_related("ma_don_hang", "ma_san_pham")
             .order_by("pk")
         )
