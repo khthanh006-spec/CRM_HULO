@@ -1,0 +1,339 @@
+.m4-plan,
+.m4-plan * {
+    box-sizing: border-box;
+}
+
+.m4-plan {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+    color: #243247;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.m4-plan__back {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.m4-plan__back:hover {
+    text-decoration: underline;
+}
+
+.m4-plan__card {
+    margin-bottom: 20px;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgb(15 23 42 / 4%);
+}
+
+.m4-plan__eyebrow {
+    margin: 0 0 6px;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.m4-plan h1 {
+    margin: 0 0 8px;
+    font-size: 25px;
+}
+
+.m4-plan h2 {
+    margin: 0 0 16px;
+    font-size: 19px;
+}
+
+.m4-plan__muted {
+    color: #64748b;
+}
+
+.m4-plan__summary {
+    margin: 20px 0;
+    padding: 16px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    overflow-wrap: anywhere;
+}
+
+.m4-plan__summary > strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #1e40af;
+}
+
+/* Bốn ô chọn phương án */
+.m4-plan__choices {
+    min-width: 0;
+    margin: 0 0 22px;
+    padding: 0;
+    border: 0;
+}
+
+.m4-plan__choices legend {
+    margin-bottom: 12px;
+    padding: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #173c70;
+}
+
+.m4-plan__options {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.m4-plan__option {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+/* Ẩn hình radio, vẫn dùng được bằng bàn phím */
+.m4-plan__option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.m4-plan__option-body {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+    min-height: 100px;
+    padding: 14px 12px;
+    background: #fff;
+    border: 1px solid #dbe7f7;
+    border-radius: 10px;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.m4-plan__option:hover .m4-plan__option-body {
+    border-color: #93c5fd;
+    background: #f8fbff;
+}
+
+.m4-plan__option input:checked + .m4-plan__option-body {
+    background: #edf5ff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.m4-plan__option input:focus-visible + .m4-plan__option-body {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+.m4-plan__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    color: #2563eb;
+    background: #e5f0ff;
+    border-radius: 50%;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.m4-plan__option-text {
+    min-width: 0;
+}
+
+.m4-plan__option-text strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #173c70;
+    font-size: 13px;
+}
+
+.m4-plan__option-text small {
+    display: block;
+    color: #71829c;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.m4-plan__check {
+    position: absolute;
+    top: 4px;
+    right: 7px;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0;
+}
+
+.m4-plan__option input:checked + .m4-plan__option-body .m4-plan__check {
+    opacity: 1;
+}
+
+/* Các trường nhập */
+.m4-plan__field {
+    margin-bottom: 18px;
+}
+
+.m4-plan__field label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: 600;
+}
+
+.m4-plan__field input,
+.m4-plan__field select,
+.m4-plan__field textarea {
+    width: 100%;
+    padding: 11px 12px;
+    color: #243247;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font: inherit;
+}
+
+.m4-plan__field textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.m4-plan__field input:focus,
+.m4-plan__field select:focus,
+.m4-plan__field textarea:focus {
+    border-color: #2563eb;
+    outline: 3px solid #dbeafe;
+}
+
+.m4-plan__field small {
+    display: block;
+    margin-top: 6px;
+    color: #64748b;
+}
+
+.m4-plan__notice {
+    padding: 12px 14px;
+    color: #854d0e;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+}
+
+.m4-plan__error {
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    color: #991b1b;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+}
+
+.m4-plan .errorlist {
+    margin: 6px 0;
+    padding-left: 20px;
+    color: #b91c1c;
+    font-size: 13px;
+}
+
+.m4-plan__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.m4-plan__submit,
+.m4-plan__cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 18px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.m4-plan__submit {
+    color: #fff;
+    background: #2563eb;
+}
+
+.m4-plan__submit:hover {
+    background: #1d4ed8;
+}
+
+.m4-plan__cancel {
+    color: #475569;
+    background: #fff;
+    border-color: #cbd5e1;
+}
+
+.m4-plan__version {
+    padding: 16px 0;
+    border-top: 1px solid #e2e8f0;
+    overflow-wrap: anywhere;
+}
+
+.m4-plan__version-heading {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.m4-plan__version-heading span {
+    padding: 3px 10px;
+    color: #1e40af;
+    background: #eff6ff;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    .m4-plan__options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .m4-plan {
+        padding: 12px;
+    }
+
+    .m4-plan__card {
+        padding: 16px;
+    }
+
+    .m4-plan h1 {
+        font-size: 21px;
+    }
+
+    .m4-plan__actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 420px) {
+    .m4-plan__options {
+        grid-template-columns: 1fr;
+    }
+
+    .m4-plan__option-body {
+        min-height: 80px;
+    }
+}
