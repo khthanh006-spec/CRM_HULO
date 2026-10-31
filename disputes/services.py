@@ -100,23 +100,35 @@ def tao_hoac_lay_ho_so(
     )
 
     if ho_so is not None:
-        if (
-            ho_so.ma_nhan_vien_tham_dinh_id
-            != nhan_vien_tham_dinh.pk
-        ):
-            raise ValidationError(
-                "Ticket đã có hồ sơ được phân công cho nhân viên khác."
-            )
+        cap_nhat_fields = []
 
         if (
-            ma_don_hang is not None
-            and ho_so.ma_don_hang_id is None
+                ho_so.ma_nhan_vien_tham_dinh_id
+                != nhan_vien_tham_dinh.pk
         ):
-            ho_so.ma_don_hang = ma_don_hang
+            if ho_so.trang_thai == "DANG_THAM_DINH":
+                raise ValidationError(
+                    "Không thể đổi người thẩm định khi hồ sơ "
+                    "đang được xử lý."
+                )
+
+            ho_so.ma_nhan_vien_tham_dinh = nhan_vien_tham_dinh
+            cap_nhat_fields.append("ma_nhan_vien_tham_dinh")
+
+        if ma_don_hang is not None:
+            if ho_so.ma_don_hang_id is None:
+                ho_so.ma_don_hang = ma_don_hang
+                cap_nhat_fields.append("ma_don_hang")
+            elif ho_so.ma_don_hang_id != ma_don_hang.pk:
+                raise ValidationError(
+                    "Hồ sơ đã được liên kết với đơn hàng khác."
+                )
+
+        if cap_nhat_fields:
             ho_so.full_clean()
             ho_so.save(
                 update_fields=[
-                    "ma_don_hang",
+                    *cap_nhat_fields,
                     "thoi_diem_cap_nhat",
                 ]
             )
