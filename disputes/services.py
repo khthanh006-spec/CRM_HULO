@@ -66,6 +66,75 @@ def _kiem_tra_ticket_dang_cho_tham_dinh(ticket):
 
 
 @transaction.atomic
+def tao_hoac_lay_ho_so(
+    *,
+    ticket,
+    nhan_vien_tham_dinh,
+    ma_don_hang=None,
+):
+    ticket = Ticket.objects.select_for_update().get(pk=ticket.pk)
+
+    if (
+        ticket.trang_thai != "IN_PROGRESS"
+        or ticket.trang_thai_tham_dinh != "WAITING"
+    ):
+        raise ValidationError(
+            "Ticket phải đang xử lý và chờ kết quả thẩm định."
+        )
+
+    if nhan_vien_tham_dinh.vai_tro != "ASSESSOR":
+        raise ValidationError(
+            "Nhân viên được phân công phải thuộc bộ phận thẩm định."
+        )
+
+    if ma_don_hang is not None:
+        if ma_don_hang.ma_khach_hang_id != ticket.khach_hang_id:
+            raise ValidationError(
+                "Đơn hàng không thuộc khách hàng của Ticket."
+            )
+
+    ho_so = (
+        DisputeCase.objects.select_for_update()
+        .filter(ma_ticket=ticket)
+        .first()
+    )
+
+    if ho_so is not None:
+        if (
+            ho_so.ma_nhan_vien_tham_dinh_id
+            != nhan_vien_tham_dinh.pk
+        ):
+            raise ValidationError(
+                "Ticket đã có hồ sơ được phân công cho nhân viên khác."
+            )
+
+        if (
+            ma_don_hang is not None
+            and ho_so.ma_don_hang_id is None
+        ):
+            ho_so.ma_don_hang = ma_don_hang
+            ho_so.full_clean()
+            ho_so.save(
+                update_fields=[
+                    "ma_don_hang",
+                    "thoi_diem_cap_nhat",
+                ]
+            )
+
+        return ho_so
+
+    ho_so = DisputeCase(
+        ma_ticket=ticket,
+        ma_nhan_vien_tham_dinh=nhan_vien_tham_dinh,
+        ma_don_hang=ma_don_hang,
+    )
+    ho_so.full_clean()
+    ho_so.save()
+
+    return ho_so
+
+
+@transaction.atomic
 def tiep_nhan_ho_so(*, user, ma_ho_so):
     nhan_vien, ticket, ho_so = _lay_ho_so_de_xu_ly(
         user=user,
