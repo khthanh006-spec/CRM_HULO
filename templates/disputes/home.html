@@ -1,29 +1,172 @@
+{% extends "base.html" %}
+{% load static %}
 
-{% extends 'base.html' %}
+{% block title %}Hồ sơ thẩm định | CRM HULO{% endblock %}
 
-{% block title %}
-Xử lý khiếu nại - CRM HULO
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'disputes/css/dispute_list.css' %}"
+>
 {% endblock %}
 
 {% block content %}
+<div class="m4-list">
 
-<div class="content-container">
+    <!-- Phần giới thiệu của trang -->
+    <section class="m4-list__hero">
+        <div>
+            <p class="m4-list__eyebrow">PHỐI HỢP CHUYÊN MÔN</p>
+            <h1>Hồ sơ thẩm định khiếu nại</h1>
+            <p class="m4-list__intro">
+                Tra cứu và theo dõi các hồ sơ cần kiểm tra, thẩm định.
+            </p>
+        </div>
 
-    <h1>Phối hợp xử lý khiếu nại - CRM HULO</h1>
+        <span class="m4-list__hero-label">
+            Thẩm định &amp; bồi hoàn
+        </span>
+    </section>
 
-    <p>
-        Chào mừng bạn đến với Module 4:
-        Phối hợp xử lý chuyên môn.
-    </p>
+    <!-- Bộ lọc -->
+    <section class="m4-list__card">
+        <div class="m4-list__section-heading">
+            <h2>Tra cứu hồ sơ</h2>
+            <p>Tìm theo Ticket, tiêu đề hoặc tên khách hàng.</p>
+        </div>
 
-    <p>
-        Đây là trang khởi đầu của Module 4.
-        Các chức năng tiếp nhận yêu cầu phối hợp,
-        thẩm định, đề xuất phương án,
-        phê duyệt và cập nhật kết quả xử lý
-        sẽ được xây dựng tại đây.
-    </p>
+        <form method="get" class="m4-list__filters">
+            <div class="m4-list__field m4-list__field--search">
+                <label for="q">Từ khóa</label>
+                <input
+                    type="search"
+                    id="q"
+                    name="q"
+                    value="{{ tu_khoa }}"
+                    placeholder="Nhập mã Ticket, tiêu đề, tên khách hàng..."
+                >
+            </div>
 
+            <div class="m4-list__field">
+                <label for="trang_thai">Trạng thái hồ sơ</label>
+                <select id="trang_thai" name="trang_thai">
+                    <option value="">Tất cả trạng thái</option>
+
+                    {% for gia_tri, nhan in trang_thai_choices %}
+                    <option
+                        value="{{ gia_tri }}"
+                        {% if trang_thai == gia_tri %}selected{% endif %}
+                    >
+                        {{ nhan }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="m4-list__actions">
+                <button type="submit" class="m4-list__button">
+                    Tìm kiếm
+                </button>
+
+                <a
+                    href="{% url 'disputes:home' %}"
+                    class="m4-list__button m4-list__button--secondary"
+                >
+                    Đặt lại
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <!-- Danh sách hồ sơ -->
+    <section class="m4-list__card m4-list__results">
+        <div class="m4-list__results-heading">
+            <div>
+                <h2>Danh sách hồ sơ</h2>
+                <p>Các hồ sơ trong phạm vi được phép xem.</p>
+            </div>
+
+            <!-- Số kết quả sau khi áp dụng bộ lọc -->
+            <span class="m4-list__count">
+                {{ ho_so_list|length }} hồ sơ
+            </span>
+        </div>
+
+        <div
+            class="m4-list__table-wrap"
+            role="region"
+            aria-label="Danh sách hồ sơ thẩm định"
+            tabindex="0"
+        >
+            <table class="m4-list__table">
+                <thead>
+                    <tr>
+                        <th scope="col">Hồ sơ / Ticket</th>
+                        <th scope="col">Nội dung khiếu nại</th>
+                        <th scope="col">Khách hàng</th>
+                        <th scope="col">Nhân viên thẩm định</th>
+                        <th scope="col">Trạng thái hồ sơ</th>
+                        <th scope="col">Ngày tạo</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for ho_so in ho_so_list %}
+                    <tr>
+                        <td>
+                            <a
+    href="{% url 'disputes:detail' ho_so.pk %}"
+    class="m4-list__primary">
+                                Hồ sơ #{{ ho_so.pk }}
+                            </a>
+                            <span class="m4-list__ticket">
+                                {{ ho_so.ma_ticket }}
+                            </span>
+                        </td>
+
+                        <td class="m4-list__subject">
+                            {{ ho_so.ma_ticket.tieu_de }}
+                        </td>
+
+                        <td>
+                            {{ ho_so.ma_ticket.khach_hang.ho_ten }}
+                        </td>
+
+                        <td>
+                            {{ ho_so.ma_nhan_vien_tham_dinh.ho_ten|default:"Chưa phân công" }}
+                        </td>
+
+                        <td>
+                            <span class="m4-list__status m4-list__status--{{ ho_so.trang_thai|lower }}">
+                                <span aria-hidden="true">●</span>
+                                {{ ho_so.get_trang_thai_display }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="m4-list__date">
+                                {{ ho_so.thoi_diem_tao|date:"d/m/Y" }}
+                            </span>
+                            <span class="m4-list__muted">
+                                {{ ho_so.thoi_diem_tao|date:"H:i" }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="m4-list__empty">
+                                <strong>Chưa có hồ sơ phù hợp</strong>
+                                <p>
+                                    Thử thay đổi từ khóa hoặc bộ lọc trạng thái.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 </div>
-
 {% endblock %}
