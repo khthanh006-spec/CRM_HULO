@@ -925,9 +925,7 @@ def ticket_assign(request, pk):
 @login_required(login_url='login')
 @role_required('CSKH')
 @require_POST
-
 def ticket_request_assessment(request, pk):
-
     staff = getattr(request.user, 'staff_profile', None)
 
     if staff is None or staff.vai_tro != 'CSKH':
@@ -945,7 +943,6 @@ def ticket_request_assessment(request, pk):
         return redirect('tickets:detail', pk=pk)
 
     with transaction.atomic():
-
         ticket = get_object_or_404(
             Ticket.objects.select_for_update(),
             pk=pk
@@ -963,7 +960,6 @@ def ticket_request_assessment(request, pk):
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-        # Ngăn gửi trùng khi đang chờ thẩm định
         if ticket.trang_thai_tham_dinh == 'WAITING':
             messages.warning(
                 request,
@@ -971,8 +967,6 @@ def ticket_request_assessment(request, pk):
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-        # Đã có kết quả: không tạo yêu cầu mới tự động.
-        # Khi REOPENED, hồ sơ M4 cũ phải được tái sử dụng.
         if ticket.trang_thai_tham_dinh == 'COMPLETED':
             messages.warning(
                 request,
@@ -982,11 +976,8 @@ def ticket_request_assessment(request, pk):
             return redirect('tickets:detail', pk=ticket.pk)
 
         now = timezone.now()
-
-        # Cập nhật trạng thái theo dõi thẩm định trong M3
         ticket.trang_thai_tham_dinh = 'WAITING'
         ticket.thoi_diem_yeu_cau_tham_dinh = now
-
         ticket.save(
             update_fields=[
                 'trang_thai_tham_dinh',
@@ -995,7 +986,12 @@ def ticket_request_assessment(request, pk):
             ]
         )
 
-        # Lưu lịch sử yêu cầu thẩm định
+        # Nối M3 với M4: tạo hồ sơ lần đầu hoặc dùng lại hồ sơ
+        # đã có cho chính Ticket này.
+        from disputes.services import tao_hoac_lay_ho_so
+
+        tao_hoac_lay_ho_so(ticket=ticket)
+
         TicketLog.objects.create(
             ticket=ticket,
             nguoi_thuc_hien=request.user,
@@ -1008,9 +1004,8 @@ def ticket_request_assessment(request, pk):
 
     messages.success(
         request,
-        "Đã ghi nhận yêu cầu thẩm định. "
-        "Ticket đang chờ kết quả từ bộ phận chuyên môn."
+        "Đã ghi nhận yêu cầu thẩm định và tạo hoặc cập nhật "
+        "hồ sơ thẩm định."
     )
 
     return redirect('tickets:detail', pk=ticket.pk)
-
