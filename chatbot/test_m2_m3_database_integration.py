@@ -1,9 +1,15 @@
 
 """
-Kiem thu tich hop M2 -> M3 bang database test va JPEG that.
+Kiem thu tich hop Module 2 va Module 3.
 
-Khong su dung database hoac anh cua khach hang that.
-Khong mock service tao Ticket hay luu TicketAttachment.
+Kiem tra:
+- M2 tao yeu cau va chuyen anh sang M3.
+- M3 tao Ticket, gan Queue, SLA va Smart Routing.
+- Hai anh JPEG duoc luu thanh cong sau commit.
+- Gui lai cung yeu cau khong tao Ticket hoac anh trung.
+
+Dung TransactionTestCase vi attachment service
+ghi file thong qua transaction.on_commit().
 """
 
 from io import BytesIO
@@ -11,13 +17,14 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from uuid import uuid4
 
-from PIL import Image
-
 from django.contrib.auth import get_user_model
-from django.test import TestCase, override_settings
+from django.test import TransactionTestCase, override_settings
+
+from PIL import Image
 
 from accounts.models import Staff
 from customers.models import Customer
+
 from tickets.models import (
     Ticket,
     TicketAttachment,
@@ -32,7 +39,7 @@ from chatbot.attachment_integration import (
 )
 
 
-class M2M3DatabaseIntegrationTest(TestCase):
+class M2M3DatabaseIntegrationTest(TransactionTestCase):
 
     def setUp(self):
         # 1. Tao kho file rieng cho bai test.
@@ -236,6 +243,11 @@ class M2M3DatabaseIntegrationTest(TestCase):
 
         # Xac nhan file JPEG da luu trong kho M3.
         for item in attachments_1:
+            self.assertTrue(
+                item.tep_dinh_kem.name,
+                "Attachment chua co duong dan file.",
+            )
+
             self.assertTrue(
                 item.tep_dinh_kem.storage.exists(
                     item.tep_dinh_kem.name

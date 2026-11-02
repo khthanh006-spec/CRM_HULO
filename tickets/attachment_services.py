@@ -17,7 +17,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from django.core.exceptions import ValidationError
-from django.core.files.base import File
+from django.core.files.base import ContentFile
 from django.db import transaction
 
 from PIL import Image, UnidentifiedImageError
@@ -236,8 +236,13 @@ def luu_anh_bang_chung_ticket(
 
             if anh_da_co is not None:
 
-                if not anh_da_co.tep_dinh_kem.storage.exists(
-                    anh_da_co.tep_dinh_kem.name
+                # Khi dang trong transaction ngoai, file co the
+                # dang cho on_commit() ghi xuong o dia.
+                if (
+                    not transaction.get_connection().in_atomic_block
+                    and not anh_da_co.tep_dinh_kem.storage.exists(
+                        anh_da_co.tep_dinh_kem.name
+                    )
                 ):
                     raise ValidationError(
                         "Anh nguon da co ban ghi "
@@ -270,9 +275,14 @@ def luu_anh_bang_chung_ticket(
             )
 
         # ==================================================
-        # 9. LUU FILE VA DATABASE
+        # 9. TAO BAN GHI TRONG TRANSACTION,
+        #    GHI FILE SAU COMMIT
         # ==================================================
 
+        # Doc du lieu truoc khi M2 dong file nguon.
+        # Moi anh toi da 10 MB.
+        tep.seek(0)
+        noi_dung_anh = tep.read()
         tep.seek(0)
 
         bang_chung = TicketAttachment(
@@ -282,23 +292,45 @@ def luu_anh_bang_chung_ticket(
             ma_anh_nguon=ma_bam_nguon,
         )
 
-        try:
-            bang_chung.tep_dinh_kem.save(
-                ten_luu,
-                File(tep),
-                save=False,
-            )
+        # Tao ban ghi truoc de giu unique constraint
+        # va gioi han 5 anh.
+        bang_chung.save()
 
-            bang_chung.save()
+        attachment_pk = bang_chung.pk
+        database_alias = bang_chung._state.db
 
-        except Exception:
-            # Chi xoa file do thao tac nay vua tao.
-            # Khong xoa file thuoc ban ghi da ton tai.
-            if bang_chung.tep_dinh_kem.name:
-                bang_chung.tep_dinh_kem.delete(
-                    save=False
+        def ghi_file_sau_commit():
+            try:
+                bang_chung.tep_dinh_kem.save(
+                    ten_luu,
+                    ContentFile(noi_dung_anh),
+                    save=False,
                 )
 
-            raise
+                # Luu ten file thuc te.
+                bang_chung.save(
+                    update_fields=["tep_dinh_kem"]
+                )
+
+            except Exception:
+                # Database da commit:
+                # don dep file va ban ghi neu luu loi.
+                if bang_chung.tep_dinh_kem.name:
+                    bang_chung.tep_dinh_kem.delete(
+                        save=False
+                    )
+
+                TicketAttachment.objects.using(
+                    database_alias
+                ).filter(
+                    pk=attachment_pk
+                ).delete()
+
+                raise
+
+        transaction.on_commit(
+            ghi_file_sau_commit,
+            using=database_alias,
+        )
 
         return bang_chung
