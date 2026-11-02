@@ -442,6 +442,7 @@ Quản lý Ticket - CRM HULO
                         <!-- =====================================
                              UC3.6 - CẢNH BÁO SLA TỪ BACKEND
                              ===================================== -->
+
                         <td>
 
                             {% if ticket.sla_deadline %}
@@ -449,6 +450,12 @@ Quản lý Ticket - CRM HULO
                                 <span class="ticket-sla">
                                     {{ ticket.sla_deadline|date:"d/m/Y H:i" }}
                                 </span>
+
+                                {% if ticket.sla_remaining %}
+                                    <div class="ticket-detail-muted" style="margin-top: 5px;">
+                                        {{ ticket.sla_remaining }}
+                                    </div>
+                                {% endif %}
 
                             {% endif %}
 
@@ -493,6 +500,8 @@ Quản lý Ticket - CRM HULO
                                 {% endif %}
 
                             </div>
+
+                        </td>
 
                         </td>
 

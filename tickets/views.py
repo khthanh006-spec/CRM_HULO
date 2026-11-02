@@ -1,5 +1,8 @@
-from accounts.models import Staff
+
 from datetime import timedelta
+
+from accounts.models import Staff
+from accounts.permissions import role_required
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -10,10 +13,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from accounts.permissions import role_required
-
 from .models import Ticket, TicketCategory, TicketLog
-
 from .forms import (
     TicketMessageForm,
     TicketResolveForm,
@@ -22,37 +22,71 @@ from .forms import (
 
 
 # ==========================================================
+# HÀM HỖ TRỢ: XÁC ĐỊNH TRẠNG THÁI VÀ THỜI GIAN SLA
+# ==========================================================
+
+def _gan_trang_thai_sla(ticket, now, warning_limit):
+    ticket.sla_remaining = None
+
+    if ticket.trang_thai in ['RESOLVED', 'CLOSED']:
+        ticket.sla_status = 'DONE'
+        return
+
+    if ticket.sla_deadline is None:
+        ticket.sla_status = 'NO_SLA'
+        return
+
+    delta = ticket.sla_deadline - now
+    total_minutes = int(abs(delta.total_seconds()) // 60)
+
+    days, remaining_minutes = divmod(total_minutes, 1440)
+    hours, minutes = divmod(remaining_minutes, 60)
+
+    parts = []
+
+    if days:
+        parts.append(f"{days} ngày")
+
+    if hours:
+        parts.append(f"{hours} giờ")
+
+    if minutes or not parts:
+        parts.append(f"{minutes} phút")
+
+    duration_text = " ".join(parts)
+
+    if delta.total_seconds() <= 0:
+        ticket.sla_status = 'OVERDUE'
+        ticket.sla_remaining = f"Quá hạn {duration_text}"
+
+    elif ticket.sla_deadline <= warning_limit:
+        ticket.sla_status = 'WARNING'
+        ticket.sla_remaining = f"Còn {duration_text}"
+
+    else:
+        ticket.sla_status = 'ON_TIME'
+        ticket.sla_remaining = f"Còn {duration_text}"
+
+
+# ==========================================================
 # UC-3.2 - TICKET QUEUE / DANH SÁCH TICKET
 # ==========================================================
 
 @login_required(login_url='login')
 @role_required('CSKH', 'MANAGER', 'ADMIN')
-
 def ticket_home(request):
 
-    # ==========================================
-    # 1. LẤY DANH SÁCH TICKET
-    # ==========================================
+    # 1. Lấy danh sách Ticket
     tickets = Ticket.objects.select_related(
         'khach_hang',
         'danh_muc',
         'nguoi_phu_trach',
     )
 
-    # ==========================================
-    # 2. PHÂN QUYỀN HIỂN THỊ CHO CSKH
-    # ==========================================
+    # 2. Phân quyền CSKH
     staff = getattr(request.user, 'staff_profile', None)
 
     if staff is not None and staff.vai_tro == 'CSKH':
-
-        # CSKH được xem:
-        # - Ticket NEW chưa được phân công
-        # - Ticket đã được phân công cho mình
-        #
-        # Không hiển thị Ticket đã giao cho
-        # nhân viên CSKH khác.
-
         tickets = tickets.filter(
             Q(
                 trang_thai='NEW',
@@ -64,16 +98,11 @@ def ticket_home(request):
             )
         )
 
-    # ==========================================
-    # 3. THỐNG KÊ TICKET VÀ SLA
-    # ==========================================
+    # 3. Thống kê Ticket và SLA
     now = timezone.now()
     warning_limit = now + timedelta(hours=4)
 
     stats = {
-
-        # Bao gồm Ticket NEW chưa phân công
-        # và Ticket ASSIGNED chờ xử lý
         'cho_tiep_nhan': tickets.filter(
             trang_thai__in=['NEW', 'ASSIGNED']
         ).count(),
@@ -100,17 +129,13 @@ def ticket_home(request):
         ).count(),
     }
 
-    # ==========================================
-    # 4. LẤY THÔNG TIN BỘ LỌC
-    # ==========================================
+    # 4. Thông tin bộ lọc
     keyword = request.GET.get('q', '').strip()
     status = request.GET.get('status', '').strip()
     priority = request.GET.get('priority', '').strip()
     category = request.GET.get('category', '').strip()
 
-    # ==========================================
-    # 5. TÌM KIẾM TICKET
-    # ==========================================
+    # 5. Tìm kiếm Ticket
     if keyword:
         tickets = tickets.filter(
             Q(ma_ticket__icontains=keyword)
@@ -120,71 +145,35 @@ def ticket_home(request):
             Q(khach_hang__ho_ten__icontains=keyword)
         )
 
-    # ==========================================
-    # 6. LỌC THEO TRẠNG THÁI
-    # ==========================================
+    # 6. Lọc trạng thái
     if status in dict(Ticket.STATUS_CHOICES):
-        tickets = tickets.filter(
-            trang_thai=status
-        )
+        tickets = tickets.filter(trang_thai=status)
 
-    # ==========================================
-    # 7. LỌC THEO ĐỘ ƯU TIÊN
-    # ==========================================
+    # 7. Lọc độ ưu tiên
     if priority in dict(Ticket.PRIORITY_CHOICES):
-        tickets = tickets.filter(
-            muc_uu_tien=priority
-        )
+        tickets = tickets.filter(muc_uu_tien=priority)
 
-    # ==========================================
-    # 8. LỌC THEO DANH MỤC
-    # ==========================================
+    # 8. Lọc danh mục
     if category.isdigit():
         tickets = tickets.filter(
             danh_muc_id=int(category)
         )
 
-    # ==========================================
-    # 9. SẮP XẾP MỚI NHẤT TRƯỚC
-    # ==========================================
-    tickets = tickets.order_by(
-        '-thoi_diem_tao'
-    )
+    # 9. Sắp xếp mới nhất
+    tickets = tickets.order_by('-thoi_diem_tao')
 
-    # ==========================================
-    # 10. XÁC ĐỊNH TRẠNG THÁI SLA
-    # ==========================================
+    # 10. Xác định trạng thái và thời gian SLA
     tickets = list(tickets)
 
     for ticket in tickets:
+        _gan_trang_thai_sla(ticket, now, warning_limit)
 
-        if ticket.trang_thai in ['RESOLVED', 'CLOSED']:
-            ticket.sla_status = 'DONE'
-
-        elif ticket.sla_deadline is None:
-            ticket.sla_status = 'NO_SLA'
-
-        elif ticket.sla_deadline <= now:
-            ticket.sla_status = 'OVERDUE'
-
-        elif ticket.sla_deadline <= warning_limit:
-            ticket.sla_status = 'WARNING'
-
-        else:
-            ticket.sla_status = 'ON_TIME'
-
-    # ==========================================
-    # 11. DANH MỤC TICKET
-    # ==========================================
+    # 11. Danh mục Ticket
     categories = TicketCategory.objects.filter(
         dang_hoat_dong=True
-    ).order_by(
-        'ten_danh_muc'
-    )
+    ).order_by('ten_danh_muc')
 
-    # ==========================================
-    # 12. HIỂN THỊ GIAO DIỆN
-    # ==========================================
+    # 12. Hiển thị giao diện
     return render(
         request,
         'tickets/home.html',
@@ -200,19 +189,15 @@ def ticket_home(request):
     )
 
 
-
 # ==========================================================
 # UC-3.2 - CHI TIẾT TICKET DÀNH CHO NHÂN VIÊN
 # ==========================================================
 
 @login_required(login_url='login')
 @role_required('CSKH', 'MANAGER', 'ADMIN')
-
 def ticket_detail(request, pk):
 
-    # ==========================================
-    # 1. LẤY THÔNG TIN TICKET
-    # ==========================================
+    # 1. Lấy thông tin Ticket
     ticket = get_object_or_404(
         Ticket.objects.select_related(
             'khach_hang',
@@ -224,9 +209,7 @@ def ticket_detail(request, pk):
         pk=pk
     )
 
-    # ==========================================
-    # 2. XÁC ĐỊNH VAI TRÒ NGƯỜI DÙNG
-    # ==========================================
+    # 2. Xác định vai trò
     staff = getattr(
         request.user,
         'staff_profile',
@@ -243,21 +226,14 @@ def ticket_detail(request, pk):
         )
     )
 
-    # ==========================================
-    # 3. KIỂM TRA QUYỀN XEM CHI TIẾT
-    # ==========================================
-
+    # 3. Kiểm tra quyền xem
     if user_role == 'CSKH':
 
-        # Ticket NEW chưa phân công:
-        # CSKH được xem để biết có yêu cầu mới.
         ticket_moi_chua_phan_cong = (
             ticket.trang_thai == 'NEW'
             and ticket.nguoi_phu_trach_id is None
         )
 
-        # Ticket đã giao cho chính nhân viên:
-        # CSKH được xem Ticket của mình.
         ticket_cua_minh = (
             ticket.nguoi_phu_trach_id == staff.pk
         )
@@ -275,9 +251,7 @@ def ticket_detail(request, pk):
             "Bạn không có quyền xem Ticket này."
         )
 
-    # ==========================================
-    # 4. DANH SÁCH NHÂN VIÊN ĐỂ PHÂN CÔNG
-    # ==========================================
+    # 4. Danh sách nhân viên để phân công
     staff_options = Staff.objects.none()
 
     if (
@@ -288,16 +262,18 @@ def ticket_detail(request, pk):
             vai_tro='CSKH'
         ).order_by('ho_ten')
 
-    # ==========================================
-    # 5. LỊCH SỬ XỬ LÝ TICKET
-    # ==========================================
+    # 5. Trạng thái và thời gian SLA
+    now = timezone.now()
+    warning_limit = now + timedelta(hours=4)
+
+    _gan_trang_thai_sla(ticket, now, warning_limit)
+
+    # 6. Lịch sử xử lý Ticket
     logs = ticket.logs.select_related(
         'nguoi_thuc_hien'
     ).order_by('-thoi_diem')
 
-    # ==========================================
-    # 6. TIN NHẮN TRAO ĐỔI
-    # ==========================================
+    # 7. Tin nhắn trao đổi
     ticket_messages = ticket.messages.select_related(
         'nguoi_gui'
     ).order_by(
@@ -305,15 +281,15 @@ def ticket_detail(request, pk):
         'pk'
     )
 
-    # Bang chung khach hang dinh kem Ticket
-    danh_sach_bang_chung = ticket.attachments.all().order_by(
-        "thoi_diem_tai_len",
-        "pk"
+    # 8. Bằng chứng đính kèm
+    danh_sach_bang_chung = (
+        ticket.attachments.all().order_by(
+            'thoi_diem_tai_len',
+            'pk'
+        )
     )
 
-    # ==========================================
-    # 7. HIỂN THỊ TRANG CHI TIẾT
-    # ==========================================
+    # 9. Hiển thị chi tiết
     return render(
         request,
         'tickets/ticket_detail.html',
@@ -328,7 +304,6 @@ def ticket_detail(request, pk):
             'danh_sach_bang_chung': danh_sach_bang_chung,
         }
     )
-
 
 
 # ==========================================================
@@ -367,7 +342,6 @@ def ticket_accept(request, pk):
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-        # Cập nhật trạng thái
         ticket.trang_thai = 'IN_PROGRESS'
         ticket.save(
             update_fields=[
@@ -376,7 +350,6 @@ def ticket_accept(request, pk):
             ]
         )
 
-        # Ghi lịch sử
         TicketLog.objects.create(
             ticket=ticket,
             nguoi_thuc_hien=request.user,
@@ -440,13 +413,11 @@ def ticket_add_message(request, pk):
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-        # Lưu TicketMessage
         ticket_message = form.save(commit=False)
         ticket_message.ticket = ticket
         ticket_message.nguoi_gui = request.user
         ticket_message.save()
 
-        # Phân biệt PUBLIC và INTERNAL
         if ticket_message.loai_tin_nhan == 'PUBLIC':
             hanh_dong = 'PHẢN HỒI KHÁCH HÀNG'
             noi_dung_log = (
@@ -517,7 +488,6 @@ def ticket_resolve(request, pk):
                 "Ticket này không được phân công cho bạn."
             )
 
-        # Chỉ được hoàn tất Ticket đang xử lý
         if ticket.trang_thai != 'IN_PROGRESS':
             messages.error(
                 request,
@@ -525,9 +495,6 @@ def ticket_resolve(request, pk):
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-
-
-        # UC3.4 - Không hoàn tất Ticket khi chờ thẩm định
         if ticket.trang_thai_tham_dinh == 'WAITING':
             messages.error(
                 request,
@@ -536,14 +503,9 @@ def ticket_resolve(request, pk):
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-
-        # Lưu kết quả
         ticket.ket_qua_xu_ly = form.cleaned_data['ket_qua_xu_ly']
-
-        # Chuyển trạng thái
         ticket.trang_thai = 'RESOLVED'
 
-        # Mỗi lần giải quyết lại, khách hàng sẽ xác nhận lại
         ticket.trang_thai_xac_nhan = 'PENDING'
         ticket.ly_do_khong_dong_y = ''
         ticket.thoi_diem_xac_nhan = None
@@ -585,12 +547,19 @@ def ticket_resolve(request, pk):
 @login_required(login_url='login')
 def ticket_customer_result(request, pk):
 
-    # Chỉ cho phép xem Ticket thuộc tài khoản khách hàng
     ticket = get_object_or_404(
         Ticket.objects.select_related('khach_hang').filter(
             khach_hang__ma_tai_khoan=request.user
         ),
         pk=pk
+    )
+
+    # Chỉ lấy phản hồi công khai, không lộ ghi chú nội bộ
+    public_messages = (
+        ticket.messages
+        .filter(loai_tin_nhan='PUBLIC')
+        .select_related('nguoi_gui')
+        .order_by('thoi_diem_gui')
     )
 
     return render(
@@ -599,6 +568,7 @@ def ticket_customer_result(request, pk):
         {
             'ticket': ticket,
             'confirmation_form': TicketConfirmationForm(),
+            'public_messages': public_messages,
         }
     )
 
@@ -607,24 +577,22 @@ def ticket_customer_result(request, pk):
 # UC-3.5 - KHÁCH HÀNG XÁC NHẬN KẾT QUẢ
 #
 # AGREE:
-#   RESOLVED + PENDING -> RESOLVED + AGREED
+# RESOLVED + PENDING -> RESOLVED + AGREED
 #
 # DISAGREE:
-#   RESOLVED + PENDING -> REOPENED + DISAGREED
+# RESOLVED + PENDING -> REOPENED + DISAGREED
 # ==========================================================
 
 @login_required(login_url='login')
 @require_POST
 def ticket_customer_confirm(request, pk):
 
-    # 1. Chỉ xử lý Ticket thuộc khách hàng đang đăng nhập
     customer_tickets = Ticket.objects.filter(
         khach_hang__ma_tai_khoan=request.user
     )
 
     ticket = get_object_or_404(customer_tickets, pk=pk)
 
-    # 2. Kiểm tra dữ liệu Form
     form = TicketConfirmationForm(request.POST)
 
     if not form.is_valid():
@@ -639,11 +607,6 @@ def ticket_customer_confirm(request, pk):
     ly_do = form.cleaned_data['ly_do']
     now = timezone.now()
 
-    # 3. Chỉ xác nhận nếu:
-    #    - Ticket đang RESOLVED
-    #    - Chưa có xác nhận (PENDING)
-    #
-    # Dùng UPDATE có điều kiện để ngăn xác nhận trùng.
     with transaction.atomic():
 
         if lua_chon == 'AGREE':
@@ -696,9 +659,7 @@ def ticket_customer_confirm(request, pk):
                     )
                 )
 
-    # 4. Thông báo sau khi thực hiện
     if updated == 0:
-
         messages.error(
             request,
             "Ticket đã được xác nhận trước đó hoặc "
@@ -706,14 +667,12 @@ def ticket_customer_confirm(request, pk):
         )
 
     elif lua_chon == 'AGREE':
-
         messages.success(
             request,
             "HULOECOM đã ghi nhận xác nhận đồng ý của bạn!"
         )
 
     else:
-
         messages.success(
             request,
             "Đã ghi nhận yêu cầu xử lý lại. "
@@ -736,7 +695,6 @@ def ticket_customer_confirm(request, pk):
 @require_POST
 def ticket_resume(request, pk):
 
-    # 1. Lấy thông tin nhân viên đang đăng nhập
     staff = getattr(request.user, 'staff_profile', None)
 
     if staff is None or staff.vai_tro != 'CSKH':
@@ -744,7 +702,6 @@ def ticket_resume(request, pk):
             "Bạn không có quyền tiếp tục xử lý Ticket."
         )
 
-    # 2. Kiểm tra và cập nhật Ticket trong transaction
     with transaction.atomic():
 
         ticket = get_object_or_404(
@@ -752,25 +709,21 @@ def ticket_resume(request, pk):
             pk=pk
         )
 
-        # 3. Kiểm tra nhân viên được phân công
         if ticket.nguoi_phu_trach_id != staff.pk:
             return HttpResponseForbidden(
                 "Ticket này không được phân công cho bạn."
             )
 
-        # 4. Chỉ cho phép tiếp tục Ticket đang REOPENED
         if ticket.trang_thai != 'REOPENED':
             messages.error(
                 request,
                 "Ticket không ở trạng thái mở lại."
             )
-
             return redirect(
                 'tickets:detail',
                 pk=ticket.pk
             )
 
-        # 5. Chuyển REOPENED -> IN_PROGRESS
         ticket.trang_thai = 'IN_PROGRESS'
 
         ticket.save(
@@ -780,7 +733,6 @@ def ticket_resume(request, pk):
             ]
         )
 
-        # 6. Lưu lịch sử
         TicketLog.objects.create(
             ticket=ticket,
             nguoi_thuc_hien=request.user,
@@ -792,7 +744,6 @@ def ticket_resume(request, pk):
             )
         )
 
-    # 7. Thông báo thành công
     messages.success(
         request,
         "Ticket đã được chuyển sang trạng thái đang xử lý!"
@@ -805,7 +756,7 @@ def ticket_resume(request, pk):
 
 
 # ==========================================================
-# UC-3.5 - DONG TICKET
+# UC-3.5 - ĐÓNG TICKET
 # RESOLVED + AGREED -> CLOSED
 # ==========================================================
 
@@ -814,15 +765,13 @@ def ticket_resume(request, pk):
 @require_POST
 def ticket_close(request, pk):
 
-    # 1. Kiem tra nhan vien dang dang nhap
     staff = getattr(request.user, 'staff_profile', None)
 
     if staff is None or staff.vai_tro != 'CSKH':
         return HttpResponseForbidden(
-            "Ban khong co quyen dong Ticket."
+            "Bạn không có quyền đóng Ticket."
         )
 
-    # 2. Khoa Ticket khi cap nhat
     with transaction.atomic():
 
         ticket = get_object_or_404(
@@ -830,30 +779,26 @@ def ticket_close(request, pk):
             pk=pk
         )
 
-        # 3. Chi nhan vien duoc phan cong moi duoc dong
         if ticket.nguoi_phu_trach_id != staff.pk:
             return HttpResponseForbidden(
-                "Ticket nay khong duoc phan cong cho ban."
+                "Ticket này không được phân công cho bạn."
             )
 
-        # 4. Ticket phai o trang thai RESOLVED
         if ticket.trang_thai != 'RESOLVED':
             messages.error(
                 request,
-                "Chi co the dong Ticket da duoc giai quyet."
+                "Chỉ có thể đóng Ticket đã được giải quyết."
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-        # 5. Khach hang phai dong y voi ket qua
         if ticket.trang_thai_xac_nhan != 'AGREED':
             messages.error(
                 request,
-                "Chua the dong Ticket vi khach hang "
-                "chua dong y voi ket qua xu ly."
+                "Chưa thể đóng Ticket vì khách hàng "
+                "chưa đồng ý với kết quả xử lý."
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-        # 6. Chuyen RESOLVED -> CLOSED
         ticket.trang_thai = 'CLOSED'
         ticket.thoi_diem_cap_nhat = timezone.now()
 
@@ -864,22 +809,20 @@ def ticket_close(request, pk):
             ]
         )
 
-        # 7. Ghi lich su dong Ticket
         TicketLog.objects.create(
             ticket=ticket,
             nguoi_thuc_hien=request.user,
             hanh_dong='DONG TICKET',
             noi_dung=(
-                f"Nhan vien {staff.ho_ten} dong Ticket "
-                "sau khi khach hang dong y voi ket qua. "
-                "Trang thai RESOLVED -> CLOSED."
+                f"Nhân viên {staff.ho_ten} đóng Ticket "
+                "sau khi khách hàng đồng ý với kết quả. "
+                "Trạng thái RESOLVED -> CLOSED."
             )
         )
 
-    # 8. Thong bao thanh cong
     messages.success(
         request,
-        "Da dong Ticket thanh cong!"
+        "Đã đóng Ticket thành công!"
     )
 
     return redirect('tickets:detail', pk=ticket.pk)
@@ -960,7 +903,6 @@ def ticket_assign(request, pk):
 @login_required(login_url='login')
 @role_required('CSKH')
 @require_POST
-
 def ticket_request_assessment(request, pk):
 
     staff = getattr(request.user, 'staff_profile', None)
@@ -998,7 +940,6 @@ def ticket_request_assessment(request, pk):
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-        # Ngăn gửi trùng khi đang chờ thẩm định
         if ticket.trang_thai_tham_dinh == 'WAITING':
             messages.warning(
                 request,
@@ -1006,8 +947,6 @@ def ticket_request_assessment(request, pk):
             )
             return redirect('tickets:detail', pk=ticket.pk)
 
-        # Đã có kết quả: không tạo yêu cầu mới tự động.
-        # Khi REOPENED, hồ sơ M4 cũ phải được tái sử dụng.
         if ticket.trang_thai_tham_dinh == 'COMPLETED':
             messages.warning(
                 request,
@@ -1018,7 +957,6 @@ def ticket_request_assessment(request, pk):
 
         now = timezone.now()
 
-        # Cập nhật trạng thái theo dõi thẩm định trong M3
         ticket.trang_thai_tham_dinh = 'WAITING'
         ticket.thoi_diem_yeu_cau_tham_dinh = now
 
@@ -1030,7 +968,6 @@ def ticket_request_assessment(request, pk):
             ]
         )
 
-        # Lưu lịch sử yêu cầu thẩm định
         TicketLog.objects.create(
             ticket=ticket,
             nguoi_thuc_hien=request.user,
@@ -1048,4 +985,3 @@ def ticket_request_assessment(request, pk):
     )
 
     return redirect('tickets:detail', pk=ticket.pk)
-

@@ -145,6 +145,15 @@ USE_TZ = True
 # 11. STATIC FILES: CSS, JAVASCRIPT, IMAGES
 STATIC_URL = 'static/'
 
+# ==========================================
+# MEDIA FILES - LƯU TRỮ ẢNH VÀ TỆP ĐÍNH KÈM
+# ==========================================
+
+MEDIA_URL = '/media/'
+
+# Giữ nguyên vị trí kho file hiện tại ở thư mục gốc dự án.
+MEDIA_ROOT = BASE_DIR
+
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]

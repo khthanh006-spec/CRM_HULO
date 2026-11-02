@@ -15,7 +15,63 @@ class TicketCategory(models.Model):
 
     def __str__(self):
         return self.ten_danh_muc
+# ==========================================================
+# UC-3.1 - QUY TẮC PHÂN LOẠI TICKET TỰ ĐỘNG
+# ==========================================================
 
+class TicketClassificationRule(models.Model):
+    tu_khoa = models.CharField(
+        max_length=150,
+        unique=True,
+        verbose_name="Từ khóa nhận diện"
+    )
+
+    danh_muc = models.ForeignKey(
+        'TicketCategory',
+        on_delete=models.PROTECT,
+        related_name='classification_rules'
+    )
+
+    muc_uu_tien = models.CharField(
+        max_length=10,
+        choices=[
+            ('LOW', 'Thấp'),
+            ('MEDIUM', 'Trung bình'),
+            ('HIGH', 'Cao'),
+            ('URGENT', 'Khẩn cấp'),
+        ]
+    )
+
+    do_uu_tien_quy_tac = models.PositiveIntegerField(
+        default=100,
+        verbose_name="Thứ tự ưu tiên quy tắc"
+    )
+
+    dang_hoat_dong = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.tu_khoa} → {self.danh_muc} ({self.muc_uu_tien})"
+
+
+# ==========================================================
+# UC-3.1 - ÁNH XẠ DANH MỤC VỚI HÀNG ĐỢI
+# ==========================================================
+
+class TicketCategoryQueue(models.Model):
+    danh_muc = models.OneToOneField(
+        'TicketCategory',
+        on_delete=models.PROTECT,
+        related_name='queue_mapping'
+    )
+
+    queue = models.ForeignKey(
+        'TicketQueue',
+        on_delete=models.PROTECT,
+        related_name='category_mappings'
+    )
+
+    def __str__(self):
+        return f"{self.danh_muc} → {self.queue}"
 
 # 1.1. QUY TẮC TỰ ĐỘNG PHÂN LOẠI TICKET
 class TicketClassificationRule(models.Model):
@@ -366,3 +422,20 @@ class TicketAttachment(models.Model):
             f"{self.ticket} - "
             f"{self.ten_tep_goc or self.tep_dinh_kem.name}"
         )
+
+    # Mã nhận diện ảnh nguồn từ Module 2.
+    # Để trống với file không được gửi từ M2.
+    ma_anh_nguon = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ticket", "ma_anh_nguon"],
+                name="unique_ticket_attachment_source",
+            )
+        ]

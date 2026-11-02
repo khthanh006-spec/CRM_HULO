@@ -9,6 +9,8 @@ from .models import (
     TicketLog,
     TicketMessage,
     TicketAttachment,
+    TicketClassificationRule,
+    TicketCategoryQueue,
 )
 
 
@@ -109,3 +111,29 @@ class TicketAttachmentAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ('thoi_diem_tai_len',)
+
+@admin.register(TicketClassificationRule)
+class TicketClassificationRuleAdmin(admin.ModelAdmin):
+    list_display = (
+        "tu_khoa",
+        "danh_muc",
+        "muc_uu_tien",
+        "do_uu_tien_quy_tac",
+        "dang_hoat_dong",
+    )
+    list_filter = (
+        "danh_muc",
+        "muc_uu_tien",
+        "dang_hoat_dong",
+    )
+    search_fields = ("tu_khoa",)
+    ordering = ("do_uu_tien_quy_tac", "id")
+
+
+@admin.register(TicketCategoryQueue)
+class TicketCategoryQueueAdmin(admin.ModelAdmin):
+    list_display = ("danh_muc", "queue")
+    search_fields = (
+        "danh_muc__ten_danh_muc",
+        "queue__ten_queue",
+    )

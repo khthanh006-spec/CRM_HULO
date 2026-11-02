@@ -110,6 +110,7 @@
             </div>
         </div>
 
+
         <!-- THÔNG TIN SLA -->
         <div class="ticket-detail-sla">
 
@@ -123,6 +124,32 @@
                 <strong>Chưa thiết lập</strong>
             {% endif %}
 
+            {% if ticket.sla_status == 'OVERDUE' %}
+                <p style="color: #dc2626; margin-top: 8px;">
+                    🚨 {{ ticket.sla_remaining }}
+                </p>
+
+            {% elif ticket.sla_status == 'WARNING' %}
+                <p style="color: #d97706; margin-top: 8px;">
+                    ⏳ {{ ticket.sla_remaining }} - Sắp quá hạn
+                </p>
+
+            {% elif ticket.sla_status == 'ON_TIME' %}
+                <p style="color: #15803d; margin-top: 8px;">
+                    ✓ {{ ticket.sla_remaining }}
+                </p>
+
+            {% elif ticket.sla_status == 'DONE' %}
+                <p style="color: #15803d; margin-top: 8px;">
+                    ✓ Đã giải quyết
+                </p>
+
+            {% else %}
+                <p style="margin-top: 8px;">
+                    Chưa thiết lập SLA
+                </p>
+            {% endif %}
+
             {% if ticket.sla_config %}
                 <small>
                     SLA cấu hình:
@@ -131,6 +158,7 @@
             {% endif %}
 
         </div>
+
 
     </section>
 
@@ -221,10 +249,8 @@
 
             </section>
 
-                        <!-- BANG CHUNG KHACH HANG CUNG CAP -->
+            <!-- B?NG CH?NG KH?CH H?NG CUNG C?P -->
             {% include "tickets/ticket_evidence.html" %}
-
-            </section>
 
             <!-- TRAO ĐỔI VÀ GHI CHÚ -->
             <section
@@ -840,7 +866,6 @@
 
                 </div>
 
-
                 <!-- FORM HOÀN TẤT -->
                 <div class="ticket-action-block ticket-resolve-block">
 
@@ -899,7 +924,6 @@
                     {% endif %}
 
                 </div>
-
 
             {% endif %}
 
