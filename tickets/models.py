@@ -17,6 +17,59 @@ class TicketCategory(models.Model):
         return self.ten_danh_muc
 
 
+# 1.1. QUY TẮC TỰ ĐỘNG PHÂN LOẠI TICKET
+class TicketClassificationRule(models.Model):
+    tu_khoa = models.CharField(
+        max_length=150,
+        unique=True,
+        verbose_name="Từ khóa nhận diện"
+    )
+
+    danh_muc = models.ForeignKey(
+        'TicketCategory',
+        on_delete=models.PROTECT,
+        related_name='classification_rules'
+    )
+
+    muc_uu_tien = models.CharField(
+        max_length=10,
+        choices=[
+            ('LOW', 'Thấp'),
+            ('MEDIUM', 'Trung bình'),
+            ('HIGH', 'Cao'),
+            ('URGENT', 'Khẩn cấp'),
+        ]
+    )
+
+    do_uu_tien_quy_tac = models.PositiveIntegerField(
+        default=100,
+        verbose_name="Thứ tự ưu tiên quy tắc"
+    )
+
+    dang_hoat_dong = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.tu_khoa} → {self.danh_muc} ({self.muc_uu_tien})"
+
+
+# 1.2. ÁNH XẠ DANH MỤC VỚI HÀNG ĐỢI
+class TicketCategoryQueue(models.Model):
+    danh_muc = models.OneToOneField(
+        'TicketCategory',
+        on_delete=models.PROTECT,
+        related_name='queue_mapping'
+    )
+
+    queue = models.ForeignKey(
+        'TicketQueue',
+        on_delete=models.PROTECT,
+        related_name='category_mappings'
+    )
+
+    def __str__(self):
+        return f"{self.danh_muc} → {self.queue}"
+
+
 # 2. HÀNG ĐỢI TICKET
 class TicketQueue(models.Model):
     ten_queue = models.CharField(max_length=100, unique=True)
@@ -94,7 +147,6 @@ class Ticket(models.Model):
         blank=True
     )
 
-
     PRIORITY_CHOICES = SLAConfig.PRIORITY_CHOICES
 
     STATUS_CHOICES = [
@@ -113,7 +165,6 @@ class Ticket(models.Model):
         blank=True
     )
 
-
     # Mã yêu cầu nguồn từ M1 hoặc M2
     # Dùng để chống tạo Ticket trùng khi gửi lại
     source_request_id = models.CharField(
@@ -122,7 +173,6 @@ class Ticket(models.Model):
         null=True,
         blank=True
     )
-
 
     khach_hang = models.ForeignKey(
         'customers.Customer',
@@ -180,7 +230,6 @@ class Ticket(models.Model):
         blank=True
     )
 
-
     ket_qua_xu_ly = models.TextField(blank=True)
 
     # UC3.4 - Theo dõi yêu cầu thẩm định trong M3
@@ -204,7 +253,6 @@ class Ticket(models.Model):
     thoi_diem_tao = models.DateTimeField(auto_now_add=True)
     thoi_diem_cap_nhat = models.DateTimeField(auto_now=True)
 
-
     def __str__(self):
         return self.ma_ticket or f"Ticket #{self.pk}"
 
@@ -226,9 +274,7 @@ class TicketLog(models.Model):
     )
 
     hanh_dong = models.CharField(max_length=100)
-
     noi_dung = models.TextField(blank=True)
-
     thoi_diem = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -260,7 +306,6 @@ class TicketMessage(models.Model):
     )
 
     noi_dung = models.TextField()
-
     thoi_diem_gui = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -288,9 +333,8 @@ class TicketAttachment(models.Model):
         blank=True
     )
 
-
-    # Ma nhan dien anh nguon tu Module 2.
-    # De trong voi file khong duoc gui tu M2.
+    # Mã nhận diện ảnh nguồn từ Module 2.
+    # Để trống với file không được gửi từ M2.
     ma_anh_nguon = models.CharField(
         max_length=64,
         null=True,
@@ -305,7 +349,6 @@ class TicketAttachment(models.Model):
                 name="unique_ticket_attachment_source",
             )
         ]
-
 
     nguoi_tai_len = models.ForeignKey(
         settings.AUTH_USER_MODEL,
