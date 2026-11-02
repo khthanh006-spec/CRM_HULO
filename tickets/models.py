@@ -3,7 +3,10 @@ from django.db import models
 from django.conf import settings
 
 
+# ==========================================================
 # 1. DANH MỤC VẤN ĐỀ
+# ==========================================================
+
 class TicketCategory(models.Model):
     ten_danh_muc = models.CharField(max_length=100, unique=True)
     mo_ta = models.TextField(blank=True)
@@ -15,6 +18,8 @@ class TicketCategory(models.Model):
 
     def __str__(self):
         return self.ten_danh_muc
+
+
 # ==========================================================
 # UC-3.1 - QUY TẮC PHÂN LOẠI TICKET TỰ ĐỘNG
 # ==========================================================
@@ -73,60 +78,11 @@ class TicketCategoryQueue(models.Model):
     def __str__(self):
         return f"{self.danh_muc} → {self.queue}"
 
-# 1.1. QUY TẮC TỰ ĐỘNG PHÂN LOẠI TICKET
-class TicketClassificationRule(models.Model):
-    tu_khoa = models.CharField(
-        max_length=150,
-        unique=True,
-        verbose_name="Từ khóa nhận diện"
-    )
 
-    danh_muc = models.ForeignKey(
-        'TicketCategory',
-        on_delete=models.PROTECT,
-        related_name='classification_rules'
-    )
-
-    muc_uu_tien = models.CharField(
-        max_length=10,
-        choices=[
-            ('LOW', 'Thấp'),
-            ('MEDIUM', 'Trung bình'),
-            ('HIGH', 'Cao'),
-            ('URGENT', 'Khẩn cấp'),
-        ]
-    )
-
-    do_uu_tien_quy_tac = models.PositiveIntegerField(
-        default=100,
-        verbose_name="Thứ tự ưu tiên quy tắc"
-    )
-
-    dang_hoat_dong = models.BooleanField(default=True)
-
-    def __str__(self):
-        return f"{self.tu_khoa} → {self.danh_muc} ({self.muc_uu_tien})"
-
-
-# 1.2. ÁNH XẠ DANH MỤC VỚI HÀNG ĐỢI
-class TicketCategoryQueue(models.Model):
-    danh_muc = models.OneToOneField(
-        'TicketCategory',
-        on_delete=models.PROTECT,
-        related_name='queue_mapping'
-    )
-
-    queue = models.ForeignKey(
-        'TicketQueue',
-        on_delete=models.PROTECT,
-        related_name='category_mappings'
-    )
-
-    def __str__(self):
-        return f"{self.danh_muc} → {self.queue}"
-
-
+# ==========================================================
 # 2. HÀNG ĐỢI TICKET
+# ==========================================================
+
 class TicketQueue(models.Model):
     ten_queue = models.CharField(max_length=100, unique=True)
     mo_ta = models.TextField(blank=True)
@@ -136,7 +92,10 @@ class TicketQueue(models.Model):
         return self.ten_queue
 
 
+# ==========================================================
 # 3. CẤU HÌNH SLA
+# ==========================================================
+
 class SLAConfig(models.Model):
     PRIORITY_CHOICES = [
         ('LOW', 'Thấp'),
@@ -175,12 +134,13 @@ class SLAConfig(models.Model):
         )
 
 
+# ==========================================================
 # 4. TICKET CHÍNH
+# ==========================================================
+
 class Ticket(models.Model):
 
-    # ==========================================
     # UC-3.5 - XÁC NHẬN KẾT QUẢ CỦA KHÁCH HÀNG
-    # ==========================================
 
     CONFIRMATION_CHOICES = [
         ('PENDING', 'Chờ xác nhận'),
@@ -288,7 +248,7 @@ class Ticket(models.Model):
 
     ket_qua_xu_ly = models.TextField(blank=True)
 
-    # UC3.4 - Theo dõi yêu cầu thẩm định trong M3
+    # UC-3.4 - THEO DÕI YÊU CẦU THẨM ĐỊNH
     ASSESSMENT_STATUS_CHOICES = [
         ('NOT_REQUESTED', 'Chưa yêu cầu'),
         ('WAITING', 'Đang chờ kết quả'),
@@ -313,7 +273,10 @@ class Ticket(models.Model):
         return self.ma_ticket or f"Ticket #{self.pk}"
 
 
+# ==========================================================
 # 5. LỊCH SỬ XỬ LÝ TICKET
+# ==========================================================
+
 class TicketLog(models.Model):
 
     ticket = models.ForeignKey(
@@ -337,7 +300,10 @@ class TicketLog(models.Model):
         return f"{self.ticket} - {self.hanh_dong}"
 
 
+# ==========================================================
 # 6. PHẢN HỒI VÀ GHI CHÚ
+# ==========================================================
+
 class TicketMessage(models.Model):
 
     MESSAGE_TYPE_CHOICES = [
@@ -371,7 +337,10 @@ class TicketMessage(models.Model):
         )
 
 
+# ==========================================================
 # 7. TỆP ĐÍNH KÈM CỦA TICKET
+# ==========================================================
+
 class TicketAttachment(models.Model):
 
     ticket = models.ForeignKey(
@@ -398,14 +367,6 @@ class TicketAttachment(models.Model):
         editable=False,
     )
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["ticket", "ma_anh_nguon"],
-                name="unique_ticket_attachment_source",
-            )
-        ]
-
     nguoi_tai_len = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -417,21 +378,6 @@ class TicketAttachment(models.Model):
         auto_now_add=True
     )
 
-    def __str__(self):
-        return (
-            f"{self.ticket} - "
-            f"{self.ten_tep_goc or self.tep_dinh_kem.name}"
-        )
-
-    # Mã nhận diện ảnh nguồn từ Module 2.
-    # Để trống với file không được gửi từ M2.
-    ma_anh_nguon = models.CharField(
-        max_length=64,
-        null=True,
-        blank=True,
-        editable=False,
-    )
-
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -439,3 +385,9 @@ class TicketAttachment(models.Model):
                 name="unique_ticket_attachment_source",
             )
         ]
+
+    def __str__(self):
+        return (
+            f"{self.ticket} - "
+            f"{self.ten_tep_goc or self.tep_dinh_kem.name}"
+        )
