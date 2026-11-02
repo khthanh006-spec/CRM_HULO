@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Xem xét lại hồ sơ #{{ ho_so.pk }} | CRM HULO{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'disputes/css/dispute_detail.css' %}?v=2"
+>
+<style>
+    .m4-reconsider {
+        max-width: 850px;
+        margin: 0 auto;
+    }
+
+    .m4-reconsider textarea {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        margin-top: 10px;
+        padding: 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font: inherit;
+        line-height: 1.6;
+        resize: vertical;
+    }
+
+    .m4-reconsider textarea:focus {
+        outline: 3px solid #dbeafe;
+        border-color: #2563eb;
+    }
+
+    .m4-reconsider__notice {
+        margin: 16px 0;
+        padding: 16px;
+        border: 1px solid #fcd34d;
+        border-radius: 12px;
+        background: #fffbeb;
+        color: #92400e;
+        line-height: 1.7;
+    }
+
+    .m4-reconsider .errorlist {
+        padding: 12px 12px 12px 30px;
+        border-radius: 10px;
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+    .m4-reconsider__actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 20px;
+    }
+
+    .m4-reconsider__confirm {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 20px;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="m4-detail m4-reconsider">
+
+    <a
+        href="{% url 'disputes:detail' ho_so.pk %}"
+        class="m4-detail__back"
+    >
+        ← Quay lại hồ sơ
+    </a>
+
+    <header class="m4-detail__hero">
+        <div>
+            <p class="m4-detail__eyebrow">PHẢN HỒI SAU XỬ LÝ</p>
+            <h1>🔄 Tiếp nhận xem xét lại</h1>
+            <p>Hồ sơ #{{ ho_so.pk }} · {{ ticket.ma_ticket }}</p>
+        </div>
+    </header>
+
+    <section class="m4-detail__card">
+        <h2>💬 Phản hồi của khách hàng</h2>
+
+        <dl class="m4-detail__info">
+            <div>
+                <dt>Khách hàng</dt>
+                <dd>{{ ticket.khach_hang.ho_ten }}</dd>
+            </div>
+            <div>
+                <dt>Thời điểm phản hồi</dt>
+                <dd>
+                    {{ ticket.thoi_diem_xac_nhan|date:"d/m/Y H:i" }}
+                </dd>
+            </div>
+        </dl>
+
+        <div class="m4-reconsider__notice">
+            {{ ticket.ly_do_khong_dong_y|linebreaksbr }}
+        </div>
+    </section>
+
+    <section class="m4-detail__card">
+        <h2>📋 Phương án đã thực hiện</h2>
+
+        <dl class="m4-detail__info">
+            <div>
+                <dt>Phiên bản</dt>
+                <dd>V{{ phuong_an.phien_ban }}</dd>
+            </div>
+            <div>
+                <dt>Loại phương án</dt>
+                <dd>{{ phuong_an.get_loai_phuong_an_display }}</dd>
+            </div>
+            <div>
+                <dt>Trạng thái</dt>
+                <dd>{{ phuong_an.get_trang_thai_display }}</dd>
+            </div>
+            <div>
+                <dt>Hoàn tất lúc</dt>
+                <dd>
+                    {{ phuong_an.thoi_diem_hoan_tat|date:"d/m/Y H:i" }}
+                </dd>
+            </div>
+        </dl>
+
+        <h3>Nội dung phương án</h3>
+        <div class="m4-detail__text">
+            {{ phuong_an.noi_dung|linebreaksbr }}
+        </div>
+
+        <h3>Kết quả thực hiện</h3>
+        <div class="m4-detail__text">
+            {{ phuong_an.ket_qua_thuc_hien|default:"Chưa có mô tả kết quả."|linebreaksbr }}
+        </div>
+    </section>
+
+    <section class="m4-detail__card">
+        <h2>📝 Nội dung tiếp nhận</h2>
+
+        <p class="m4-reconsider__notice">
+            Thao tác này ghi nhận việc xem xét lại.
+            Phương án và kết quả đã thực hiện được giữ nguyên.
+            Chưa phát sinh lần hoàn tiền hoặc giao hàng mới.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.ma_phuong_an }}
+            {{ form.ma_phuong_an.errors }}
+            {{ form.non_field_errors }}
+
+            <label for="{{ form.noi_dung.id_for_label }}">
+                <strong>{{ form.noi_dung.label }}</strong>
+            </label>
+
+            {{ form.noi_dung }}
+            {{ form.noi_dung.errors }}
+
+            <label class="m4-reconsider__confirm"
+                   for="{{ form.xac_nhan.id_for_label }}">
+                {{ form.xac_nhan }}
+                <span>{{ form.xac_nhan.label }}</span>
+            </label>
+
+            {{ form.xac_nhan.errors }}
+
+            <div class="m4-reconsider__actions">
+                <button type="submit" class="m4-detail__button">
+                    ✓ Tiếp nhận xem xét lại
+                </button>
+
+                <a href="{% url 'disputes:detail' ho_so.pk %}">
+                    Hủy và quay lại
+                </a>
+            </div>
+        </form>
+    </section>
+
+</div>
+{% endblock %}

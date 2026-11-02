@@ -1,0 +1,375 @@
+/* Chỉ áp dụng cho trang danh sách hồ sơ M4.
+   Mọi selector đều nằm trong .m4-list để tránh ảnh hưởng module khác. */
+
+.m4-list {
+    --m4-blue: #1683ff;
+    --m4-navy: #153e75;
+    --m4-muted: #73849d;
+    --m4-border: #dce9fb;
+
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 28px 24px 48px;
+    color: var(--m4-navy);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.m4-list,
+.m4-list * {
+    box-sizing: border-box;
+}
+
+/* Tiêu đề trên nền xanh nhạt giống tinh thần ảnh demo */
+.m4-list .m4-list__hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding: 30px 32px;
+    border: 1px solid #dfecff;
+    border-radius: 18px;
+    background: linear-gradient(120deg, #edf6ff, #dfeeff 65%, #f2f8ff);
+}
+
+.m4-list .m4-list__eyebrow {
+    margin: 0 0 8px;
+    color: #527aaa;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+.m4-list h1 {
+    margin: 0;
+    color: var(--m4-navy);
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 750;
+    line-height: 1.25;
+}
+
+.m4-list .m4-list__intro {
+    margin: 10px 0 0;
+    color: #607c9d;
+}
+
+.m4-list .m4-list__hero-label {
+    flex-shrink: 0;
+    padding: 9px 16px;
+    border: 1px solid #c8dfff;
+    border-radius: 999px;
+    background: #ffffffb8;
+    color: #2468b5;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Các khối nội dung */
+.m4-list .m4-list__card {
+    margin-bottom: 22px;
+    padding: 24px;
+    border: 1px solid var(--m4-border);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 5px 20px rgb(30 83 151 / 5%);
+}
+
+.m4-list h2 {
+    margin: 0;
+    color: var(--m4-navy);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.m4-list .m4-list__section-heading p,
+.m4-list .m4-list__results-heading p {
+    margin: 5px 0 0;
+    color: var(--m4-muted);
+    font-size: 13px;
+}
+
+/* Bộ lọc co giãn theo kích thước màn hình */
+.m4-list .m4-list__filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 230px auto;
+    align-items: end;
+    gap: 16px;
+    margin-top: 22px;
+}
+
+.m4-list .m4-list__field {
+    min-width: 0;
+}
+
+.m4-list .m4-list__field label {
+    display: block;
+    margin-bottom: 7px;
+    color: #466080;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.m4-list .m4-list__field input,
+.m4-list .m4-list__field select {
+    display: block;
+    width: 100%;
+    height: 44px;
+    margin: 0;
+    padding: 0 12px;
+    border: 1px solid #cfdcf0;
+    border-radius: 8px;
+    background: #fbfdff;
+    color: var(--m4-navy);
+    font: inherit;
+}
+
+.m4-list .m4-list__field input::placeholder {
+    color: #94a3b8;
+}
+
+.m4-list .m4-list__field input:focus,
+.m4-list .m4-list__field select:focus {
+    border-color: var(--m4-blue);
+    outline: 3px solid rgb(22 131 255 / 14%);
+}
+
+.m4-list .m4-list__actions {
+    display: flex;
+    gap: 9px;
+}
+
+.m4-list .m4-list__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 19px;
+    border: 1px solid var(--m4-blue);
+    border-radius: 8px;
+    background: var(--m4-blue);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.m4-list .m4-list__button:hover {
+    background: #086fdf;
+}
+
+.m4-list .m4-list__button--secondary {
+    border-color: #cfe1fa;
+    background: #f5f9ff;
+    color: #2876cc;
+}
+
+.m4-list .m4-list__button--secondary:hover {
+    background: #eaf3ff;
+}
+
+.m4-list .m4-list__button:focus-visible {
+    outline: 3px solid #85baff;
+    outline-offset: 3px;
+}
+
+/* Bảng kết quả */
+.m4-list .m4-list__results {
+    overflow: hidden;
+    padding: 0;
+}
+
+.m4-list .m4-list__results-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 24px;
+}
+
+.m4-list .m4-list__count {
+    flex-shrink: 0;
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: #edf5ff;
+    color: #2674ce;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.m4-list .m4-list__table-wrap {
+    overflow-x: auto;
+}
+
+.m4-list .m4-list__table {
+    width: 100%;
+    min-width: 1000px;
+    margin: 0;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.m4-list .m4-list__table th {
+    padding: 14px 20px;
+    border-top: 1px solid #e6eef9;
+    border-bottom: 1px solid #e6eef9;
+    background: #f5f9ff;
+    color: #667f9d;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.m4-list .m4-list__table td {
+    padding: 20px;
+    border-bottom: 1px solid #edf2fa;
+    color: #36516f;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.m4-list .m4-list__table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.m4-list .m4-list__table tbody tr:hover {
+    background: #fbfdff;
+}
+
+.m4-list .m4-list__primary {
+    display: block;
+    color: var(--m4-navy);
+    font-weight: 700;
+}
+
+.m4-list .m4-list__ticket {
+    display: block;
+    margin-top: 5px;
+    color: #3382d8;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.m4-list .m4-list__subject {
+    min-width: 210px;
+    max-width: 300px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.m4-list .m4-list__date {
+    display: block;
+    white-space: nowrap;
+}
+
+.m4-list .m4-list__muted {
+    display: block;
+    margin-top: 3px;
+    color: #8b9bb0;
+    font-size: 12px;
+}
+
+/* Màu trạng thái riêng của hồ sơ */
+.m4-list .m4-list__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f0f4fa;
+    color: #61758f;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.m4-list .m4-list__status--cho_tiep_nhan {
+    background: #fff5e5;
+    color: #95600a;
+}
+
+.m4-list .m4-list__status--dang_tham_dinh {
+    background: #eaf3ff;
+    color: #1769c5;
+}
+
+.m4-list .m4-list__status--cho_bo_sung {
+    background: #f2edff;
+    color: #7548bc;
+}
+
+.m4-list .m4-list__status--da_ket_luan {
+    background: #e8fbf2;
+    color: #187957;
+}
+
+.m4-list .m4-list__empty {
+    padding: 38px 16px;
+    text-align: center;
+}
+
+.m4-list .m4-list__empty strong {
+    color: #47698f;
+    font-size: 15px;
+}
+
+.m4-list .m4-list__empty p {
+    margin: 8px 0 0;
+    color: var(--m4-muted);
+}
+
+/* Tablet */
+@media (max-width: 1000px) {
+    .m4-list .m4-list__filters {
+        grid-template-columns: minmax(0, 1fr) 230px;
+    }
+
+    .m4-list .m4-list__actions {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+}
+
+/* Điện thoại */
+@media (max-width: 640px) {
+    .m4-list {
+        padding: 16px 12px 32px;
+    }
+
+    .m4-list .m4-list__hero {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+        padding: 24px 20px;
+    }
+
+    .m4-list .m4-list__card {
+        padding: 20px;
+    }
+
+    .m4-list .m4-list__filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .m4-list .m4-list__actions {
+        justify-content: stretch;
+    }
+
+    .m4-list .m4-list__button {
+        flex: 1;
+    }
+
+    .m4-list .m4-list__results {
+        padding: 0;
+    }
+
+    .m4-list .m4-list__results-heading {
+        padding: 20px;
+    }
+}

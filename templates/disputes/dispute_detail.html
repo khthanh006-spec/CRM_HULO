@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Hồ sơ thẩm định #{{ ho_so.pk }} | CRM HULO
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'disputes/css/dispute_detail.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+<div class="m4-detail">
+    <a href="{% url 'disputes:home' %}" class="m4-detail__back">
+        ← Quay lại danh sách
+    </a>
+
+    <header class="m4-detail__hero">
+        <div>
+            <p class="m4-detail__eyebrow">PHỐI HỢP CHUYÊN MÔN</p>
+            <h1>📂 Hồ sơ thẩm định #{{ ho_so.pk }}</h1>
+            <p>{{ ticket.ma_ticket }} · {{ ticket.tieu_de }}</p>
+        </div>
+        <span class="m4-detail__badge">
+            ● {{ ho_so.get_trang_thai_display }}
+        </span>
+    </header>
+
+    {% if messages %}
+        <div class="m4-detail__messages" aria-live="polite">
+            {% for message in messages %}
+                <p class="m4-detail__message {{ message.tags }}">
+                    {{ message }}
+                </p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="m4-detail__layout">
+        <div class="m4-detail__column">
+
+            {% include "disputes/_reconsideration_panel.html" %}
+
+            <section class="m4-detail__card">
+                <h2>📝 Nội dung khiếu nại</h2>
+                <dl class="m4-detail__info">
+                    <div>
+                        <dt>Mã Ticket</dt>
+                        <dd>{{ ticket.ma_ticket }}</dd>
+                    </div>
+                    <div>
+                        <dt>Danh mục</dt>
+                        <dd>{{ ticket.danh_muc|default:"Chưa phân loại" }}</dd>
+                    </div>
+                    <div>
+                        <dt>Mức ưu tiên</dt>
+                        <dd>{{ ticket.get_muc_uu_tien_display }}</dd>
+                    </div>
+                    <div>
+                        <dt>Trạng thái Ticket</dt>
+                        <dd>{{ ticket.get_trang_thai_display }}</dd>
+                    </div>
+                </dl>
+
+                <h3>{{ ticket.tieu_de }}</h3>
+                <div class="m4-detail__text">
+                    {{ ticket.noi_dung|linebreaksbr }}
+                </div>
+            </section>
+
+            <section class="m4-detail__card">
+                <h2>📦 Đơn hàng liên quan</h2>
+                {% if don_hang %}
+                    <dl class="m4-detail__info">
+                        <div>
+                            <dt>Mã đơn hàng</dt>
+                            <dd>{{ don_hang.so_don_hang }}</dd>
+                        </div>
+                        <div>
+                            <dt>Trạng thái</dt>
+                            <dd>{{ don_hang.get_trang_thai_display }}</dd>
+                        </div>
+                        <div>
+                            <dt>Thời điểm đặt</dt>
+                            <dd>{{ don_hang.thoi_diem_dat|date:"d/m/Y H:i" }}</dd>
+                        </div>
+                        <div>
+                            <dt>Đơn vị tiền tệ</dt>
+                            <dd>{{ don_hang.don_vi_tien_te }}</dd>
+                        </div>
+                    </dl>
+
+                    <h3>🛍️ Sản phẩm trong đơn</h3>
+                    <ul class="m4-detail__files">
+                        {% for item in chi_tiet_don %}
+                            <li>
+                                <strong>{{ item.ten_san_pham_luc_mua }}</strong>
+                                <small>SKU: {{ item.ma_san_pham.ma_sku }}</small>
+                                <div class="m4-detail__product-meta">
+                                    <span>Số lượng: {{ item.so_luong }}</span>
+                                    <span>
+                                        Đã thanh toán:
+                                        {{ item.gia_tri_da_thanh_toan|floatformat:2 }}
+                                        {{ don_hang.don_vi_tien_te }}
+                                    </span>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li>Đơn hàng chưa có sản phẩm.</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="m4-detail__muted">
+                        Hồ sơ chưa được liên kết với đơn hàng.
+                    </p>
+                {% endif %}
+            </section>
+
+            <section class="m4-detail__card">
+                <h2>📋 Phương án xử lý khiếu nại</h2>
+
+                {% if phuong_an_moi_nhat %}
+                    <dl class="m4-detail__info">
+                        <div>
+                            <dt>Phiên bản</dt>
+                            <dd>V{{ phuong_an_moi_nhat.phien_ban }}</dd>
+                        </div>
+                        <div>
+                            <dt>Loại phương án</dt>
+                            <dd>{{ phuong_an_moi_nhat.get_loai_phuong_an_display }}</dd>
+                        </div>
+                        <div>
+                            <dt>Trạng thái</dt>
+                            <dd>{{ phuong_an_moi_nhat.get_trang_thai_display }}</dd>
+                        </div>
+
+                        {% if phuong_an_moi_nhat.loai_phuong_an == "HOAN_TIEN" %}
+                            <div>
+                                <dt>Số tiền đề xuất hoàn</dt>
+                                <dd>
+                                    {{ phuong_an_moi_nhat.so_tien_hoan|floatformat:2 }}
+                                    {{ phuong_an_moi_nhat.don_vi_tien_te }}
+                                </dd>
+                            </div>
+                        {% endif %}
+
+                        {% if phuong_an_moi_nhat.ma_chi_tiet_don %}
+                            <div>
+                                <dt>Sản phẩm xử lý</dt>
+                                <dd>
+                                    {{ phuong_an_moi_nhat.ma_chi_tiet_don.ten_san_pham_luc_mua }}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>Số lượng xử lý</dt>
+                                <dd>{{ phuong_an_moi_nhat.so_luong }}</dd>
+                            </div>
+                        {% endif %}
+
+                        {% if phuong_an_moi_nhat.dia_chi_nhan %}
+                            <div>
+                                <dt>Địa chỉ nhận</dt>
+                                <dd>{{ phuong_an_moi_nhat.dia_chi_nhan|linebreaksbr }}</dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+
+                    <h3>Nội dung phương án</h3>
+                    <div class="m4-detail__text">
+                        {{ phuong_an_moi_nhat.noi_dung|linebreaksbr }}
+                    </div>
+
+                    <h3>Căn cứ / lý do</h3>
+                    <div class="m4-detail__text">
+                        {{ phuong_an_moi_nhat.ly_do|linebreaksbr }}
+                    </div>
+
+                    {% if phuong_an_moi_nhat.ly_do_tu_choi %}
+                        <h3>Lý do từ chối hỗ trợ</h3>
+                        <div class="m4-detail__text">
+                            {{ phuong_an_moi_nhat.ly_do_tu_choi|linebreaksbr }}
+                        </div>
+                    {% endif %}
+
+                    {% if phuong_an_moi_nhat.trang_thai == "CHO_DUYET" %}
+                        <p class="m4-detail__hint">
+                            ⏳ Phương án hoàn tiền đang chờ quản lý phê duyệt.
+                        </p>
+                    {% endif %}
+
+                    {% if ket_qua_phe_duyet %}
+                        <h3>⚖️ Quyết định của quản lý</h3>
+
+                        {% if ket_qua_phe_duyet.quyet_dinh == "PHE_DUYET" %}
+                            <p class="m4-detail__message success">
+                                ✅ Đã phê duyệt phương án hoàn tiền
+                                V{{ phuong_an_moi_nhat.phien_ban }}.
+                            </p>
+                        {% else %}
+                            <p class="m4-detail__hint">
+                                ✍️ Quản lý yêu cầu điều chỉnh phương án
+                                V{{ phuong_an_moi_nhat.phien_ban }}.
+                            </p>
+                        {% endif %}
+
+                        <dl class="m4-detail__info">
+                            <div>
+                                <dt>Người quyết định</dt>
+                                <dd>{{ ket_qua_phe_duyet.nguoi_phe_duyet.ho_ten }}</dd>
+                            </div>
+                            <div>
+                                <dt>Thời điểm</dt>
+                                <dd>
+                                    {{ ket_qua_phe_duyet.thoi_diem_phe_duyet|date:"d/m/Y H:i" }}
+                                </dd>
+                            </div>
+                        </dl>
+
+                        <div class="m4-detail__text">
+                            {{ ket_qua_phe_duyet.ly_do|default:"Không có nhận xét thêm."|linebreaksbr }}
+                        </div>
+                    {% endif %}
+
+                    {% if co_the_xet_duyet %}
+                        <p>
+                            <a href="{% url 'disputes:review' ho_so.pk %}"
+                               class="m4-detail__button">
+                                ⚖️ Xét duyệt hoàn tiền
+                            </a>
+                        </p>
+                    {% elif co_the_xem_phe_duyet %}
+                        <p>
+                            <a href="{% url 'disputes:review' ho_so.pk %}"
+                               class="m4-detail__button">
+                                📄 Xem thông tin xét duyệt
+                            </a>
+                        </p>
+                    {% endif %}
+
+                    {% if co_the_gui_phe_duyet %}
+                        <p>
+                            <a href="{% url 'disputes:submit' ho_so.pk %}"
+                               class="m4-detail__button">
+                                📤 Gửi quản lý phê duyệt hoàn tiền
+                            </a>
+                        </p>
+                    {% endif %}
+
+                    {% if phuong_an_moi_nhat.ket_qua_thuc_hien %}
+                        <h3>⚙️ Tiến độ / kết quả thực hiện</h3>
+                        <div class="m4-detail__text">
+                            {{ phuong_an_moi_nhat.ket_qua_thuc_hien|linebreaksbr }}
+                        </div>
+                    {% endif %}
+
+                    {% if phuong_an_moi_nhat.trang_thai == "DA_HOAN_TAT" %}
+                        <p class="m4-detail__message success">
+                            ✅ Đã hoàn tất phương án lúc
+                            {{ phuong_an_moi_nhat.thoi_diem_hoan_tat|date:"d/m/Y H:i" }}.
+                            Kết quả đã được trả về CSKH.
+                        </p>
+                    {% endif %}
+
+                    {% if co_the_thuc_hien %}
+                        <p>
+                            <a href="{% url 'disputes:execute' ho_so.pk %}"
+                               class="m4-detail__button">
+                                {% if phuong_an_moi_nhat.trang_thai == "DANG_THUC_HIEN" %}
+                                    ⚙️ Tiếp tục thực hiện phương án
+                                {% else %}
+                                    ⚙️ Thực hiện phương án
+                                {% endif %}
+                            </a>
+                        </p>
+                    {% endif %}
+                {% else %}
+                    <p class="m4-detail__muted">
+                        Chưa có phương án xử lý.
+                    </p>
+                {% endif %}
+
+                {% if co_the_lap_phuong_an %}
+                    <p>
+                        <a href="{% url 'disputes:plan' ho_so.pk %}"
+                           class="m4-detail__button">
+                            {% if phuong_an_moi_nhat %}
+                                ✍️ Điều chỉnh phương án
+                            {% else %}
+                                ＋ Lập phương án xử lý
+                            {% endif %}
+                        </a>
+                    </p>
+                {% endif %}
+            </section>
+
+            {% include "disputes/_attachment_gallery.html" %}
+
+            <section class="m4-detail__card">
+                <h2>🕘 Lịch sử xử lý Ticket</h2>
+                <ol class="m4-detail__history">
+                    {% for log in lich_su %}
+                        <li>
+                            <strong>{{ log.hanh_dong }}</strong>
+                            <small>
+                                {{ log.thoi_diem|date:"d/m/Y H:i" }}
+                                · {{ log.nguoi_thuc_hien.username|default:"Hệ thống" }}
+                            </small>
+                            {% if log.noi_dung %}
+                                <div class="m4-detail__history-text">
+                                    {{ log.noi_dung|linebreaksbr }}
+                                </div>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li>Chưa có lịch sử xử lý.</li>
+                    {% endfor %}
+                </ol>
+            </section>
+        </div>
+
+        <aside class="m4-detail__column m4-detail__sidebar">
+            <section class="m4-detail__card">
+                <h2>🔍 Tiếp nhận thẩm định</h2>
+                <dl class="m4-detail__info m4-detail__info--single">
+                    <div>
+                        <dt>Yêu cầu thẩm định</dt>
+                        <dd>{{ ticket.get_trang_thai_tham_dinh_display }}</dd>
+                    </div>
+                    <div>
+                        <dt>Thời điểm yêu cầu</dt>
+                        <dd>
+                            {% if ticket.thoi_diem_yeu_cau_tham_dinh %}
+                                {{ ticket.thoi_diem_yeu_cau_tham_dinh|date:"d/m/Y H:i" }}
+                            {% else %}
+                                Chưa có yêu cầu
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+
+                {% if co_the_tiep_nhan %}
+                    <p class="m4-detail__hint">
+                        Hồ sơ được phân công cho bạn và đủ điều kiện tiếp nhận.
+                    </p>
+                    <form method="post" action="{% url 'disputes:accept' ho_so.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="m4-detail__button">
+                            ✓ Tiếp nhận xử lý hồ sơ
+                        </button>
+                    </form>
+                {% elif ly_do_chua_the_tiep_nhan %}
+                    <p class="m4-detail__hint">
+                        {{ ly_do_chua_the_tiep_nhan }}
+                    </p>
+                {% else %}
+                    <p class="m4-detail__hint">
+                        Trạng thái hồ sơ: {{ ho_so.get_trang_thai_display }}.
+                    </p>
+                {% endif %}
+            </section>
+
+            <section class="m4-detail__card">
+                <h2>⚖️ Kết luận thẩm định</h2>
+
+                {% if ho_so.ket_qua_tham_dinh %}
+                    <p>
+                        <strong>Kết quả:</strong>
+                        {{ ho_so.get_ket_qua_tham_dinh_display }}
+                    </p>
+                {% endif %}
+
+                {% if ho_so.ket_luan %}
+                    <div class="m4-detail__text">
+                        {{ ho_so.ket_luan|linebreaksbr }}
+                    </div>
+                {% elif co_the_ket_luan %}
+                    <p class="m4-detail__muted">
+                        Ghi nhận kết quả sau khi kiểm tra hồ sơ và bằng chứng.
+                    </p>
+                    <a href="{% url 'disputes:conclusion' ho_so.pk %}"
+                       class="m4-detail__button">
+                        ✍️ Ghi kết luận thẩm định
+                    </a>
+                {% else %}
+                    <p class="m4-detail__muted">Chưa có kết luận thẩm định.</p>
+                {% endif %}
+            </section>
+
+            <section class="m4-detail__card">
+                <h2>👤 Thông tin khách hàng</h2>
+                <dl class="m4-detail__info m4-detail__info--single">
+                    <div>
+                        <dt>Họ tên</dt>
+                        <dd>{{ ticket.khach_hang.ho_ten }}</dd>
+                    </div>
+                    <div>
+                        <dt>Email</dt>
+                        <dd>{{ ticket.khach_hang.email|default:"Chưa cập nhật" }}</dd>
+                    </div>
+                    <div>
+                        <dt>Số điện thoại</dt>
+                        <dd>{{ ticket.khach_hang.so_dien_thoai|default:"Chưa cập nhật" }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="m4-detail__card">
+                <h2>📋 Theo dõi hồ sơ</h2>
+                <dl class="m4-detail__info m4-detail__info--single">
+                    <div>
+                        <dt>Nhân viên thẩm định</dt>
+                        <dd>
+                            {% if ho_so.ma_nhan_vien_tham_dinh %}
+                                {{ ho_so.ma_nhan_vien_tham_dinh.ho_ten }}
+                            {% else %}
+                                Chưa phân công
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>CSKH phụ trách</dt>
+                        <dd>
+                            {% if ticket.nguoi_phu_trach %}
+                                {{ ticket.nguoi_phu_trach.ho_ten }}
+                            {% else %}
+                                Chưa phân công
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Hạn SLA</dt>
+                        <dd>
+                            {% if ticket.sla_deadline %}
+                                {{ ticket.sla_deadline|date:"d/m/Y H:i" }}
+                            {% else %}
+                                Chưa thiết lập
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Ngày tạo</dt>
+                        <dd>{{ ho_so.thoi_diem_tao|date:"d/m/Y H:i" }}</dd>
+                    </div>
+                    <div>
+                        <dt>Cập nhật gần nhất</dt>
+                        <dd>{{ ho_so.thoi_diem_cap_nhat|date:"d/m/Y H:i" }}</dd>
+                    </div>
+                </dl>
+            </section>
+        </aside>
+    </div>
+</div>
+{% endblock %}

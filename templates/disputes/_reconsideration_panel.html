@@ -1,0 +1,115 @@
+{% if ticket.trang_thai_xac_nhan == "DISAGREED" %}
+<section class="m4-detail__card">
+    <h2>🔄 Khách hàng yêu cầu xem xét lại</h2>
+
+    <dl class="m4-detail__info">
+        <div>
+            <dt>Thời điểm phản hồi</dt>
+            <dd>{{ ticket.thoi_diem_xac_nhan|date:"d/m/Y H:i" }}</dd>
+        </div>
+        <div>
+            <dt>Trạng thái Ticket</dt>
+            <dd>{{ ticket.get_trang_thai_display }}</dd>
+        </div>
+    </dl>
+
+    <h3>💬 Lý do không đồng ý</h3>
+    <div class="m4-detail__text">
+        {{ ticket.ly_do_khong_dong_y|default:"Chưa có nội dung phản hồi."|linebreaksbr }}
+    </div>
+
+    {% if ticket.trang_thai == "REOPENED" %}
+        <p class="m4-detail__hint">
+            ⏳ Chờ CSKH tiếp tục xử lý Ticket mở lại.
+        </p>
+    {% elif co_the_tiep_nhan_xem_xet %}
+        <p>
+            <a href="{% url 'disputes:reconsider' ho_so.pk %}"
+               class="m4-detail__button">
+                🔍 Xem xét lại phản hồi khách hàng
+            </a>
+        </p>
+    {% elif da_tiep_nhan_phan_hoi_xem_xet %}
+        <p class="m4-detail__hint">
+            Phản hồi này đã được tiếp nhận.
+            Xem thông tin xử lý ở khung bên dưới.
+        </p>
+    {% elif ticket.trang_thai_tham_dinh == "WAITING" %}
+        <p class="m4-detail__hint">
+            ⏳ Ticket đang chờ kết quả từ bộ phận thẩm định.
+        </p>
+    {% else %}
+        <p class="m4-detail__muted">
+            Việc tiếp nhận xem xét lại cần đúng nhân viên được
+            phân công và đủ điều kiện xử lý hồ sơ.
+        </p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if lan_xem_xet_moi_nhat %}
+<section class="m4-detail__card">
+    <h2>🔎 Lần xem xét lại gần nhất</h2>
+
+    <dl class="m4-detail__info">
+        <div>
+            <dt>Mã lần xem xét</dt>
+            <dd>#{{ lan_xem_xet_moi_nhat.pk }}</dd>
+        </div>
+        <div>
+            <dt>Trạng thái</dt>
+            <dd>{{ lan_xem_xet_moi_nhat.get_trang_thai_display }}</dd>
+        </div>
+        <div>
+            <dt>Phương án trước</dt>
+            <dd>V{{ lan_xem_xet_moi_nhat.phuong_an_truoc.phien_ban }}</dd>
+        </div>
+        <div>
+            <dt>Ngày tiếp nhận</dt>
+            <dd>{{ lan_xem_xet_moi_nhat.thoi_diem_tao|date:"d/m/Y H:i" }}</dd>
+        </div>
+    </dl>
+
+    <h3>Phản hồi đã tiếp nhận</h3>
+    <div class="m4-detail__text">
+        {{ lan_xem_xet_moi_nhat.ly_do_khach_hang|linebreaksbr }}
+    </div>
+
+    {% if lan_xem_xet_moi_nhat.trang_thai == "DA_KET_THUC" %}
+        <h3>✅ Kết quả xem xét</h3>
+        <div class="m4-detail__text">
+            {{ lan_xem_xet_moi_nhat.ket_qua_xem_xet|linebreaksbr }}
+        </div>
+        <p class="m4-detail__muted">
+            {{ lan_xem_xet_moi_nhat.nguoi_ket_thuc.ho_ten }}
+            · {{ lan_xem_xet_moi_nhat.thoi_diem_ket_thuc|date:"d/m/Y H:i" }}
+        </p>
+    {% elif lan_xem_xet_moi_nhat.trang_thai == "DA_LAP_PHUONG_AN" %}
+        <p class="m4-detail__hint">
+            Đã lập phương án điều chỉnh
+            V{{ lan_xem_xet_moi_nhat.phuong_an_moi.phien_ban }}.
+            Theo dõi phương án trong phần xử lý khiếu nại.
+        </p>
+    {% else %}
+        <p class="m4-detail__hint">
+            ⏳ Bộ phận thẩm định đang kiểm tra phản hồi.
+        </p>
+    {% endif %}
+
+    {% if co_the_ghi_ket_qua_xem_xet %}
+        <p>
+            <a href="{% url 'disputes:reconsider_result' ho_so.pk %}"
+               class="m4-detail__button">
+                📝 Ghi nhận kết quả xem xét
+            </a>
+        </p>
+    {% elif co_the_xem_ket_qua_xem_xet %}
+        <p>
+            <a href="{% url 'disputes:reconsider_result' ho_so.pk %}"
+               class="m4-detail__button">
+                📄 Xem kết quả xem xét
+            </a>
+        </p>
+    {% endif %}
+</section>
+{% endif %}

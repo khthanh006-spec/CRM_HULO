@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Kết quả xem xét lại | CRM HULO{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'disputes/css/dispute_detail.css' %}?v=2">
+<style>
+    .m4-review-result {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .m4-review-result textarea {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 14px;
+        margin: 12px 0;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font: inherit;
+        line-height: 1.7;
+        resize: vertical;
+    }
+
+    .m4-review-result textarea:focus {
+        outline: 3px solid #dbeafe;
+        border-color: #2563eb;
+    }
+
+    .m4-review-result .errorlist {
+        padding: 12px 12px 12px 30px;
+        background: #fef2f2;
+        color: #b91c1c;
+        border-radius: 10px;
+    }
+
+    .m4-review-result__notice {
+        padding: 16px;
+        margin: 16px 0;
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+        border-radius: 12px;
+        line-height: 1.7;
+    }
+
+    .m4-review-result__confirm {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 20px 0;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="m4-detail m4-review-result">
+
+    <a href="{% url 'disputes:detail' ho_so.pk %}"
+       class="m4-detail__back">
+        ← Quay lại hồ sơ
+    </a>
+
+    <header class="m4-detail__hero">
+        <div>
+            <p class="m4-detail__eyebrow">PHẢN HỒI SAU XỬ LÝ</p>
+            <h1>🔎 Kết quả xem xét lại</h1>
+            <p>Hồ sơ #{{ ho_so.pk }} · {{ ticket.ma_ticket }}</p>
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="m4-detail__messages" aria-live="polite">
+            {% for message in messages %}
+                <p class="m4-detail__message {{ message.tags }}">
+                    {{ message }}
+                </p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="m4-detail__card">
+        <h2>💬 Phản hồi cần kiểm tra</h2>
+
+        <p>
+            Phản hồi lúc:
+            {{ lan_xem_xet.thoi_diem_phan_hoi|date:"d/m/Y H:i" }}
+        </p>
+
+        <div class="m4-detail__text">
+            {{ lan_xem_xet.ly_do_khach_hang|linebreaksbr }}
+        </div>
+
+        <h3>Nội dung đã tiếp nhận</h3>
+        <div class="m4-detail__text">
+            {{ lan_xem_xet.noi_dung_tiep_nhan|linebreaksbr }}
+        </div>
+    </section>
+
+    <section class="m4-detail__card">
+        <h2>📋 Phương án liên quan</h2>
+
+        <p>
+            V{{ lan_xem_xet.phuong_an_truoc.phien_ban }}
+            · {{ lan_xem_xet.phuong_an_truoc.get_loai_phuong_an_display }}
+        </p>
+
+        <div class="m4-detail__text">
+            {{ lan_xem_xet.phuong_an_truoc.ket_qua_thuc_hien|linebreaksbr }}
+        </div>
+    </section>
+
+    <section class="m4-detail__card">
+        {% if da_ket_thuc %}
+            <h2>✅ Đã ghi nhận kết quả</h2>
+
+            <p>
+                {{ lan_xem_xet.nguoi_ket_thuc.ho_ten }}
+                · {{ lan_xem_xet.thoi_diem_ket_thuc|date:"d/m/Y H:i" }}
+            </p>
+
+            <div class="m4-detail__text">
+                {{ lan_xem_xet.ket_qua_xem_xet|linebreaksbr }}
+            </div>
+
+            <p class="m4-review-result__notice">
+                Kết quả đã được lưu vào ghi chú nội bộ của Ticket.
+                CSKH tiếp tục xử lý và thông báo cho khách hàng.
+            </p>
+        {% else %}
+            <h2>📝 Ghi nhận kết quả kiểm tra</h2>
+
+            <p class="m4-review-result__notice">
+                Dùng khi đã kiểm tra xong và có thể bàn giao cho CSKH.
+                Nếu cần thực hiện phương án mới, hãy quay lại hồ sơ
+                để lập phương án điều chỉnh.
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                {{ form.ma_lan_xem_xet }}
+                {{ form.ma_lan_xem_xet.errors }}
+
+                <label for="{{ form.ket_qua.id_for_label }}">
+                    <strong>{{ form.ket_qua.label }}</strong>
+                </label>
+
+                {{ form.ket_qua }}
+                {{ form.ket_qua.errors }}
+
+                <label class="m4-review-result__confirm"
+                       for="{{ form.xac_nhan.id_for_label }}">
+                    {{ form.xac_nhan }}
+                    <span>{{ form.xac_nhan.label }}</span>
+                </label>
+
+                {{ form.xac_nhan.errors }}
+
+                <button type="submit" class="m4-detail__button">
+                    ✓ Lưu kết quả và bàn giao CSKH
+                </button>
+            </form>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}
