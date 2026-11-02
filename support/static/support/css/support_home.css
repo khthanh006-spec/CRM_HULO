@@ -1,0 +1,797 @@
+
+/* =====================================================
+   CRM HULO - MODULE 1
+   HELP CENTER - GIAO DIEN TRANG CHU
+   ===================================================== */
+
+/* ===== TONG THE ===== */
+
+.support-container {
+    width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 25px 24px 40px;
+    box-sizing: border-box;
+    color: #263445;
+}
+
+.support-section {
+    margin-bottom: 25px;
+}
+
+.support-title {
+    color: #123b70;
+    font-size: 21px;
+    font-weight: 700;
+    margin: 0 0 18px;
+}
+
+.support-subtitle {
+    color: #123b70;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 14px;
+}
+
+/* ===== BANNER ===== */
+
+.support-banner {
+    background: linear-gradient(135deg, #e8f3ff, #f4f8ff);
+    padding: 38px 25px;
+    border: 1px solid #d8e8fb;
+    border-radius: 14px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.support-banner h1 {
+    color: #103d78;
+    font-size: 30px;
+    font-weight: 750;
+    margin: 0 0 12px;
+}
+
+.support-banner p {
+    color: #536579;
+    font-size: 15px;
+    line-height: 1.7;
+    margin: 0 auto;
+    max-width: 750px;
+}
+
+/* ===== BON DANH MUC ===== */
+
+.support-category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.support-category-card {
+    min-height: 105px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 9px;
+    background: #ffffff;
+    border: 1px solid #dce7f4;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.support-category-card:hover {
+    border-color: #2684e8;
+    background: #f5faff;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 16px rgba(20, 80, 150, 0.08);
+}
+
+.support-category-card.active {
+    border: 2px solid #1683ff;
+    background: #edf6ff;
+}
+
+.support-category-name {
+    color: #123b70;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.support-category-description {
+    color: #718096;
+    font-size: 13px;
+}
+
+/* ===== BO CUC FAQ VA CHATBOT ===== */
+
+.support-main-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
+    align-items: start;
+    gap: 22px;
+    margin-top: 12px;
+}
+
+.support-faq-panel {
+    min-width: 0;
+    background: #ffffff;
+    border: 1px solid #e0e8f1;
+    border-radius: 13px;
+    padding: 22px;
+    box-sizing: border-box;
+}
+
+/* ===== TIM KIEM ===== */
+
+.support-search {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+}
+
+.support-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 15px;
+    border: 1px solid #cdd9e6;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background: #ffffff;
+}
+
+.support-search input:focus {
+    border-color: #1683ff;
+    box-shadow: 0 0 0 3px rgba(22, 131, 255, 0.1);
+}
+
+.support-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    background: #1683ff;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.support-button:hover {
+    background: #086bd6;
+    color: #ffffff;
+}
+
+.support-reset {
+    display: inline-block;
+    margin-top: 10px;
+    color: #1683ff;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.support-reset:hover {
+    text-decoration: underline;
+}
+
+/* ===== FAQ GOI Y ===== */
+
+.support-faq-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.support-suggestion-card {
+    display: block;
+    padding: 13px 15px;
+    background: #f7faff;
+    border: 1px solid #e0eaf6;
+    border-radius: 8px;
+    color: #234b78;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.support-suggestion-card:hover {
+    background: #edf5ff;
+    border-color: #1683ff;
+    color: #086bd6;
+}
+
+/* ===== DANH SACH FAQ ===== */
+
+.support-faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.support-faq-item {
+    background: #ffffff;
+    border: 1px solid #dce6f1;
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.support-faq-item[open] {
+    border-color: #1683ff;
+    box-shadow: 0 3px 12px rgba(22, 131, 255, 0.07);
+}
+
+.support-faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    color: #193f6e;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.6;
+    cursor: pointer;
+    list-style: none;
+}
+
+.support-faq-question::-webkit-details-marker {
+    display: none;
+}
+
+.support-faq-question:hover {
+    background: #f5f9ff;
+}
+
+.support-faq-arrow {
+    flex-shrink: 0;
+    color: #1683ff;
+    font-size: 20px;
+    transition: transform 0.2s ease;
+}
+
+.support-faq-item[open] .support-faq-arrow {
+    transform: rotate(180deg);
+}
+
+/* ===== NOI DUNG TRA LOI ===== */
+
+.support-faq-answer {
+    padding: 18px;
+    border-top: 1px solid #e7edf5;
+    background: #fbfdff;
+}
+
+.support-faq-answer-content {
+    color: #46576b;
+    font-size: 14px;
+    line-height: 1.85;
+    overflow-wrap: anywhere;
+}
+
+/* ===== DANH GIA FAQ ===== */
+
+.support-faq-feedback {
+    margin-top: 22px;
+    padding-top: 17px;
+    border-top: 1px solid #e4ebf3;
+}
+
+.support-faq-feedback > p:first-child {
+    color: #263f5b;
+    font-size: 14px;
+    font-weight: 650;
+    margin: 0 0 12px;
+}
+
+.support-feedback-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.support-feedback-button {
+    padding: 10px 16px;
+    border: 1px solid #cbd9e8;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #31516f;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.support-feedback-button:hover {
+    background: #edf6ff;
+    border-color: #1683ff;
+    color: #086bd6;
+}
+
+.support-feedback-hint {
+    margin: 14px 0 0;
+    padding: 12px;
+    background: #edf5ff;
+    border-radius: 8px;
+    color: #45627f;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* ===== CHATBOT PANEL ===== */
+
+.support-chatbot-panel {
+    min-width: 0;
+    height: 680px;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #dce6f1;
+    border-radius: 13px;
+    overflow: hidden;
+    box-shadow: 0 3px 14px rgba(24, 65, 110, 0.06);
+}
+
+.support-chatbot-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 17px 19px;
+    background: #1269bd;
+    color: #ffffff;
+}
+
+.support-chatbot-avatar {
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.17);
+    border-radius: 50%;
+    font-size: 22px;
+}
+
+.support-chatbot-header h2 {
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 5px;
+}
+
+.support-chatbot-header p {
+    color: #e5f1ff;
+    font-size: 12px;
+    margin: 0;
+}
+
+.support-chatbot-content {
+    flex: 1;
+    min-height: 0;
+    background: #f8fbff;
+}
+
+.support-chatbot-frame {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #ffffff;
+}
+
+/* ===== THONG BAO TRONG ===== */
+
+.support-empty {
+    padding: 22px;
+    border: 1px dashed #ccd8e5;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #667085;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.support-empty p {
+    margin: 10px 0;
+}
+
+/* ===== RESPONSIVE TABLET ===== */
+
+@media (max-width: 1000px) {
+
+    .support-main-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .support-chatbot-panel {
+        height: 600px;
+    }
+
+}
+
+/* ===== RESPONSIVE MOBILE ===== */
+
+@media (max-width: 650px) {
+
+    .support-container {
+        padding: 16px 12px 30px;
+    }
+
+    .support-banner {
+        padding: 28px 17px;
+        margin-bottom: 22px;
+    }
+
+    .support-banner h1 {
+        font-size: 23px;
+    }
+
+    .support-banner p {
+        font-size: 13px;
+    }
+
+    .support-title {
+        font-size: 18px;
+    }
+
+    .support-category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .support-category-card {
+        min-height: 90px;
+        padding: 13px;
+    }
+
+    .support-category-name {
+        font-size: 14px;
+    }
+
+    .support-category-description {
+        font-size: 11px;
+    }
+
+    .support-main-layout {
+        gap: 17px;
+    }
+
+    .support-faq-panel {
+        padding: 15px;
+    }
+
+    .support-search {
+        flex-direction: column;
+    }
+
+    .support-search input,
+    .support-search button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .support-faq-question {
+        padding: 13px;
+        font-size: 13px;
+    }
+
+    .support-faq-answer {
+        padding: 14px;
+    }
+
+    .support-feedback-form {
+        flex-direction: column;
+    }
+
+    .support-feedback-button {
+        width: 100%;
+    }
+
+    .support-chatbot-panel {
+        height: 560px;
+    }
+
+}
+/* ===== THONG BAO DANH GIA FAQ ===== */
+
+.support-messages {
+    margin-bottom: 20px;
+}
+
+.support-message {
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.support-message.success {
+    background: #eaf8ef;
+    border: 1px solid #b7e4c7;
+    color: #237344;
+}
+
+.support-message.info {
+    background: #edf5ff;
+    border: 1px solid #c8def7;
+    color: #245b91;
+}
+
+.support-message.error {
+    background: #fff0f0;
+    border: 1px solid #f3c5c5;
+    color: #a52a2a;
+}
+
+.support-message.warning {
+    background: #fff8e8;
+    border: 1px solid #f2dfa9;
+    color: #856404;
+}
+
+/* ===== DONG BO GIAO DIEN M1 VOI M2 ===== */
+
+/* Banner theo phong cach M2 */
+.support-banner {
+    text-align: left;
+    padding: 38px 32px;
+    background: linear-gradient(110deg, #e6f3ff, #cde5ff);
+    border: none;
+}
+
+.support-banner p {
+    margin: 0;
+    max-width: 850px;
+}
+
+/* Tieu de danh muc can giua */
+.support-container > .support-section > .support-title {
+    text-align: center;
+}
+
+/* The danh muc gon gang, dong deu */
+.support-category-card {
+    min-height: 78px;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+}
+
+.support-category-name {
+    font-size: 15px;
+}
+
+.support-category-description {
+    font-size: 12px;
+}
+
+/* Hai cot FAQ va Chatbot */
+.support-main-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 18px;
+}
+
+.support-faq-panel {
+    min-width: 0;
+}
+
+.support-chatbot-panel {
+    height: 620px;
+}
+
+/* Khung chat moi khong su dung iframe */
+.support-chatbot-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#hulo-chat-messages {
+    flex: 1;
+    min-height: 0;
+    height: auto !important;
+    overflow-y: auto;
+}
+
+#hulo-chat-form {
+    flex-shrink: 0;
+}
+
+#hulo-chat-input {
+    width: 100%;
+    min-width: 0;
+}
+
+#hulo-chat-send {
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 1000px) {
+    .support-main-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .support-chatbot-panel {
+        height: 600px;
+    }
+}
+
+@media (max-width: 650px) {
+    .support-banner {
+        padding: 28px 18px;
+    }
+
+    .support-category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .support-chatbot-panel {
+        height: 560px;
+    }
+}
+
+/* ===== M1 DONG BO GIAO DIEN M2 ===== */
+
+.support-container {
+    max-width: 1220px;
+    padding: 22px 24px 35px;
+}
+
+.support-banner {
+    padding: 36px 32px;
+    margin-bottom: 22px;
+    text-align: left;
+    background: linear-gradient(110deg, #e6f3ff, #cde5ff);
+}
+
+.support-banner h1 {
+    font-size: 29px;
+}
+
+.support-banner p {
+    margin: 0;
+}
+
+/* Danh muc ho tro */
+.support-container > .support-section {
+    margin-bottom: 20px;
+}
+
+.support-container > .support-section > .support-title {
+    text-align: center;
+    font-size: 20px;
+    margin-bottom: 18px;
+}
+
+.support-category-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.support-category-card {
+    min-height: 58px;
+    padding: 12px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+}
+
+.support-category-name {
+    font-size: 14px;
+}
+
+.support-category-description {
+    font-size: 11px;
+}
+
+/* FAQ va chatbot */
+.support-main-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 18px;
+    margin-top: 0;
+    align-items: stretch;
+}
+
+.support-faq-panel {
+    padding: 18px;
+    min-height: 460px;
+}
+
+.support-chatbot-panel {
+    height: 460px;
+}
+
+.support-chatbot-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+#hulo-chat-messages {
+    flex: 1;
+    min-height: 0;
+    height: auto !important;
+    overflow-y: auto;
+}
+
+#hulo-chat-form {
+    flex-shrink: 0;
+}
+
+/* FAQ */
+.support-title {
+    font-size: 17px;
+}
+
+.support-subtitle {
+    font-size: 14px;
+}
+
+.support-section {
+    margin-bottom: 20px;
+}
+
+.support-suggestion-card {
+    padding: 11px 13px;
+}
+
+.support-faq-question {
+    padding: 12px 14px;
+}
+
+/* Nut ho tro nam ben duoi */
+.support-help-footer {
+    margin-top: 20px;
+    padding: 26px 20px;
+    text-align: center;
+    background: #edf5ff;
+    border-radius: 12px;
+}
+
+.support-help-footer p {
+    margin: 0 0 12px;
+    color: #123b70;
+}
+
+/* Responsive */
+@media (max-width: 1000px) {
+    .support-main-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .support-chatbot-panel {
+        height: 500px;
+    }
+}
+
+@media (max-width: 650px) {
+    .support-container {
+        padding: 16px 12px 28px;
+    }
+
+    .support-category-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .support-banner {
+        padding: 26px 18px;
+    }
+
+    .support-banner h1 {
+        font-size: 23px;
+    }
+}

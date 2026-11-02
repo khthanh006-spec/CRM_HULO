@@ -1,0 +1,411 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Cung cấp bằng chứng - HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* UC-2.5: GIAO DIỆN CUNG CẤP BẰNG CHỨNG */
+
+    .m2-evidence-page {
+        max-width: 850px;
+        margin: 35px auto;
+        padding: 0 20px 40px;
+        color: #173b68;
+    }
+
+    .m2-evidence-heading {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .m2-evidence-heading h1 {
+        color: #103e78;
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .m2-evidence-card {
+        background: white;
+        border: 2px solid #84bdeb;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 60, 120, .06);
+    }
+
+    .m2-evidence-step {
+        background: #eef6ff;
+        border-radius: 10px;
+        padding: 17px;
+        margin-bottom: 25px;
+        color: #125ca7;
+    }
+
+    .m2-section-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #135ba4;
+        border-bottom: 1px solid #dce7f3;
+        padding-bottom: 10px;
+        margin-bottom: 18px;
+    }
+
+    /* Khu vực tải tệp */
+
+    .m2-upload-area {
+        background: #f7fbff;
+        border: 2px dashed #a9cfee;
+        border-radius: 12px;
+        padding: 35px 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .m2-upload-icon {
+        font-size: 42px;
+        margin-bottom: 12px;
+    }
+
+    .m2-upload-area h2 {
+        font-size: 22px;
+        color: #1677d2;
+        margin-bottom: 12px;
+    }
+
+    .m2-upload-area p {
+        color: #6581a2;
+        line-height: 1.6;
+    }
+
+    .m2-upload-input {
+        margin-top: 20px;
+    }
+
+    .m2-upload-input input[type="file"] {
+        max-width: 100%;
+        padding: 12px;
+        background: white;
+        border: 1px solid #cbdbea;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    /* Danh sách tệp */
+
+    .m2-files {
+        margin-top: 30px;
+    }
+
+    .m2-file-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px;
+        border: 1px solid #dce7f3;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        background: #fafcff;
+    }
+
+    .m2-file-icon {
+        font-size: 26px;
+    }
+
+    .m2-file-info {
+        min-width: 0;
+    }
+
+    .m2-file-name {
+        font-weight: bold;
+        overflow-wrap: anywhere;
+    }
+
+    .m2-file-size {
+        font-size: 13px;
+        color: #6581a2;
+        margin-top: 5px;
+    }
+
+    .m2-empty {
+        padding: 20px;
+        text-align: center;
+        color: #6581a2;
+        background: #f7fbff;
+        border-radius: 10px;
+    }
+
+    /* Thông báo */
+
+    .m2-success {
+        background: #eaf7ee;
+        color: #176337;
+        padding: 17px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .m2-error {
+        background: #fff0f0;
+        color: #b42318;
+        padding: 14px;
+        border-radius: 8px;
+        margin-bottom: 18px;
+    }
+
+    /* Nút */
+
+    .m2-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+
+    .m2-button {
+        display: inline-block;
+        background: #1677d2;
+        color: white;
+        padding: 12px 22px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .m2-button:hover {
+        background: #095dab;
+        color: white;
+    }
+
+    .m2-back {
+        display: inline-block;
+        background: #f1f5f9;
+        color: #315b82;
+        border: 1px solid #d8e2ed;
+        padding: 12px 22px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .m2-note {
+        color: #6581a2;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 600px) {
+        .m2-evidence-card {
+            padding: 18px;
+        }
+
+        .m2-upload-area {
+            padding: 22px 12px;
+        }
+
+        .m2-actions {
+            flex-direction: column;
+        }
+
+        .m2-actions a,
+        .m2-actions button {
+            text-align: center;
+        }
+    }
+</style>
+
+
+<!-- UC-2.5: CUNG CẤP BẰNG CHỨNG -->
+
+<div class="m2-evidence-page">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="m2-evidence-heading">
+
+        <h1>Cung cấp bằng chứng</h1>
+
+        <p>
+            Bổ sung hình ảnh hoặc tài liệu giúp HULO
+            hiểu rõ vấn đề của bạn.
+        </p>
+
+    </div>
+
+
+    <div class="m2-evidence-card">
+
+        <!-- THÔNG TIN BƯỚC -->
+        <div class="m2-evidence-step">
+
+            <strong>
+                BƯỚC 3 – BẰNG CHỨNG / TỆP ĐÍNH KÈM
+            </strong>
+
+            <p class="m2-note">
+                Yêu cầu đang được lưu tạm,
+                chưa gửi chính thức đến nhân viên.
+            </p>
+
+        </div>
+
+
+        <!-- THÔNG BÁO THÀNH CÔNG -->
+
+        {% if thong_bao %}
+
+            <div class="m2-success">
+                {{ thong_bao }}
+            </div>
+
+        {% endif %}
+
+
+        <!-- LỖI CHUNG -->
+
+        {% if form.non_field_errors %}
+
+            <div class="m2-error">
+                {{ form.non_field_errors }}
+            </div>
+
+        {% endif %}
+
+
+        <!-- FORM TẢI BẰNG CHỨNG -->
+
+        <form method="post"
+              enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <div class="m2-section-title">
+                TẢI BẰNG CHỨNG
+            </div>
+
+
+            <div class="m2-upload-area">
+
+                <div class="m2-upload-icon">
+                    📁
+                </div>
+
+                <h2>Tải ảnh hoặc tệp lên</h2>
+
+                <p>
+                    Chọn hình ảnh sản phẩm bị lỗi,
+                    hóa đơn hoặc tài liệu liên quan.
+                </p>
+
+                <p class="m2-note">
+                    Định dạng: JPG, PNG, PDF, MP4.
+                    Dung lượng tối đa: 10 MB mỗi tệp.
+                    Tối đa 5 tệp cho mỗi bản nháp.
+                </p>
+
+
+                <div class="m2-upload-input">
+
+                    <label for="{{ form.tep_bang_chung.id_for_label }}">
+                        <strong>Chọn tệp bằng chứng</strong>
+                    </label>
+
+                    <div style="margin-top: 12px;">
+                        {{ form.tep_bang_chung }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- HIỂN THỊ LỖI TỆP -->
+
+            {% if form.tep_bang_chung.errors %}
+
+                <div class="m2-error">
+                    {{ form.tep_bang_chung.errors }}
+                </div>
+
+            {% endif %}
+
+
+            <div class="m2-actions">
+
+                <a href="{% url 'chatbot:khai_bao_yeu_cau' %}"
+                   class="m2-back">
+                    Quay lại
+                </a>
+
+                <button type="submit"
+                        class="m2-button">
+                    Tải bằng chứng
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- DANH SÁCH BẰNG CHỨNG -->
+
+        <div class="m2-files">
+
+            <div class="m2-section-title">
+                DANH SÁCH BẰNG CHỨNG ĐÃ TẢI
+            </div>
+
+            {% if danh_sach_tep %}
+
+                {% for tep in danh_sach_tep %}
+
+                    <div class="m2-file-item">
+
+                        <div class="m2-file-icon">
+                            📄
+                        </div>
+
+                        <div class="m2-file-info">
+
+                            <div class="m2-file-name">
+                                {{ tep.ten_goc }}
+                            </div>
+
+                            <div class="m2-file-size">
+                                {{ tep.dung_luong|filesizeformat }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="m2-empty">
+                    Bạn chưa tải lên tệp bằng chứng nào.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <p class="m2-note" style="margin-top: 22px;">
+            Các tệp đang được lưu tạm.
+            Chức năng xem trước, xóa hoặc thay thế
+            sẽ được bổ sung sau khi kiểm thử tải lên.
+            Chưa có Ticket chính thức được tạo.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}
