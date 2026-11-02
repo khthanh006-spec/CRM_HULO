@@ -29,6 +29,7 @@ from tickets.models import (
     Ticket,
     TicketAttachment,
     TicketCategory,
+    TicketCategoryQueue,
     TicketQueue,
     SLAConfig,
     TicketLog,
@@ -100,6 +101,12 @@ class M2M3DatabaseIntegrationTest(TransactionTestCase):
             ten_queue="CSKH - Sản phẩm",
             mo_ta="Xu ly van de san pham",
             dang_hoat_dong=True,
+        )
+
+        # Lien ket Category -> Queue theo Smart Routing M3.
+        self.category_queue = TicketCategoryQueue.objects.create(
+            danh_muc=self.category,
+            queue=self.queue,
         )
 
         self.sla = SLAConfig.objects.create(
