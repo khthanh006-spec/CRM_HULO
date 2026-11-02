@@ -5,17 +5,23 @@ Kiem thu tich hop bang chung Module 2 -> Module 3.
 Muc tieu:
 - Neu khong mo duoc anh nguon M2,
   khong duoc goi service tao Ticket M3.
+- Kiem tra gui lai Ticket va xu ly bang chung.
+- Kiem tra giu ban nhap khi gui that bai.
+- Kiem tra xoa ban nhap khi gui thanh cong.
 - Khong su dung database that.
 - Khong thay doi Smart Routing hoac SLA.
 """
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
+from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.exceptions import ValidationError
-from django.test import SimpleTestCase
+from django.test import RequestFactory, SimpleTestCase
 
-from .attachment_integration import (
-    tao_ticket_kem_bang_chung,
+from .attachment_integration import tao_ticket_kem_bang_chung
+from .integration_m3 import (
+    BANG_ANH_XA_M2_M3,
+    gui_yeu_cau_sang_m3,
 )
 
 
@@ -60,9 +66,7 @@ class AttachmentIntegrationTest(SimpleTestCase):
                 danh_muc=object(),
             )
 
-        # Service M3 khong duoc goi neu anh nguon loi.
         mock_tao_ticket.assert_not_called()
-
 
     @patch(
         "chatbot.attachment_integration.luu_anh_bang_chung_ticket"
@@ -84,7 +88,6 @@ class AttachmentIntegrationTest(SimpleTestCase):
         mock_luu_anh,
     ):
         from contextlib import nullcontext
-        from unittest.mock import Mock
 
         yeu_cau = {
             "ma_khach_hang": 1,
@@ -106,7 +109,6 @@ class AttachmentIntegrationTest(SimpleTestCase):
         danh_muc = Mock()
         ticket_cu = Mock()
 
-        # Mo phong M2 da kiem tra hai anh nguon.
         mock_chuan_bi.return_value = yeu_cau["bang_chung"]
 
         tep_1 = Mock(name="tep_1")
@@ -116,10 +118,8 @@ class AttachmentIntegrationTest(SimpleTestCase):
             [tep_1, tep_2]
         )
 
-        # M3 tra ve Ticket cu theo source_request_id.
         mock_tao_ticket.return_value = ticket_cu
 
-        # Service M3 tu xu ly trung anh nguon.
         mock_luu_anh.side_effect = [
             Mock(name="anh_da_co"),
             Mock(name="anh_moi"),
@@ -158,7 +158,6 @@ class AttachmentIntegrationTest(SimpleTestCase):
             "kh_1/anh_2.jpg",
         )
 
-
     @patch(
         "chatbot.attachment_integration.luu_anh_bang_chung_ticket"
     )
@@ -179,7 +178,6 @@ class AttachmentIntegrationTest(SimpleTestCase):
         mock_luu_anh,
     ):
         from contextlib import nullcontext
-        from unittest.mock import Mock
 
         yeu_cau = {
             "ma_khach_hang": 1,
@@ -198,7 +196,6 @@ class AttachmentIntegrationTest(SimpleTestCase):
 
         mock_tao_ticket.return_value = Mock()
 
-        # Anh 1 thanh cong, anh 2 that bai.
         mock_luu_anh.side_effect = [
             Mock(),
             ValidationError("Khong the luu anh thu hai."),
@@ -211,10 +208,8 @@ class AttachmentIntegrationTest(SimpleTestCase):
                 danh_muc=Mock(),
             )
 
-        # Dung ngay khi anh thu hai loi.
         self.assertEqual(mock_luu_anh.call_count, 2)
 
-        # Anh thu ba chua duoc xu ly.
         self.assertEqual(
             mock_luu_anh.call_args_list[-1].kwargs[
                 "ma_anh_nguon"
@@ -222,41 +217,32 @@ class AttachmentIntegrationTest(SimpleTestCase):
             "kh_1/anh_2.jpg",
         )
 
-        # Ham dieu phoi khong tra ve thanh cong.
         mock_tao_ticket.assert_called_once()
-
-
-from unittest.mock import patch
-from django.core.exceptions import ValidationError
-from django.test import SimpleTestCase, RequestFactory
-from django.contrib.messages.storage.fallback import FallbackStorage
-
-from chatbot.integration_m3 import gui_yeu_cau_sang_m3
 
 
 class M2M3SubmissionFailureTest(SimpleTestCase):
 
     @patch("chatbot.integration_m3.redirect")
     @patch("chatbot.integration_m3.tao_ticket_kem_bang_chung")
-    @patch("chatbot.integration_m3.TicketCategory.objects.filter")
+    @patch("chatbot.integration_m3.tim_danh_muc_m3")
     @patch("chatbot.integration_m3.YeuCauHoTroForm")
     @patch("chatbot.integration_m3.Customer.objects.filter")
     def test_failure_keeps_m2_draft(
         self,
         mock_customer_filter,
         mock_form,
-        mock_category_filter,
+        mock_find_category,
         mock_send,
         mock_redirect,
     ):
-        from unittest.mock import Mock
-
         customer = Mock()
         customer.pk = 1
 
+        category = Mock()
+
         mock_customer_filter.return_value.first.return_value = customer
         mock_form.return_value.is_valid.return_value = True
-        mock_category_filter.return_value.first.return_value = Mock()
+        mock_find_category.return_value = category
 
         mock_send.side_effect = ValidationError(
             "Luu bang chung that bai"
@@ -273,7 +259,9 @@ class M2M3SubmissionFailureTest(SimpleTestCase):
         draft = {
             "ma_khach_hang": 1,
             "loai_van_de": "SAN_PHAM_LOI",
-            "thong_tin": {"mo_ta": "San pham bi hong"},
+            "thong_tin": {
+                "mo_ta": "San pham bi hong"
+            },
             "bang_chung": [
                 {"ten_goc": "anh_1.jpg"}
             ],
@@ -299,39 +287,52 @@ class M2M3SubmissionFailureTest(SimpleTestCase):
             request.session,
         )
 
-        mock_send.assert_called_once()
+        mock_find_category.assert_called_once_with(
+            loai_van_de="SAN_PHAM_LOI",
+            bang_anh_xa=BANG_ANH_XA_M2_M3,
+        )
+
+        mock_send.assert_called_once_with(
+            yeu_cau=draft,
+            khach_hang=customer,
+            danh_muc=category,
+        )
+
         mock_redirect.assert_called_once_with(
             "chatbot:xac_nhan_yeu_cau"
         )
 
-
     @patch("chatbot.integration_m3.redirect")
     @patch("chatbot.integration_m3.tao_ticket_kem_bang_chung")
-    @patch("chatbot.integration_m3.TicketCategory.objects.filter")
+    @patch("chatbot.integration_m3.tim_danh_muc_m3")
     @patch("chatbot.integration_m3.YeuCauHoTroForm")
     @patch("chatbot.integration_m3.Customer.objects.filter")
     def test_success_clears_draft_only_after_service_returns(
         self,
         mock_customer_filter,
         mock_form,
-        mock_category_filter,
+        mock_find_category,
         mock_send,
         mock_redirect,
     ):
-        from unittest.mock import Mock
-
         customer = Mock()
         customer.pk = 1
 
+        category = Mock()
+
         mock_customer_filter.return_value.first.return_value = customer
         mock_form.return_value.is_valid.return_value = True
-        mock_category_filter.return_value.first.return_value = Mock()
+        mock_find_category.return_value = category
 
         draft = {
             "ma_khach_hang": 1,
             "loai_van_de": "SAN_PHAM_LOI",
-            "thong_tin": {"mo_ta": "San pham bi hong"},
-            "bang_chung": [{"ten_goc": "anh_1.jpg"}],
+            "thong_tin": {
+                "mo_ta": "San pham bi hong"
+            },
+            "bang_chung": [
+                {"ten_goc": "anh_1.jpg"}
+            ],
         }
 
         request = RequestFactory().post(
@@ -346,14 +347,19 @@ class M2M3SubmissionFailureTest(SimpleTestCase):
             "m2_yeu_cau_ho_tro": draft
         }
 
-        # Dung RequestFactory nen can gan message storage.
         from django.contrib.messages.storage.base import BaseStorage
 
         class TestMessageStorage(BaseStorage):
             def _get(self, *args, **kwargs):
                 return [], True
 
-            def _store(self, messages, response, *args, **kwargs):
+            def _store(
+                self,
+                messages,
+                response,
+                *args,
+                **kwargs,
+            ):
                 return []
 
         request._messages = TestMessageStorage(request)
@@ -363,7 +369,6 @@ class M2M3SubmissionFailureTest(SimpleTestCase):
         ticket.ma_ticket = "TK_TEST_015"
 
         def gui_thanh_cong(**kwargs):
-            # Khi service dang xu ly, ban nhap van phai ton tai.
             self.assertIn(
                 "m2_yeu_cau_ho_tro",
                 request.session,
@@ -388,10 +393,21 @@ class M2M3SubmissionFailureTest(SimpleTestCase):
             },
         )
 
-        mock_send.assert_called_once()
+        mock_find_category.assert_called_once_with(
+            loai_van_de="SAN_PHAM_LOI",
+            bang_anh_xa=BANG_ANH_XA_M2_M3,
+        )
+
+        mock_send.assert_called_once_with(
+            yeu_cau=draft,
+            khach_hang=customer,
+            danh_muc=category,
+        )
+
         mock_redirect.assert_called_once_with(
             "chatbot:home"
         )
+
 
 class M2RealFileHandoffTest(SimpleTestCase):
 
@@ -415,10 +431,6 @@ class M2RealFileHandoffTest(SimpleTestCase):
         from PIL import Image
         from django.test import override_settings
 
-        from chatbot.attachment_integration import (
-            tao_ticket_kem_bang_chung,
-        )
-
         with TemporaryDirectory() as temp_dir:
             base_dir = Path(temp_dir) / "CRM_HULO"
             base_dir.mkdir()
@@ -430,17 +442,21 @@ class M2RealFileHandoffTest(SimpleTestCase):
             )
             source_folder.mkdir(parents=True)
 
-            # Tao anh JPEG that trong bo nho.
             image_buffer = BytesIO()
+
             Image.new(
                 "RGB",
                 (100, 100),
                 "white",
-            ).save(image_buffer, format="JPEG")
+            ).save(
+                image_buffer,
+                format="JPEG",
+            )
 
             image_content = image_buffer.getvalue()
 
             source_name = f"kh_1/{uuid4().hex}.jpg"
+
             source_path = (
                 Path(temp_dir)
                 / "CRM_HULO_m2_private"

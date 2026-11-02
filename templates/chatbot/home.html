@@ -36,6 +36,51 @@
         font-size: 16px;
     }
 
+    /* Thong bao gui yeu cau ho tro */
+    .hulo-notice {
+        padding: 20px 24px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        border: 1px solid #b7dfc5;
+        background: #f0fff5;
+        color: #17633a;
+        box-shadow: 0 3px 12px rgba(0, 65, 130, .05);
+    }
+
+    .hulo-notice.error,
+    .hulo-notice.warning {
+        background: #fff5f2;
+        border-color: #f1c4b9;
+        color: #9b3827;
+    }
+
+    .hulo-notice.info {
+        background: #edf6ff;
+        border-color: #c6ddf5;
+        color: #17588d;
+    }
+
+    .hulo-notice-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 19px;
+        font-weight: bold;
+    }
+
+    .hulo-notice-message {
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+        font-size: 15px;
+    }
+
+    .hulo-notice-guide {
+        margin-top: 12px;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
     .hulo-title {
         text-align: center;
         font-size: 23px;
@@ -224,6 +269,18 @@
         .hulo-banner h1 {
             font-size: 25px;
         }
+
+        .hulo-chat-form {
+            flex-wrap: wrap;
+        }
+
+        .hulo-chat-input {
+            flex-basis: 100%;
+        }
+
+        .hulo-send {
+            width: 100%;
+        }
     }
 </style>
 
@@ -238,28 +295,80 @@
         </p>
     </section>
 
+    <!-- Thong bao Django Messages sau khi gui yeu cau -->
+    {% if messages %}
+        <div aria-live="polite">
+            {% for message in messages %}
+                <div
+                    class="hulo-notice {{ message.tags }}"
+                    role="{% if 'error' in message.tags %}alert{% else %}status{% endif %}"
+                >
+                    <div class="hulo-notice-heading">
+                        {% if 'success' in message.tags %}
+                            <span>✓</span>
+                            <span>Gửi yêu cầu hỗ trợ thành công!</span>
+                        {% elif 'error' in message.tags %}
+                            <span>!</span>
+                            <span>Thông báo lỗi</span>
+                        {% else %}
+                            <span>ℹ</span>
+                            <span>Thông báo</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="hulo-notice-message">
+                        {{ message }}
+                    </div>
+
+                    {% if 'success' in message.tags %}
+                        <div class="hulo-notice-guide">
+                            Yêu cầu của bạn đã được hệ thống ghi nhận.
+                            Vui lòng lưu lại mã Ticket để tiện theo dõi.
+                            Nhân viên chăm sóc khách hàng sẽ xử lý
+                            theo quy trình hỗ trợ.
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <!-- Chủ đề hỗ trợ -->
-    <h2 class="hulo-title">Các chủ đề hỗ trợ phổ biến</h2>
+    <h2 class="hulo-title">
+        Các chủ đề hỗ trợ phổ biến
+    </h2>
 
     <div class="hulo-topics">
 
-        <button type="button" class="hulo-topic"
-                data-question="Tôi muốn hỏi về đơn hàng">
+        <button
+            type="button"
+            class="hulo-topic"
+            data-question="Tôi muốn hỏi về đơn hàng"
+        >
             📦 Đơn hàng
         </button>
 
-        <button type="button" class="hulo-topic"
-                data-question="Tôi muốn hỏi về giao hàng">
+        <button
+            type="button"
+            class="hulo-topic"
+            data-question="Tôi muốn hỏi về giao hàng"
+        >
             🚚 Giao hàng
         </button>
 
-        <button type="button" class="hulo-topic"
-                data-question="Tôi muốn hỏi về đổi trả">
+        <button
+            type="button"
+            class="hulo-topic"
+            data-question="Tôi muốn hỏi về đổi trả"
+        >
             🔄 Đổi trả
         </button>
 
-        <button type="button" class="hulo-topic"
-                data-question="Tôi muốn hỏi về thanh toán">
+        <button
+            type="button"
+            class="hulo-topic"
+            data-question="Tôi muốn hỏi về thanh toán"
+        >
             💳 Thanh toán
         </button>
 
@@ -269,8 +378,9 @@
 
         <!-- Câu hỏi gợi ý -->
         <section class="hulo-panel">
+
             <div class="hulo-panel-title">
-                ❓ Câu hỏi thường gặp
+                ☰ Câu hỏi thường gặp
             </div>
 
             <div class="hulo-help-content">
@@ -279,23 +389,35 @@
                     hỗ trợ tra cứu nhanh.
                 </p>
 
-                <button type="button" class="hulo-question"
-                        data-question="Tôi muốn hỏi về giao hàng">
+                <button
+                    type="button"
+                    class="hulo-question"
+                    data-question="Tôi muốn hỏi về giao hàng"
+                >
                     Khi nào đơn hàng được giao?
                 </button>
 
-                <button type="button" class="hulo-question"
-                        data-question="Làm sao để theo dõi đơn hàng?">
+                <button
+                    type="button"
+                    class="hulo-question"
+                    data-question="Làm sao để theo dõi đơn hàng?"
+                >
                     Làm sao để theo dõi đơn hàng?
                 </button>
 
-                <button type="button" class="hulo-question"
-                        data-question="Tôi muốn đổi trả sản phẩm">
+                <button
+                    type="button"
+                    class="hulo-question"
+                    data-question="Tôi muốn đổi trả sản phẩm"
+                >
                     Chính sách đổi trả sản phẩm?
                 </button>
 
-                <button type="button" class="hulo-question"
-                        data-question="Tôi muốn hỏi về thanh toán">
+                <button
+                    type="button"
+                    class="hulo-question"
+                    data-question="Tôi muốn hỏi về thanh toán"
+                >
                     Có những phương thức thanh toán nào?
                 </button>
 
@@ -315,9 +437,15 @@
                 <small>● Hỗ trợ tự động</small>
             </div>
 
-            <div class="hulo-messages" id="hulo-messages">
-
-                <div class="hulo-message hulo-bot">Xin chào {{ request.user.username }}! Mình là HULO Assistant. Bạn cần hỗ trợ vấn đề gì hôm nay?</div>
+            <div
+                class="hulo-messages"
+                id="hulo-messages"
+            >
+                <div class="hulo-message hulo-bot">
+                    Xin chào {{ request.user.username }}!
+                    Mình là HULO Assistant. Bạn cần hỗ trợ
+                    vấn đề gì hôm nay?
+                </div>
 
                 <!-- Lịch sử tin nhắn -->
                 {% for msg in tin_nhan %}
@@ -329,11 +457,13 @@
                     {% endif %}
 
                 {% endfor %}
-
             </div>
 
             <!-- Form gửi câu hỏi -->
-            <form id="hulo-chat-form" class="hulo-chat-form">
+            <form
+                id="hulo-chat-form"
+                class="hulo-chat-form"
+            >
                 {% csrf_token %}
 
                 <input
@@ -345,9 +475,11 @@
                     required
                 >
 
-                <button type="submit"
-                        id="hulo-send"
-                        class="hulo-send">
+                <button
+                    type="submit"
+                    id="hulo-send"
+                    class="hulo-send"
+                >
                     Gửi
                 </button>
             </form>
@@ -357,13 +489,23 @@
 
     <!-- Chuyển sang nhân viên hỗ trợ -->
     <div class="hulo-bottom">
-        <p>Thông tin trên đã giải quyết được vấn đề của bạn chưa?</p>
 
+        <p>
+            Thông tin trên đã giải quyết được
+            vấn đề của bạn chưa?
+        </p>
 
-        <a href="{% url 'chatbot:chuyen_ho_tro' %}"
-           class="hulo-support-btn"
-           style="display: inline-block; color: white; text-decoration: none; cursor: pointer;">
-           Cần nhân viên hỗ trợ
+        <a
+            href="{% url 'chatbot:chuyen_ho_tro' %}"
+            class="hulo-support-btn"
+            style="
+                display: inline-block;
+                color: white;
+                text-decoration: none;
+                cursor: pointer;
+            "
+        >
+            Cần nhân viên hỗ trợ
         </a>
 
     </div>
@@ -382,7 +524,9 @@
         const message = document.createElement("div");
 
         message.className = "hulo-message " +
-            (sender === "customer" ? "hulo-customer" : "hulo-bot");
+            (sender === "customer"
+                ? "hulo-customer"
+                : "hulo-bot");
 
         message.textContent = content;
 
@@ -417,7 +561,8 @@
 
             if (!response.ok) {
                 throw new Error(
-                    result.error || "Không gửi được câu hỏi."
+                    result.error ||
+                    "Không gửi được câu hỏi."
                 );
             }
 

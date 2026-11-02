@@ -1,12 +1,10 @@
 
 from datetime import timedelta
 from uuid import uuid4
-from .routing import chon_nhan_vien_cskh, tim_queue_san_pham
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
-from .models import Ticket, TicketMessage, TicketLog
 
 from customers.models import Customer
 
@@ -15,9 +13,14 @@ from .models import (
     TicketCategory,
     TicketQueue,
     SLAConfig,
+    TicketMessage,
     TicketLog,
 )
 
+from .routing import (
+    chon_nhan_vien_cskh,
+    tim_queue_theo_danh_muc,
+)
 
 
 def create_ticket(
@@ -35,9 +38,10 @@ def create_ticket(
 
     - Chống tạo trùng bằng source_request_id.
     - Kiểm tra khách hàng, danh mục, Queue và SLA.
-    - Ghi lịch sử tạo Ticket.
-    - Tự phân công CSKH cho danh mục sản phẩm đã cấu hình.
-    - Không có CSKH phù hợp thì giữ Ticket ở NEW.
+    - Tự phân luồng theo danh mục Ticket.
+    - Tự phân công CSKH khi có Queue phù hợp.
+    - Không có Queue hoặc CSKH phù hợp thì giữ NEW.
+    - Ghi lịch sử tạo và phân công Ticket.
     """
 
     # 1. Kiểm tra mã yêu cầu nguồn
@@ -136,24 +140,21 @@ def create_ticket(
             "và mức ưu tiên này."
         )
 
-    # 8. Tạo Ticket và phân công trong một transaction
+    # 8. Tạo Ticket và phân công trong transaction
     try:
         with transaction.atomic():
 
             now = timezone.now()
 
-            # Ánh xạ đã xác nhận trong dữ liệu demo:
-            # Hàng bị lỗi -> CSKH - Sản phẩm.
-            #
-            # Chưa áp dụng cho các danh mục khác
-            # khi nhóm chưa cấu hình quy tắc phân luồng.
-
-            la_danh_muc_san_pham = (
-                danh_muc.ten_danh_muc == "Hàng bị lỗi"
+            # Tìm Queue được cấu hình cho danh mục.
+            queue_phu_hop = tim_queue_theo_danh_muc(
+                danh_muc
             )
 
-            if queue is None and la_danh_muc_san_pham:
-                queue = tim_queue_san_pham()
+            # Nếu bên gọi không chỉ định Queue,
+            # tự sử dụng Queue được cấu hình.
+            if queue is None:
+                queue = queue_phu_hop
 
             ticket = Ticket.objects.create(
                 ma_ticket=(
@@ -174,7 +175,7 @@ def create_ticket(
                 ),
             )
 
-            # Ghi lịch sử tạo
+            # 9. Ghi lịch sử tạo Ticket
             TicketLog.objects.create(
                 ticket=ticket,
                 nguoi_thuc_hien=None,
@@ -185,17 +186,20 @@ def create_ticket(
                 ),
             )
 
-            # 9. Tự phân công khi đã xác định đúng
-            # danh mục và Queue sản phẩm.
+            # 10. Tự động phân công nhân viên
             #
-            # Không tự phân công mọi danh mục
-            # cho nhân viên CSKH một cách tùy tiện.
+            # Chỉ tự phân công khi Queue thực tế
+            # trùng với Queue được cấu hình cho danh mục.
+            # Tránh tự phân công nếu bên gọi truyền
+            # một Queue không phù hợp.
 
-            if (
-                la_danh_muc_san_pham
-                and queue is not None
-                and queue.ten_queue == "CSKH - Sản phẩm"
-            ):
+            co_queue_phu_hop = (
+                queue is not None
+                and queue_phu_hop is not None
+                and queue.pk == queue_phu_hop.pk
+            )
+
+            if co_queue_phu_hop:
 
                 nhan_vien = chon_nhan_vien_cskh()
 
@@ -219,6 +223,7 @@ def create_ticket(
                         noi_dung=(
                             "Hệ thống tự động phân công "
                             f"Ticket cho {nhan_vien.ho_ten}. "
+                            f"Queue: {queue.ten_queue}. "
                             "Trạng thái NEW → ASSIGNED."
                         ),
                     )

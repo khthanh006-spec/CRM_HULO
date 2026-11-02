@@ -7,11 +7,25 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 
 from customers.models import Customer
-from tickets.models import TicketCategory
 
 from .forms import YeuCauHoTroForm
-from .services import tao_ticket_theo_chuan_m3
+from .services import (
+    tao_ticket_theo_chuan_m3,
+    tim_danh_muc_m3,
+)
 from .attachment_integration import tao_ticket_kem_bang_chung
+
+
+# Anh xa 6 nhom van de M2 sang danh muc M3 dang hoat dong.
+# Day la anh xa mac dinh theo nhom, chua phan loai chi tiet.
+BANG_ANH_XA_M2_M3 = {
+    "DON_HANG": "Sai sản phẩm / đơn hàng",
+    "GIAO_HANG": "Chậm giao hàng",
+    "DOI_TRA": "Đổi trả / Hoàn tiền",
+    "THANH_TOAN": "Thanh toán / Hóa đơn",
+    "SAN_PHAM_LOI": "Hàng bị lỗi",
+    "KHAC": "Khiếu nại dịch vụ",
+}
 
 
 @login_required(login_url="login")
@@ -21,10 +35,11 @@ def gui_yeu_cau_sang_m3(request):
     Gui yeu cau ho tro tu M2 sang M3.
 
     - Kiem tra khach hang so huu ban nhap.
+    - Anh xa loai van de M2 sang danh muc M3.
     - Su dung service tao Ticket chinh thuc cua M3.
     - Ho tro yeu cau co hoac khong co anh.
     - Giu ban nhap neu luu Ticket/anh that bai.
-    - Chi thong bao thanh cong khi xu ly het anh.
+    - Chi thong bao thanh cong khi service hoan tat.
     """
 
     # 1. Xac dinh khach hang
@@ -73,11 +88,17 @@ def gui_yeu_cau_sang_m3(request):
         )
         return redirect("chatbot:khai_bao_yeu_cau")
 
-    # 4. Chi tich hop loai SAN_PHAM_LOI
-    if yeu_cau.get("loai_van_de") != "SAN_PHAM_LOI":
+    # 4. Anh xa loai van de M2 sang danh muc M3
+    try:
+        danh_muc = tim_danh_muc_m3(
+            loai_van_de=yeu_cau.get("loai_van_de"),
+            bang_anh_xa=BANG_ANH_XA_M2_M3,
+        )
+
+    except ValueError as error:
         messages.error(
             request,
-            "Loai van de nay chua duoc cau hinh tich hop M3."
+            f"Khong the xac dinh danh muc M3: {error}"
         )
         return redirect("chatbot:xac_nhan_yeu_cau")
 
@@ -91,34 +112,21 @@ def gui_yeu_cau_sang_m3(request):
         )
         return redirect("chatbot:xac_nhan_yeu_cau")
 
-    # 6. Anh xa danh muc M2 -> M3
-    danh_muc = TicketCategory.objects.filter(
-        ten_danh_muc="Hàng bị lỗi",
-        dang_hoat_dong=True
-    ).first()
-
-    if danh_muc is None:
-        messages.error(
-            request,
-            "Chua tim thay danh muc Hang bi loi cua M3."
-        )
-        return redirect("chatbot:xac_nhan_yeu_cau")
-
-    # 7. Goi service phu hop
+    # 6. Goi service phu hop
     try:
         if bang_chung:
             # Co anh: M2 dieu phoi Ticket + TicketAttachment
             ticket = tao_ticket_kem_bang_chung(
                 yeu_cau=yeu_cau,
                 khach_hang=khach_hang,
-                danh_muc=danh_muc
+                danh_muc=danh_muc,
             )
         else:
-            # Khong co anh: giu nguyen luong M2 -> M3
+            # Khong co anh: tao Ticket qua service M3
             ticket = tao_ticket_theo_chuan_m3(
                 yeu_cau=yeu_cau,
                 khach_hang=khach_hang,
-                danh_muc=danh_muc
+                danh_muc=danh_muc,
             )
 
     except (ValueError, ValidationError) as error:
@@ -129,16 +137,16 @@ def gui_yeu_cau_sang_m3(request):
         )
         return redirect("chatbot:xac_nhan_yeu_cau")
 
-    # 8. Chi ghi nhan thanh cong khi service tra ve Ticket
+    # 7. Ghi nhan Ticket da tao
     request.session["m2_ticket_vua_tao"] = {
         "ticket_id": ticket.pk,
-        "ma_ticket": ticket.ma_ticket
+        "ma_ticket": ticket.ma_ticket,
     }
 
-    # Xoa ban nhap chi sau khi xu ly thanh cong
+    # Chi xoa ban nhap khi service tra ve thanh cong
     request.session.pop(
         "m2_yeu_cau_ho_tro",
-        None
+        None,
     )
 
     messages.success(
