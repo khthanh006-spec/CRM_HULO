@@ -5,7 +5,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
 
-from .models import LoyaltyAccount, LoyaltyTransaction
+from .models import LoyaltyAccount, LoyaltyTransaction, LoyaltyTier
 
 
 # ==============================================
@@ -132,7 +132,7 @@ def change_loyalty_points(
                 )
             )
 
-            # 10. Cong diem
+            # 10. Cộng điểm và cập nhật hạng
             if transaction_type == LoyaltyTransaction.TransactionType.EARN:
 
                 LoyaltyAccount.objects.filter(
@@ -140,9 +140,28 @@ def change_loyalty_points(
                 ).update(
                     points_balance=F("points_balance") + points,
                     total_points_earned=F("total_points_earned") + points,
-                    updated_at=timezone.now()
+                    updated_at=timezone.now(),
                 )
 
+                # Đọc lại tổng điểm sau khi cộng
+                account.refresh_from_db()
+
+                # Chọn hạng có ngưỡng cao nhất mà khách đã đạt
+                new_tier = (
+                    LoyaltyTier.objects
+                    .filter(
+                        min_total_points__lte=account.total_points_earned
+                    )
+                    .order_by("-min_total_points")
+                    .first()
+                )
+
+                if new_tier is not None:
+                    LoyaltyAccount.objects.filter(
+                        pk=account.pk
+                    ).update(tier=new_tier)
+
+                    account.tier = new_tier
             # 11. Doi diem
             elif transaction_type == LoyaltyTransaction.TransactionType.REDEEM:
 
@@ -184,3 +203,123 @@ def change_loyalty_points(
             raise
 
         return check_existing(existing)
+from datetime import timedelta
+from uuid import UUID
+
+from django.db import transaction
+from django.utils import timezone
+
+from .models import (
+    LoyaltyAccount,
+    LoyaltyTransaction,
+    LoyaltyReward,
+    LoyaltyRedemption,
+)
+def redeem_loyalty_voucher(
+    *,
+    customer,
+    reward_id,
+    description,
+    performed_by,
+    idempotency_key,
+):
+    """
+    Trừ điểm và tạo Voucher trong cùng giao dịch.
+    Gửi lại cùng yêu cầu trả về Voucher đã tạo.
+    """
+    if performed_by is None or performed_by.pk is None:
+        raise ValueError('Người thực hiện không hợp lệ.')
+
+    try:
+        key = UUID(str(idempotency_key))
+    except (ValueError, TypeError, AttributeError):
+        raise ValueError('Mã yêu cầu không hợp lệ.')
+
+    if not isinstance(description, str):
+        raise ValueError('Lý do giao dịch không hợp lệ.')
+
+    description = description.strip()
+
+    if not 5 <= len(description) <= 240:
+        raise ValueError('Lý do cần từ 5 đến 240 ký tự.')
+
+    transaction_description = 'DEMO - ' + description
+
+    with transaction.atomic():
+        # Khóa tài khoản trước khi kiểm tra yêu cầu và trừ điểm.
+        account = (
+            LoyaltyAccount.objects
+            .select_for_update()
+            .get(customer=customer)
+        )
+
+        existing = (
+            LoyaltyTransaction.objects
+            .filter(idempotency_key=key)
+            .first()
+        )
+
+        if existing is not None:
+            redemption = (
+                LoyaltyRedemption.objects
+                .filter(transaction=existing)
+                .first()
+            )
+
+            if (
+                existing.account_id != account.pk
+                or existing.transaction_type != 'REDEEM'
+                or existing.description != transaction_description
+                or existing.performed_by_id != performed_by.pk
+                or redemption is None
+                or redemption.reward_id != reward_id
+            ):
+                raise ValueError(
+                    'Mã yêu cầu đã được dùng cho giao dịch khác.'
+                )
+
+            return redemption, False
+
+        reward = (
+            LoyaltyReward.objects
+            .select_for_update()
+            .filter(pk=reward_id)
+            .first()
+        )
+
+        if reward is None or not reward.is_enabled:
+            raise ValueError('Voucher không còn được phép đổi.')
+
+        if (
+            reward.points_cost < 1
+            or reward.discount_amount < 1
+            or reward.validity_days < 1
+        ):
+            raise ValueError('Cấu hình Voucher không hợp lệ.')
+
+        if account.points_balance < reward.points_cost:
+            raise ValueError('Khách hàng không đủ điểm đổi Voucher.')
+
+        point_transaction = change_loyalty_points(
+            customer=customer,
+            transaction_type='REDEEM',
+            points=reward.points_cost,
+            description=transaction_description,
+            performed_by=performed_by,
+            idempotency_key=key,
+        )
+
+        now = timezone.now()
+
+        redemption = LoyaltyRedemption.objects.create(
+            transaction=point_transaction,
+            reward=reward,
+            voucher_name=reward.name,
+            points_spent=reward.points_cost,
+            discount_amount=reward.discount_amount,
+            terms=reward.terms,
+            issued_at=now,
+            expires_at=now + timedelta(days=reward.validity_days),
+        )
+
+        return redemption, True

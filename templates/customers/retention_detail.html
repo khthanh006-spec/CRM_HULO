@@ -1,0 +1,901 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ case.case_code }} - Ca giữ chân | CRM HULO
+{% endblock %}
+
+{% block content %}
+<style>
+.m5-retention,
+.m5-retention * {
+    box-sizing: border-box;
+}
+
+.m5-retention {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 0 30px;
+    color: #17365d;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.m5-retention * {
+    font-family: inherit;
+}
+
+.m5-retention a {
+    color: #103b78;
+}
+
+.m5-retention .back {
+    display: inline-block;
+    margin-bottom: 18px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.m5-retention .back:hover {
+    text-decoration: underline;
+}
+
+/* Tiêu đề trang */
+.m5-retention .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.m5-retention .page-header > * {
+    min-width: 0;
+}
+
+.m5-retention .eyebrow {
+    margin: 0 0 6px;
+    color: #607da8;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.m5-retention h1 {
+    margin: 0 0 10px;
+    color: #103b78;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.m5-retention .subtitle {
+    margin: 0;
+    color: #607da8;
+    font-size: 16px;
+}
+
+.m5-retention h2 {
+    margin: 0;
+    color: #103b78;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+/* Khung nội dung */
+.m5-retention .panel {
+    min-width: 0;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #fff;
+    border: 1px solid #d5e3fa;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(33, 78, 145, 0.05);
+}
+
+.m5-retention .panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.m5-retention .panel-description {
+    margin: 8px 0 20px;
+    color: #607da8;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Trạng thái và mức rủi ro */
+.m5-retention .badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.m5-retention .badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #edf2f7;
+    color: #52657e;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.m5-retention .badge.PENDING,
+.m5-retention .badge.MEDIUM {
+    background: #fff5df;
+    color: #976308;
+}
+
+.m5-retention .badge.IN_PROGRESS {
+    background: #eaf2ff;
+    color: #103b78;
+}
+
+.m5-retention .badge.SAVED {
+    background: #e7f6ec;
+    color: #17683b;
+}
+
+.m5-retention .badge.UNSUCCESSFUL,
+.m5-retention .badge.HIGH {
+    background: #fff0e9;
+    color: #b54708;
+}
+
+/* Thông tin ca */
+.m5-retention .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin: 0;
+}
+
+.m5-retention .info-item {
+    min-width: 0;
+}
+
+.m5-retention dt {
+    margin-bottom: 6px;
+    color: #607da8;
+    font-size: 14px;
+}
+
+.m5-retention dd {
+    margin: 0;
+    color: #103b78;
+    font-size: 16px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.m5-retention .trigger-box {
+    padding: 16px;
+    margin-top: 22px;
+    background: #f4f8ff;
+    border: 1px solid #d5e3fa;
+    border-radius: 8px;
+}
+
+.m5-retention .trigger-box strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #103b78;
+    font-size: 14px;
+}
+
+.m5-retention .text {
+    font-size: 14px;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+
+/* Nút và liên kết thao tác */
+.m5-retention .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.m5-retention .actions form {
+    margin: 0;
+}
+
+.m5-retention .actions .claim-action {
+    margin-left: auto;
+}
+
+.m5-retention .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 11px 18px;
+    border: 1px solid #103b78;
+    border-radius: 6px;
+    background: #103b78;
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.m5-retention .button:hover {
+    background: #0a2b57;
+    border-color: #0a2b57;
+    color: #fff;
+}
+
+.m5-retention .button.secondary {
+    background: #eaf2ff;
+    border-color: #d5e3fa;
+    color: #103b78;
+}
+
+.m5-retention .button.secondary:hover {
+    background: #103b78;
+    border-color: #103b78;
+    color: #fff;
+}
+
+.m5-retention .button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Hoạt động chăm sóc và Voucher */
+.m5-retention .work-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+/* Thông báo */
+.m5-retention .notice {
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    border: 1px solid #d5e3fa;
+    border-radius: 8px;
+    background: #eaf2ff;
+    color: #45658e;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.m5-retention .notice.success {
+    background: #eaf8ee;
+    border-color: #cdebd6;
+    color: #17683b;
+}
+
+.m5-retention .notice.error {
+    background: #fff0ed;
+    border-color: #f4cfc7;
+    color: #b42318;
+}
+
+/* Biểu mẫu */
+.m5-retention form p {
+    margin: 0 0 18px;
+}
+
+.m5-retention label {
+    display: block;
+    margin-bottom: 8px;
+    color: #17365d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.m5-retention input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+.m5-retention select,
+.m5-retention textarea {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbdcf5;
+    border-radius: 8px;
+    background: #fbfdff;
+    color: #17365d;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.m5-retention textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.m5-retention input[type="checkbox"],
+.m5-retention input[type="radio"] {
+    width: 17px;
+    height: 17px;
+    margin: 0 6px 0 0;
+    vertical-align: middle;
+    accent-color: #103b78;
+}
+
+.m5-retention input:focus-visible,
+.m5-retention select:focus-visible,
+.m5-retention textarea:focus-visible,
+.m5-retention .button:focus-visible,
+.m5-retention a:focus-visible {
+    outline: 3px solid #9fc5ff;
+    outline-offset: 3px;
+}
+
+.m5-retention .helptext {
+    display: block;
+    margin-top: 6px;
+    color: #607da8;
+    font-size: 13px;
+}
+
+.m5-retention .errorlist {
+    margin: 8px 0;
+    padding-left: 20px;
+    color: #b42318;
+    font-size: 14px;
+}
+
+.m5-retention .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+/* Checkbox xác nhận cùng hàng với nội dung */
+.m5-retention .confirmation-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.m5-retention .confirmation-row input[type="checkbox"] {
+    flex: 0 0 17px;
+    width: 17px;
+    height: 17px;
+    margin: 0;
+}
+
+.m5-retention .confirmation-row label {
+    min-width: 0;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.6;
+    cursor: pointer;
+}
+
+/* Voucher phù hợp */
+.m5-retention .voucher-card {
+    padding: 16px;
+    margin-top: 14px;
+    border: 1px solid #d5e3fa;
+    border-radius: 8px;
+    background: #f7faff;
+}
+
+.m5-retention .voucher-card strong {
+    display: block;
+    color: #103b78;
+    font-size: 16px;
+    overflow-wrap: anywhere;
+}
+
+.m5-retention .voucher-card p {
+    margin: 8px 0 14px;
+    color: #607da8;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.m5-retention .empty-state {
+    padding: 20px;
+    border: 1px dashed #cbdcf5;
+    border-radius: 8px;
+    background: #fafcff;
+    color: #607da8;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+/* Kết quả chăm sóc */
+.m5-retention .result-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.m5-retention .result-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #607da8;
+    font-size: 14px;
+}
+
+.m5-retention .muted {
+    color: #607da8;
+    font-size: 14px;
+}
+
+/* Voucher đã cấp */
+.m5-retention .delivery-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.m5-retention .delivery-item {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid #d5e3fa;
+    border-radius: 8px;
+    background: #f7faff;
+}
+
+.m5-retention .delivery-item strong {
+    display: block;
+    margin-bottom: 10px;
+    color: #103b78;
+    font-size: 16px;
+    overflow-wrap: anywhere;
+}
+
+.m5-retention code {
+    display: inline-block;
+    max-width: 100%;
+    padding: 7px 10px;
+    border-radius: 6px;
+    background: #eaf2ff;
+    color: #103b78;
+    font-size: 13px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    user-select: all;
+}
+
+/* Lịch sử chăm sóc */
+.m5-retention .timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.m5-retention .timeline-item {
+    position: relative;
+    padding: 0 0 24px 24px;
+    margin-left: 5px;
+    border-left: 2px solid #d5e3fa;
+}
+
+.m5-retention .timeline-item:last-child {
+    padding-bottom: 0;
+    border-left-color: transparent;
+}
+
+.m5-retention .timeline-item::before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: -6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #103b78;
+    box-shadow: 0 0 0 4px #eaf2ff;
+}
+
+.m5-retention .timeline-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-bottom: 8px;
+    color: #607da8;
+    font-size: 13px;
+}
+
+.m5-retention .timeline-type {
+    color: #103b78;
+    font-weight: 700;
+}
+
+/* Màn hình nhỏ */
+@media (max-width: 850px) {
+    .m5-retention .work-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .m5-retention .info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .m5-retention h1 {
+        font-size: 26px;
+    }
+
+    .m5-retention .panel {
+        padding: 16px;
+    }
+
+    .m5-retention .info-grid,
+    .m5-retention .result-grid,
+    .m5-retention .delivery-list {
+        grid-template-columns: 1fr;
+    }
+
+    .m5-retention .form-actions .button {
+        width: 100%;
+    }
+
+    .m5-retention .actions .claim-action {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .m5-retention .claim-action .button {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="content-container m5-retention">
+
+    <a class="back"
+       href="{% url 'customers:after_sales_overview' %}">
+
+    </a>
+
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">CA GIỮ CHÂN · {{ case.case_code }}</p>
+
+            <h1>{{ case.customer.ho_ten }}</h1>
+
+            <p class="subtitle">
+                Theo dõi hoạt động hỗ trợ và kết quả chăm sóc khách hàng.
+            </p>
+        </div>
+
+        <div class="badges">
+            <span class="badge {{ case.status }}">
+                {{ case.get_status_display }}
+            </span>
+
+            <span class="badge {{ case.risk_level }}">
+                Rủi ro {{ case.get_risk_level_display|lower }}
+            </span>
+        </div>
+    </header>
+
+    {% for message in messages %}
+        <div class="notice {{ message.tags }}" role="status">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <!-- THÔNG TIN CA -->
+    <section class="panel">
+        <div class="panel-heading">
+            <h2>Thông tin ca chăm sóc</h2>
+        </div>
+
+        <dl class="info-grid">
+            <div class="info-item">
+                <dt>Mã khách hàng</dt>
+                <dd>KH{{ case.customer_id|stringformat:"03d" }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Nhân viên phụ trách</dt>
+                <dd>
+                    {% if case.assigned_to %}
+                        {{ case.assigned_to.get_full_name|default:case.assigned_to.username }}
+                    {% else %}
+                        Chưa phân công
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Nguồn kích hoạt</dt>
+                <dd>{{ case.get_source_display }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Ticket liên quan</dt>
+                <dd>{{ case.ticket }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Trạng thái Ticket hiện tại</dt>
+                <dd>{{ case.ticket.get_trang_thai_display }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Thời điểm phát sinh</dt>
+                <dd>{{ case.triggered_at|date:"d/m/Y H:i" }}</dd>
+            </div>
+        </dl>
+
+        <div class="trigger-box">
+            <strong>Nội dung cần chăm sóc</strong>
+
+            <div class="text">
+                {{ case.trigger_summary|default:"Chưa có nội dung."|linebreaksbr }}
+            </div>
+        </div>
+
+        <div class="actions">
+            <a class="button secondary"
+               href="{% url 'customers:detail' case.customer_id %}">
+                Customer 360°
+            </a>
+
+            <a class="button secondary"
+               href="{% url 'customers:loyalty_detail' case.customer_id %}">
+                Xem Loyalty
+            </a>
+
+            <a class="button secondary"
+               href="{% url 'customers:csat_care' case.customer_id %}">
+                Chăm sóc CSAT
+            </a>
+
+            {% if can_claim %}
+    <form method="post" class="claim-action">
+        {% csrf_token %}
+
+        <button class="button"
+                type="submit"
+                name="action"
+                value="claim">
+            Tiếp nhận và bắt đầu chăm sóc
+        </button>
+    </form>
+{% endif %}
+        </div>
+    </section>
+
+    <!-- CÔNG VIỆC ĐANG THỰC HIỆN -->
+    {% if case.status == 'IN_PROGRESS' %}
+        {% if can_work %}
+
+            <div class="work-grid">
+
+                <section class="panel">
+                    <h2>Ghi hoạt động chăm sóc</h2>
+
+                    <p class="panel-description">
+                        Ghi nhận nội dung liên hệ và kết quả trao đổi.
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {{ care_form.as_p }}
+
+                        <div class="form-actions">
+                            <button class="button"
+                                    type="submit"
+                                    name="action"
+                                    value="care">
+                                Lưu hoạt động chăm sóc
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <h2>Voucher đền bù phù hợp</h2>
+
+                    <p class="panel-description">
+                        Voucher còn hiệu lực, đúng điều kiện Loyalty
+                        và chưa được khách hàng nhận.
+                        Cấp Voucher không tự kết thúc ca.
+                    </p>
+
+                    {% for benefit in eligible_benefits %}
+                        <div class="voucher-card">
+                            <strong>{{ benefit.name }}</strong>
+
+                            <p>{{ benefit.description }}</p>
+
+                            <a class="button secondary"
+                               href="{% url 'customers:issue_voucher' benefit.pk %}?case={{ case.pk }}">
+                                Xem trước và cấp Voucher →
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="empty-state">
+                            Chưa có Voucher đền bù phù hợp.
+                            Kiểm tra phân loại, thời hạn, hạng Loyalty
+                            và lịch sử cấp.
+                        </div>
+                    {% endfor %}
+                </section>
+
+            </div>
+
+            <section class="panel">
+                <h2>Kết thúc ca chăm sóc</h2>
+
+                <p class="panel-description">
+                    Ghi kết quả xử lý và phản hồi thực tế.
+                    Chỉ chọn “Hài lòng lại” khi khách hàng đã xác nhận.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    {{ close_form.non_field_errors }}
+
+{% for field in close_form %}
+    {% if field.name == 'confirmed' %}
+        <div class="confirmation-row">
+            {{ field }}
+            <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+            </label>
+        </div>
+        {{ field.errors }}
+    {% else %}
+        <p>
+            {{ field.label_tag }}
+            {{ field }}
+            {{ field.errors }}
+        </p>
+    {% endif %}
+{% endfor %}
+
+                    <div class="form-actions">
+                        <button class="button"
+                                type="submit"
+                                name="action"
+                                value="close">
+                            Lưu kết quả và kết thúc ca
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+        {% else %}
+            <div class="notice">
+                Ca đang do nhân viên khác phụ trách.
+                Chỉ người phụ trách hoặc Quản lý được cập nhật.
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- KẾT QUẢ CA ĐÃ KẾT THÚC -->
+    {% if case.closed_at %}
+        <section class="panel">
+            <div class="panel-heading">
+                <h2>Kết quả chăm sóc</h2>
+
+                <span class="badge {{ case.status }}">
+                    {{ case.get_status_display }}
+                </span>
+            </div>
+
+            <p class="muted">
+                Kết thúc lúc {{ case.closed_at|date:"d/m/Y H:i" }}
+            </p>
+
+            <div class="result-grid">
+                <div>
+                    <strong class="result-label">Kết quả xử lý</strong>
+
+                    <div class="text">
+                        {{ case.resolution_note|linebreaksbr }}
+                    </div>
+                </div>
+
+                <div>
+                    <strong class="result-label">Phản hồi khách hàng</strong>
+
+                    <div class="text">
+                        {{ case.customer_feedback|default:"Chưa có phản hồi."|linebreaksbr }}
+                    </div>
+                </div>
+            </div>
+
+            {% if case.satisfaction_confirmed_at %}
+                <p class="muted">
+                    Xác nhận hài lòng được ghi nhận lúc
+                    {{ case.satisfaction_confirmed_at|date:"d/m/Y H:i" }}.
+                </p>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <!-- VOUCHER ĐÃ CẤP -->
+    <section class="panel">
+        <div class="panel-heading">
+            <h2>Voucher đã cấp cho ca</h2>
+        </div>
+
+        <div class="delivery-list">
+            {% for delivery in case_deliveries %}
+                <article class="delivery-item">
+                    <strong>{{ delivery.benefit.name }}</strong>
+
+                    <code>{{ delivery.reference_code }}</code>
+
+                    <p class="muted">
+                        {{ delivery.get_status_display }}
+                        <br>
+                        {{ delivery.issued_at|date:"d/m/Y H:i" }}
+                    </p>
+                </article>
+            {% empty %}
+                <div class="empty-state">
+                    Chưa có Voucher được cấp cho ca này.
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- DÒNG THỜI GIAN -->
+    <section class="panel">
+        <div class="panel-heading">
+            <h2>Lịch sử chăm sóc</h2>
+        </div>
+
+        <ol class="timeline">
+            {% for record in care_records %}
+                <li class="timeline-item">
+                    <div class="timeline-meta">
+                        <span>
+                            {{ record.created_at|date:"d/m/Y H:i" }}
+                        </span>
+
+                        <span class="timeline-type">
+                            {{ record.get_care_type_display }}
+                        </span>
+
+                        <span>
+                            {% if record.created_by %}
+                                {{ record.created_by.get_full_name|default:record.created_by.username }}
+                            {% else %}
+                                Hệ thống
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="text">
+                        {{ record.content|linebreaksbr }}
+                    </div>
+                </li>
+            {% empty %}
+                <li class="empty-state">
+                    Chưa có hoạt động chăm sóc.
+                </li>
+            {% endfor %}
+        </ol>
+    </section>
+
+</div>
+{% endblock %}

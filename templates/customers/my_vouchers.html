@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Voucher của tôi - CRM HULO{% endblock %}
+
+{% block content %}
+<style>
+    .m5-my-vouchers {
+        max-width: 1100px;
+        margin: 0 auto;
+        color: #17365d;
+    }
+
+    .m5-my-vouchers h1 {
+        color: #103b78;
+        margin-bottom: 10px;
+    }
+
+    .m5-my-vouchers .intro {
+        color: #607da8;
+        line-height: 1.6;
+        margin-bottom: 24px;
+    }
+
+    .m5-my-vouchers .voucher-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .m5-my-vouchers .voucher-card {
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-top: 4px solid #2878e7;
+        border-radius: 12px;
+        padding: 24px;
+    }
+
+    .m5-my-vouchers .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .m5-my-vouchers .program-code {
+        color: #607da8;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .m5-my-vouchers .badge {
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        background: #edf2f7;
+        color: #52657e;
+    }
+
+    .m5-my-vouchers .badge.active {
+        background: #e7f6ec;
+        color: #17683b;
+    }
+
+    .m5-my-vouchers .badge.expired {
+        background: #fff0e7;
+        color: #b54708;
+    }
+
+    .m5-my-vouchers .badge.upcoming {
+        background: #eaf2ff;
+        color: #1859a5;
+    }
+
+    .m5-my-vouchers h2 {
+        color: #103b78;
+        font-size: 20px;
+        margin: 18px 0 12px;
+    }
+
+    .m5-my-vouchers .voucher-code {
+        padding: 14px;
+        margin: 16px 0;
+        background: #f5f8ff;
+        border: 1px dashed #9fbbe2;
+        border-radius: 8px;
+    }
+
+    .m5-my-vouchers .voucher-code small {
+        display: block;
+        color: #607da8;
+        margin-bottom: 8px;
+    }
+
+    .m5-my-vouchers code {
+        color: #103b78;
+        overflow-wrap: anywhere;
+        user-select: all;
+    }
+
+    .m5-my-vouchers .meta,
+    .m5-my-vouchers .description,
+    .m5-my-vouchers .terms {
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .m5-my-vouchers .meta {
+        color: #60718c;
+        font-size: 14px;
+    }
+
+    .m5-my-vouchers summary {
+        color: #103b78;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 14px;
+    }
+
+    .m5-my-vouchers .notice {
+        padding: 14px 18px;
+        margin-bottom: 24px;
+        background: #eaf2ff;
+        border-radius: 8px;
+        color: #17365d;
+        line-height: 1.6;
+    }
+
+    .m5-my-vouchers .empty {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 45px 20px;
+        border: 1px dashed #cbd8ea;
+        border-radius: 12px;
+        background: #fff;
+        color: #607da8;
+    }
+
+    @media (max-width: 750px) {
+        .m5-my-vouchers .voucher-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="content-container m5-my-vouchers">
+    <h1>Voucher của tôi</h1>
+
+    <p class="intro">
+        Xin chào {{ customer.ho_ten }}.
+        Đây là các Voucher HULO đã cấp cho bạn.
+    </p>
+
+    <div class="notice">
+        Khi cần sử dụng, hãy cung cấp mã Voucher cho nhân viên
+        để được kiểm tra điều kiện và hướng dẫn áp dụng.
+    </div>
+
+    <div class="voucher-grid">
+        {% for row in voucher_rows %}
+            <article class="voucher-card">
+                <div class="card-top">
+                    <span class="program-code">
+                        {{ row.delivery.benefit.program.code }}
+                    </span>
+
+                    <span class="badge {{ row.badge_class }}">
+                        {{ row.availability }}
+                    </span>
+                </div>
+
+                <h2>{{ row.delivery.benefit.name }}</h2>
+
+                <div class="description">
+                    {{ row.delivery.benefit.description|linebreaksbr }}
+                </div>
+
+                <div class="voucher-code">
+                    <small>Mã Voucher của bạn</small>
+                    <code>{{ row.delivery.reference_code }}</code>
+                </div>
+
+                <p class="meta">
+                    <strong>Chương trình:</strong>
+                    {{ row.delivery.benefit.program.name }}
+                    <br>
+
+                    <strong>Ngày cấp:</strong>
+                    {{ row.delivery.issued_at|date:"d/m/Y H:i" }}
+                    <br>
+
+                    <strong>Hiệu lực:</strong>
+                    {{ row.delivery.benefit.valid_from|date:"d/m/Y H:i" }}
+                    –
+                    {{ row.delivery.benefit.valid_until|date:"d/m/Y H:i" }}
+                </p>
+
+                {% if row.delivery.benefit.terms %}
+                    <details>
+                        <summary>Điều kiện sử dụng</summary>
+                        <div class="terms">
+                            {{ row.delivery.benefit.terms|linebreaksbr }}
+                        </div>
+                    </details>
+                {% endif %}
+            </article>
+        {% empty %}
+            <div class="empty">
+                Bạn chưa có Voucher được cấp.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -3,6 +3,7 @@ from django import forms
 
 from .models import CareRecord
 from .models import CSAT
+from .models import LoyaltyReward
 
 
 class CareInteractionForm(forms.ModelForm):
@@ -115,3 +116,67 @@ class LoyaltyPointForm(forms.Form):
             }
         )
     )
+class LoyaltyVoucherTransactionForm(forms.Form):
+    idempotency_key = forms.UUIDField(
+        widget=forms.HiddenInput(),
+    )
+
+    transaction_type = forms.ChoiceField(
+        label='Loại giao dịch',
+        choices=[
+            ('EARN', 'Cộng điểm'),
+            ('REDEEM', 'Đổi điểm lấy Voucher'),
+        ],
+    )
+
+    points = forms.IntegerField(
+        label='Số điểm cộng',
+        min_value=1,
+        max_value=10000,
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'min': 1,
+            'max': 10000,
+            'placeholder': 'Nhập số điểm cần cộng',
+        }),
+    )
+
+    reward = forms.ModelChoiceField(
+        label='Voucher muốn đổi',
+        queryset=LoyaltyReward.objects.none(),
+        required=False,
+        empty_label='Chọn Voucher',
+    )
+
+    description = forms.CharField(
+        label='Lý do giao dịch',
+        min_length=5,
+        max_length=240,
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'Nhập lý do cộng điểm hoặc đổi Voucher',
+        }),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['reward'].queryset = (
+            LoyaltyReward.objects
+            .filter(is_enabled=True)
+            .order_by('points_cost', 'pk')
+        )
+
+    def clean(self):
+        cleaned = super().clean()
+        transaction_type = cleaned.get('transaction_type')
+
+        if transaction_type == 'EARN':
+            if cleaned.get('points') is None:
+                self.add_error('points', 'Vui lòng nhập số điểm cộng.')
+
+        elif transaction_type == 'REDEEM':
+            if cleaned.get('reward') is None:
+                self.add_error('reward', 'Vui lòng chọn Voucher.')
+
+        return cleaned

@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block title %}Loyalty - CRM HULO{% endblock %}
+
+{% block content %}
+<style>
+    .m5-loyalty-overview {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .m5-loyalty-overview h1 {
+        color: #103b78;
+        margin-bottom: 10px;
+    }
+
+    .m5-loyalty-overview .description {
+        color: #607da8;
+        margin-bottom: 25px;
+    }
+
+    .m5-loyalty-overview .stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        margin: 25px 0 30px;
+    }
+
+    .m5-loyalty-overview .stat-card {
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 10px;
+    }
+
+    .m5-loyalty-overview .stat-label {
+        color: #607da8;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .m5-loyalty-overview .stat-value {
+        color: #103b78;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .m5-loyalty-overview .search {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin: 25px 0;
+    }
+
+    .m5-loyalty-overview .search input {
+        flex: 1;
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .m5-loyalty-overview .search button {
+        padding: 12px 24px;
+        background: #103b78;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .m5-loyalty-overview .search button:hover {
+        background: #0a2b57;
+    }
+
+    .m5-loyalty-overview .search a {
+        padding: 12px;
+        color: #103b78;
+    }
+
+    .m5-loyalty-overview .table-wrapper {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .m5-loyalty-overview table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+    }
+
+    .m5-loyalty-overview th,
+    .m5-loyalty-overview td {
+        padding: 14px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .m5-loyalty-overview th {
+        background: #103b78;
+        color: #fff;
+        white-space: nowrap;
+    }
+
+    .m5-loyalty-overview td {
+        color: #17365d;
+    }
+
+    .m5-loyalty-overview tbody tr:hover {
+        background: #f2f6fc;
+    }
+
+    .m5-loyalty-overview .tier {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: #eaf2ff;
+        color: #103b78;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .m5-loyalty-overview .points {
+        color: #17683b;
+        font-weight: 700;
+    }
+
+    .m5-loyalty-overview .action-btn {
+        display: inline-block;
+        padding: 8px 14px;
+        background: #eaf2ff;
+        color: #103b78;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .m5-loyalty-overview .action-btn:hover {
+        background: #103b78;
+        color: #fff;
+    }
+
+    .m5-loyalty-overview .empty {
+        padding: 24px;
+        text-align: center;
+        color: #7489a8;
+    }
+
+    .m5-loyalty-overview .back {
+        display: inline-block;
+        margin-top: 25px;
+        color: #103b78;
+        text-decoration: none;
+    }
+
+    .m5-loyalty-overview .back:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+        .m5-loyalty-overview .stats {
+            grid-template-columns: 1fr;
+        }
+
+        .m5-loyalty-overview .search input {
+            flex-basis: 100%;
+        }
+    }
+</style>
+
+<div class="content-container m5-loyalty-overview">
+
+    <h1>Loyalty &amp; Khách hàng thân thiết</h1>
+
+    <p class="description">
+        Theo dõi hạng thành viên, số dư điểm và lịch sử
+        giao dịch điểm của khách hàng.
+    </p>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-label">Tổng số tài khoản Loyalty</div>
+            <div class="stat-value">
+                {{ total_accounts|default:0 }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Tổng số điểm hiện có</div>
+            <div class="stat-value">
+                {{ total_points_balance|default:0 }}
+            </div>
+        </div>
+    </div>
+
+    <form method="get"
+          action="{% url 'customers:loyalty_overview' %}"
+          class="search">
+
+        <input type="text"
+               name="q"
+               value="{{ keyword|default:'' }}"
+               placeholder="Nhập mã, tên hoặc email khách hàng..."
+               aria-label="Tìm kiếm khách hàng">
+
+        <button type="submit">Tìm kiếm</button>
+
+    </form>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Họ và tên</th>
+                    <th>Hạng thành viên</th>
+                    <th>Điểm hiện có</th>
+                    <th>Tổng điểm đã tích lũy</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for account in loyalty_accounts %}
+                    <tr>
+                        <td>{{ account.customer.ma_khach_hang }}</td>
+                        <td>{{ account.customer.ho_ten }}</td>
+
+                        <td>
+                            {% if account.tier %}
+                                <span class="tier">
+                                    {{ account.tier.get_code_display }}
+                                </span>
+                            {% else %}
+                                Chưa xếp hạng
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="points">
+                                {{ account.points_balance }} điểm
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ account.total_points_earned }} điểm
+                        </td>
+
+                        <td>
+                            <a class="action-btn"
+                               href="{% url 'customers:loyalty_detail' account.customer.ma_khach_hang %}">
+                                Xem chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty">
+                            {% if keyword %}
+                                Không tìm thấy tài khoản Loyalty phù hợp.
+                            {% else %}
+                                Chưa có tài khoản Loyalty.
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a class="back" href="{% url 'customers:list' %}">
+        ← Quay về danh sách khách hàng
+    </a>
+
+</div>
+{% endblock %}
