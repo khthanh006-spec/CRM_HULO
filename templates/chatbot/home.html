@@ -208,6 +208,36 @@
         cursor: not-allowed;
     }
 
+    /* Thông báo kết quả gửi yêu cầu hỗ trợ */
+    .hulo-alert {
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        border: 1px solid #a9dfbc;
+        background: #e8f7ed;
+        color: #176b39;
+        line-height: 1.6;
+    }
+
+    .hulo-alert-title {
+        font-size: 17px;
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    .hulo-alert-error {
+        border-color: #f2b9b9;
+        background: #fff0f0;
+        color: #9b2222;
+    }
+
+    .hulo-alert-warning,
+    .hulo-alert-info {
+        border-color: #c9d8ed;
+        background: #f0f6ff;
+        color: #194b83;
+    }
+
     @media (max-width: 750px) {
         .hulo-main {
             grid-template-columns: 1fr;
@@ -228,6 +258,20 @@
 </style>
 
 <div class="hulo-page">
+
+    <!-- Hiển thị thông báo Django Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="hulo-alert{% if 'error' in message.tags %} hulo-alert-error{% elif 'warning' in message.tags %} hulo-alert-warning{% elif 'info' in message.tags %} hulo-alert-info{% endif %}" role="alert">
+                {% if 'success' in message.tags %}
+                    <div class="hulo-alert-title">
+                        ✓ Gửi yêu cầu hỗ trợ thành công!
+                    </div>
+                {% endif %}
+                <div>{{ message }}</div>
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <!-- Banner -->
     <section class="hulo-banner">
@@ -359,11 +403,10 @@
     <div class="hulo-bottom">
         <p>Thông tin trên đã giải quyết được vấn đề của bạn chưa?</p>
 
-
         <a href="{% url 'chatbot:chuyen_ho_tro' %}"
            class="hulo-support-btn"
            style="display: inline-block; color: white; text-decoration: none; cursor: pointer;">
-           Cần nhân viên hỗ trợ
+            Cần nhân viên hỗ trợ
         </a>
 
     </div>

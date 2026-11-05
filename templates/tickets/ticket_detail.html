@@ -6,7 +6,148 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'tickets/tickets.css' %}?v=5">
-<link rel="stylesheet" href="{% static 'tickets/ticket_detail.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'tickets/ticket_detail.css' %}?v=4">
+
+<style>
+    /* Giao diện bằng chứng đính kèm M2 -> M3 */
+    .ticket-detail-page .ticket-evidence-section {
+        padding: 24px;
+    }
+
+    .ticket-detail-page .ticket-evidence-section > h3 {
+        margin-top: 0;
+        margin-bottom: 14px;
+    }
+
+    .ticket-detail-page .ticket-evidence-section > .ticket-detail-muted {
+        margin-bottom: 22px;
+        line-height: 1.6;
+    }
+
+    .ticket-detail-page .ticket-evidence-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        width: 100%;
+    }
+
+    .ticket-detail-page .ticket-evidence-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        width: 100%;
+        min-width: 0;
+        padding: 22px;
+        background: #f7f9fc;
+        border: 1px solid #dce6f2;
+        border-radius: 14px;
+    }
+
+    .ticket-detail-page .ticket-evidence-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 9px;
+    }
+
+    .ticket-detail-page .ticket-evidence-name {
+        display: block;
+        max-width: 100%;
+        color: #183e70;
+        font-size: 15px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+        line-height: 1.5;
+    }
+
+    .ticket-detail-page .ticket-evidence-info small {
+        display: block;
+        color: #7a90aa;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .ticket-detail-page .ticket-evidence-actions {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        flex: 0 0 auto;
+        gap: 10px;
+        margin: 0;
+    }
+
+    .ticket-detail-page .ticket-evidence-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 44px;
+        padding: 11px 16px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        line-height: 1.4;
+        transition: background-color .2s, border-color .2s;
+    }
+
+    .ticket-detail-page .ticket-evidence-view {
+        color: #ffffff;
+        background: #176fc1;
+        border: 1px solid #176fc1;
+    }
+
+    .ticket-detail-page .ticket-evidence-view:hover {
+        color: #ffffff;
+        background: #0c559d;
+        border-color: #0c559d;
+        text-decoration: none;
+    }
+
+    .ticket-detail-page .ticket-evidence-download {
+        color: #145b9f;
+        background: #ffffff;
+        border: 1px solid #cbd9e8;
+    }
+
+    .ticket-detail-page .ticket-evidence-download:hover {
+        color: #0d4b88;
+        background: #edf5ff;
+        border-color: #8db9e5;
+        text-decoration: none;
+    }
+
+    @media (max-width: 800px) {
+        .ticket-detail-page .ticket-evidence-item {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 16px;
+            padding: 18px;
+        }
+
+        .ticket-detail-page .ticket-evidence-actions {
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .ticket-detail-page .ticket-evidence-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .ticket-detail-page .ticket-evidence-btn {
+            width: 100%;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -29,9 +170,7 @@
         {% endfor %}
     {% endif %}
 
-    <!-- ==========================================
-         1. BANNER THÔNG TIN TICKET
-         ========================================== -->
+    <!-- 1. BANNER THÔNG TIN TICKET -->
     <section class="ticket-detail-header">
 
         <div class="ticket-detail-header-main">
@@ -48,59 +187,48 @@
 
             <div class="ticket-detail-tags">
 
-                <!-- MỨC ƯU TIÊN -->
                 {% if ticket.muc_uu_tien == 'URGENT' %}
                     <span class="ticket-badge ticket-priority-high">
                         Ưu tiên: Khẩn cấp
                     </span>
-
                 {% elif ticket.muc_uu_tien == 'HIGH' %}
                     <span class="ticket-badge ticket-priority-high">
                         Ưu tiên: Cao
                     </span>
-
                 {% elif ticket.muc_uu_tien == 'MEDIUM' %}
                     <span class="ticket-badge ticket-priority-medium">
                         Ưu tiên: Trung bình
                     </span>
-
                 {% elif ticket.muc_uu_tien == 'LOW' %}
                     <span class="ticket-badge ticket-priority-low">
                         Ưu tiên: Thấp
                     </span>
-
                 {% else %}
                     <span class="ticket-badge ticket-badge-new">
                         Chưa xác định ưu tiên
                     </span>
                 {% endif %}
 
-                <!-- TRẠNG THÁI TICKET -->
                 {% if ticket.trang_thai == 'NEW' %}
                     <span class="ticket-badge ticket-badge-new">
                         NEW
                     </span>
-
                 {% elif ticket.trang_thai == 'ASSIGNED' %}
                     <span class="ticket-badge ticket-badge-assigned">
                         ASSIGNED
                     </span>
-
                 {% elif ticket.trang_thai == 'IN_PROGRESS' %}
                     <span class="ticket-badge ticket-badge-progress">
                         IN_PROGRESS
                     </span>
-
                 {% elif ticket.trang_thai == 'RESOLVED' %}
                     <span class="ticket-badge ticket-badge-resolved">
                         RESOLVED
                     </span>
-
                 {% elif ticket.trang_thai == 'CLOSED' %}
                     <span class="ticket-badge ticket-badge-closed">
                         CLOSED
                     </span>
-
                 {% elif ticket.trang_thai == 'REOPENED' %}
                     <span class="ticket-badge ticket-badge-reopened">
                         REOPENED
@@ -109,7 +237,6 @@
 
             </div>
         </div>
-
 
         <!-- THÔNG TIN SLA -->
         <div class="ticket-detail-sla">
@@ -128,22 +255,18 @@
                 <p style="color: #dc2626; margin-top: 8px;">
                     🚨 {{ ticket.sla_remaining }}
                 </p>
-
             {% elif ticket.sla_status == 'WARNING' %}
                 <p style="color: #d97706; margin-top: 8px;">
                     ⏳ {{ ticket.sla_remaining }} - Sắp quá hạn
                 </p>
-
             {% elif ticket.sla_status == 'ON_TIME' %}
                 <p style="color: #15803d; margin-top: 8px;">
                     ✓ {{ ticket.sla_remaining }}
                 </p>
-
             {% elif ticket.sla_status == 'DONE' %}
                 <p style="color: #15803d; margin-top: 8px;">
                     ✓ Đã giải quyết
                 </p>
-
             {% else %}
                 <p style="margin-top: 8px;">
                     Chưa thiết lập SLA
@@ -159,12 +282,9 @@
 
         </div>
 
-
     </section>
 
-    <!-- ==========================================
-         2. THÔNG BÁO KHÁCH KHÔNG ĐỒNG Ý
-         ========================================== -->
+    <!-- 2. THÔNG BÁO KHÁCH KHÔNG ĐỒNG Ý -->
     {% if ticket.trang_thai_xac_nhan == 'DISAGREED' %}
 
         {% if ticket.trang_thai == 'REOPENED' or ticket.trang_thai == 'IN_PROGRESS' %}
@@ -204,9 +324,7 @@
 
     {% endif %}
 
-    <!-- ==========================================
-         3. BỐ CỤC THÔNG TIN HAI CỘT
-         ========================================== -->
+    <!-- 3. BỐ CỤC THÔNG TIN HAI CỘT -->
     <div class="ticket-detail-grid">
 
         <!-- CỘT TRÁI -->
@@ -249,17 +367,14 @@
 
             </section>
 
-            <!-- ==========================================
-                 BẰNG CHỨNG ĐÍNH KÈM TỪ KHÁCH HÀNG
-                 MODULE 2 -> MODULE 3
-                 ========================================== -->
+            <!-- BẰNG CHỨNG ĐÍNH KÈM TỪ KHÁCH HÀNG -->
             <section class="ticket-detail-card ticket-evidence-section">
 
-                <h3>📎 Hình ảnh và bằng chứng đính kèm</h3>
+                <h3>📎 Bằng chứng khách hàng cung cấp</h3>
 
                 <p class="ticket-detail-muted">
-                    Các hình ảnh khách hàng đã cung cấp
-                    trong quá trình gửi yêu cầu hỗ trợ.
+                    Hình ảnh được khách hàng đính kèm
+                    để hỗ trợ xác minh và xử lý yêu cầu.
                 </p>
 
                 <div class="ticket-evidence-list">
@@ -268,22 +383,21 @@
 
                         <div class="ticket-evidence-item">
 
-                            <!-- THÔNG TIN FILE -->
+                            <!-- THÔNG TIN FILE BÊN TRÁI -->
                             <div class="ticket-evidence-info">
 
                                 <strong class="ticket-evidence-name">
-                                    🖼️
-                                    {{ attachment.ten_tep_goc|default:"Hình ảnh bằng chứng" }}
+                                    📷 {{ attachment.ten_tep_goc|default:"Hình ảnh bằng chứng" }}
                                 </strong>
 
                                 <small class="ticket-detail-muted">
-                                    Tải lên:
+                                    Thời điểm tải lên:
                                     {{ attachment.thoi_diem_tai_len|date:"d/m/Y H:i" }}
                                 </small>
 
                             </div>
 
-                            <!-- THAO TÁC VỚI FILE -->
+                            <!-- HAI NÚT BÊN PHẢI -->
                             <div class="ticket-evidence-actions">
 
                                 <a
@@ -552,9 +666,7 @@
 
             </section>
 
-            <!-- ==========================================
-                 UC3.4 - THEO DÕI TRẠNG THÁI THẨM ĐỊNH
-                 ========================================== -->
+            <!-- THEO DÕI THẨM ĐỊNH -->
             <section class="ticket-detail-card">
 
                 <h3>📋 Theo dõi thẩm định</h3>
@@ -636,9 +748,7 @@
 
     </div>
 
-    <!-- ==========================================
-         4. HÀNH ĐỘNG XỬ LÝ TICKET
-         ========================================== -->
+    <!-- 4. HÀNH ĐỘNG XỬ LÝ TICKET -->
     <section class="ticket-detail-card ticket-detail-actions">
 
         <h3>⚙️ Hành động xử lý</h3>
@@ -766,9 +876,7 @@
 
                 </div>
 
-                <!-- ==========================================
-                     UC3.4 - GHI NHẬN YÊU CẦU THẨM ĐỊNH
-                     ========================================== -->
+                <!-- YÊU CẦU THẨM ĐỊNH -->
                 <div class="ticket-action-block">
 
                     <h4>📋 Yêu cầu chuyển thẩm định</h4>
@@ -936,7 +1044,6 @@
                             để hoàn tất quy trình hỗ trợ.
                         </p>
 
-                        <!-- FORM ĐÓNG TICKET -->
                         <form
                             method="POST"
                             action="{% url 'tickets:close' ticket.pk %}"
