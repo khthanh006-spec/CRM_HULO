@@ -35,11 +35,14 @@ def ticket_home(request):
         'nguoi_phu_trach',
     )
 
-    # CSKH chỉ xem Ticket được giao cho mình
+    # CSKH xem Ticket NEW chưa phân công và Ticket được giao cho mình
     staff = getattr(request.user, 'staff_profile', None)
 
     if staff is not None and staff.vai_tro == 'CSKH':
-        tickets = tickets.filter(nguoi_phu_trach=staff)
+        tickets = tickets.filter(
+            Q(trang_thai='NEW', nguoi_phu_trach__isnull=True) |
+            Q(nguoi_phu_trach=staff)
+        )
 
     # Thống kê trước khi lọc
     now = timezone.now()
@@ -97,7 +100,6 @@ def ticket_home(request):
 
     tickets = tickets.order_by('-thoi_diem_tao')
 
-
     # UC3.6 - Xác định trạng thái và thời gian SLA cho từng Ticket
     tickets = list(tickets)
 
@@ -139,8 +141,6 @@ def ticket_home(request):
                 ticket.sla_status = 'ON_TIME'
                 ticket.sla_remaining = f"Còn {duration_text}"
 
-
-
     categories = TicketCategory.objects.filter(
         dang_hoat_dong=True
     ).order_by('ten_danh_muc')
@@ -159,11 +159,9 @@ def ticket_home(request):
         }
     )
 
-
 # ==========================================================
 # UC-3.2 - CHI TIẾT TICKET DÀNH CHO NHÂN VIÊN
 # ==========================================================
-
 
 @login_required(login_url='login')
 @role_required('CSKH', 'MANAGER', 'ADMIN')
@@ -182,8 +180,19 @@ def ticket_detail(request, pk):
 
     staff = getattr(request.user, 'staff_profile', None)
 
+    # CSKH được xem Ticket NEW chưa phân công
+    # hoặc Ticket đã được giao cho chính mình
     if staff is not None and staff.vai_tro == 'CSKH':
-        if ticket.nguoi_phu_trach_id != staff.pk:
+
+        la_ticket_moi_chua_phan_cong = (
+            ticket.trang_thai == 'NEW'
+            and ticket.nguoi_phu_trach_id is None
+        )
+
+        if (
+            not la_ticket_moi_chua_phan_cong
+            and ticket.nguoi_phu_trach_id != staff.pk
+        ):
             return HttpResponseForbidden(
                 "Bạn không có quyền xem Ticket này."
             )
@@ -286,8 +295,6 @@ def ticket_detail(request, pk):
             'danh_sach_bang_chung': danh_sach_bang_chung,
         }
     )
-
-
 # ==========================================================
 # UC-3.2 - TIẾP NHẬN TICKET
 # ASSIGNED -> IN_PROGRESS

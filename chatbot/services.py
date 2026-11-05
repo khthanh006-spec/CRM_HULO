@@ -296,3 +296,130 @@ def chuan_bi_bang_chung_cho_m3(yeu_cau):
         })
 
     return ket_qua
+
+
+# ================================================
+# M2 -> M3: DOC BANG CHUNG TU KHO RIENG M2
+# ================================================
+
+def mo_bang_chung_m2(*, yeu_cau, khach_hang):
+    """
+    Mo cac file bang chung da tai len M2.
+
+    Chi tra ve file khi:
+    - Ban nhap thuoc dung khach hang.
+    - Duong dan dung cau truc duoc phep.
+    - File ton tai trong kho rieng M2.
+    - Dung luong file thuc te hop le.
+
+    Tra ve danh sach (ten_goc, file_da_mo).
+    Ben goi phai dong file sau khi su dung.
+    """
+    from pathlib import Path
+
+    from django.conf import settings
+    from django.core.files.storage import FileSystemStorage
+    from django.core.exceptions import ValidationError
+
+    if yeu_cau.get("ma_khach_hang") != khach_hang.pk:
+        raise ValidationError(
+            "Ban khong co quyen truy cap bang chung nay."
+        )
+
+    try:
+        danh_sach = chuan_bi_bang_chung_cho_m3(yeu_cau)
+    except ValueError as error:
+        raise ValidationError(str(error)) from error
+
+    thu_muc_rieng = (
+        Path(settings.BASE_DIR).parent
+        / "CRM_HULO_m2_private"
+    )
+
+    kho_luu = FileSystemStorage(
+        location=str(thu_muc_rieng)
+    )
+
+    ket_qua = []
+
+    try:
+        for thong_tin in danh_sach:
+            duong_dan = thong_tin["duong_dan_luu"]
+
+            if not kho_luu.exists(duong_dan):
+                raise ValidationError(
+                    "Khong tim thay file bang chung M2."
+                )
+
+            dung_luong_thuc = kho_luu.size(duong_dan)
+
+            if (
+                dung_luong_thuc <= 0
+                or dung_luong_thuc > 10 * 1024 * 1024
+                or dung_luong_thuc != thong_tin["dung_luong"]
+            ):
+                raise ValidationError(
+                    "Dung luong file bang chung khong hop le."
+                )
+
+            tep = kho_luu.open(duong_dan, "rb")
+
+            # Service M3 dung tep.name de kiem tra duoi JPG/JPEG.
+            # Vi ten luu M2 la UUID, can truyen ten goc rieng
+            # o buoc tich hop tiep theo.
+            ket_qua.append(
+                {
+                    "ten_goc": thong_tin["ten_goc"],
+                    "duong_dan_luu": duong_dan,
+                    "tep": tep,
+                }
+            )
+
+        return ket_qua
+
+    except Exception:
+        for muc in ket_qua:
+            muc["tep"].close()
+        raise
+
+
+# ================================================
+# M2 -> M3: CHUAN BI FILE GUI SANG M3
+# ================================================
+
+from contextlib import contextmanager
+from django.core.files.base import File
+
+
+@contextmanager
+def chuan_bi_file_gui_m3(*, yeu_cau, khach_hang):
+    """
+    Chuan bi anh cua M2 thanh Django File.
+
+    - Giu nguyen noi dung anh.
+    - Su dung ten file goc.
+    - Tu dong dong cac file sau khi su dung.
+    - Khong tao Ticket hay TicketAttachment.
+    """
+
+    danh_sach_da_mo = mo_bang_chung_m2(
+        yeu_cau=yeu_cau,
+        khach_hang=khach_hang,
+    )
+
+    try:
+        danh_sach_file = []
+
+        for muc in danh_sach_da_mo:
+            tep = File(
+                muc["tep"],
+                name=muc["ten_goc"],
+            )
+
+            danh_sach_file.append(tep)
+
+        yield danh_sach_file
+
+    finally:
+        for muc in danh_sach_da_mo:
+            muc["tep"].close()

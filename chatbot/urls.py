@@ -1,6 +1,8 @@
 
 from django.urls import path
+
 from . import views
+from . import integration_m3
 
 app_name = 'chatbot'
 
@@ -41,8 +43,6 @@ urlpatterns = [
         name='bang_chung'
     ),
 
-
-
     # UC-2.5: Xóa bằng chứng đã tải
     path(
         'xoa-bang-chung/',
@@ -55,6 +55,13 @@ urlpatterns = [
         'xac-nhan-yeu-cau/',
         views.xac_nhan_yeu_cau,
         name='xac_nhan_yeu_cau'
+    ),
+
+    # UC-2.6: Gửi yêu cầu từ M2 sang M3 để tạo Ticket
+    path(
+        'gui-yeu-cau-sang-m3/',
+        integration_m3.gui_yeu_cau_sang_m3,
+        name='gui_yeu_cau_sang_m3'
     ),
 
     # UC-2.7: Giao diện bổ sung thông tin yêu cầu

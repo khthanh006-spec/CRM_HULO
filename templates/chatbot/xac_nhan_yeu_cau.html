@@ -8,7 +8,7 @@ Kiểm tra yêu cầu hỗ trợ - HULO
 {% block content %}
 
 <style>
-    /* UC-2.6: KIỂM TRA YÊU CẦU */
+    /* UC-2.6: KIỂM TRA VÀ GỬI YÊU CẦU */
 
     .m2-confirm-page {
         max-width: 850px;
@@ -123,9 +123,14 @@ Kiểm tra yêu cầu hỗ trợ - HULO
     .m2-actions {
         display: flex;
         justify-content: flex-end;
+        align-items: center;
         gap: 12px;
         margin-top: 25px;
         flex-wrap: wrap;
+    }
+
+    .m2-actions form {
+        margin: 0;
     }
 
     .m2-btn {
@@ -152,9 +157,22 @@ Kiểm tra yêu cầu hỗ trợ - HULO
         cursor: pointer;
     }
 
+    .m2-btn-submit:hover {
+        background: #105fae;
+    }
+
     .m2-btn-submit:disabled {
         background: #a9b9ca;
         cursor: not-allowed;
+    }
+
+    .m2-alert {
+        padding: 12px 15px;
+        margin-bottom: 18px;
+        border-radius: 8px;
+        border: 1px solid #f1dda5;
+        background: #fff8e8;
+        color: #735719;
     }
 
     @media (max-width: 600px) {
@@ -173,10 +191,17 @@ Kiểm tra yêu cầu hỗ trợ - HULO
 
         .m2-actions {
             flex-direction: column;
+            align-items: stretch;
+        }
+
+        .m2-actions form,
+        .m2-actions .m2-btn,
+        .m2-actions button {
+            width: 100%;
+            box-sizing: border-box;
         }
     }
 </style>
-
 
 <div class="m2-confirm-page">
 
@@ -193,6 +218,15 @@ Kiểm tra yêu cầu hỗ trợ - HULO
 
     </div>
 
+    <!-- THÔNG BÁO -->
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="m2-alert" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div class="m2-confirm-card">
 
@@ -209,7 +243,6 @@ Kiểm tra yêu cầu hỗ trợ - HULO
             </strong>
 
         </div>
-
 
         <!-- THÔNG TIN YÊU CẦU -->
 
@@ -241,7 +274,6 @@ Kiểm tra yêu cầu hỗ trợ - HULO
 
         </div>
 
-
         <!-- MÔ TẢ -->
 
         <div class="m2-section-title">
@@ -251,7 +283,6 @@ Kiểm tra yêu cầu hỗ trợ - HULO
         <div class="m2-description">
             {{ thong_tin.mo_ta|linebreaksbr }}
         </div>
-
 
         <!-- THÔNG TIN LIÊN HỆ -->
 
@@ -282,7 +313,6 @@ Kiểm tra yêu cầu hỗ trợ - HULO
             </div>
 
         </div>
-
 
         <!-- BẰNG CHỨNG -->
 
@@ -324,7 +354,6 @@ Kiểm tra yêu cầu hỗ trợ - HULO
 
         {% endif %}
 
-
         <!-- GHI CHÚ -->
 
         <div class="m2-note">
@@ -333,11 +362,13 @@ Kiểm tra yêu cầu hỗ trợ - HULO
 
             Đây là trang kiểm tra thông tin trước khi gửi.
 
-            Yêu cầu hiện chưa được gửi chính thức
-            đến nhân viên hỗ trợ và chưa có Ticket.
+            Khi bạn xác nhận, hệ thống sẽ chuyển yêu cầu
+            sang Module 3 để tạo Ticket hỗ trợ.
+
+            Sau khi gửi thành công, bạn sẽ nhận được
+            mã Ticket để theo dõi quá trình xử lý.
 
         </div>
-
 
         <!-- NÚT THAO TÁC -->
 
@@ -350,20 +381,48 @@ Kiểm tra yêu cầu hỗ trợ - HULO
                 Quay lại chỉnh sửa
             </a>
 
-            <!-- Chưa kích hoạt cho đến khi kết nối M3 -->
-
-            <button
-                type="button"
-                class="m2-btn m2-btn-submit"
-                disabled
+            <form
+                method="post"
+                action="{% url 'chatbot:gui_yeu_cau_sang_m3' %}"
+                id="m2-submit-request-form"
             >
-                Xác nhận gửi yêu cầu
-            </button>
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="m2-btn m2-btn-submit"
+                    id="m2-submit-request-button"
+                >
+                    Xác nhận gửi yêu cầu
+                </button>
+
+            </form>
 
         </div>
 
     </div>
 
 </div>
+
+<script>
+    (function () {
+        const form = document.getElementById(
+            'm2-submit-request-form'
+        );
+
+        const button = document.getElementById(
+            'm2-submit-request-button'
+        );
+
+        if (!form || !button) {
+            return;
+        }
+
+        form.addEventListener('submit', function () {
+            button.disabled = true;
+            button.textContent = 'Đang gửi yêu cầu...';
+        });
+    })();
+</script>
 
 {% endblock %}
