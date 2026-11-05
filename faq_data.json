@@ -1,0 +1,238 @@
+[
+{
+  "model": "support.faqcategory",
+  "pk": 1,
+  "fields": {
+    "ten_danh_muc": "Đơn hàng",
+    "mo_ta": "Các câu hỏi thường gặp về đặt hàng, xác nhận đơn hàng và theo dõi đơn hàng.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-24T10:28:48.181Z",
+    "thoi_diem_cap_nhat": "2026-10-28T12:43:20.344Z"
+  }
+},
+{
+  "model": "support.faqcategory",
+  "pk": 2,
+  "fields": {
+    "ten_danh_muc": "Giao hàng",
+    "mo_ta": "Hỗ trợ các vấn đề về vận chuyển, thời gian giao hàng và trạng thái giao hàng.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T08:40:40.549Z",
+    "thoi_diem_cap_nhat": "2026-10-31T08:40:40.549Z"
+  }
+},
+{
+  "model": "support.faqcategory",
+  "pk": 3,
+  "fields": {
+    "ten_danh_muc": "Đổi trả",
+    "mo_ta": "Hỗ trợ đổi trả sản phẩm, hoàn tiền và các vấn đề sau mua hàng.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T08:40:59.679Z",
+    "thoi_diem_cap_nhat": "2026-10-31T08:40:59.679Z"
+  }
+},
+{
+  "model": "support.faqcategory",
+  "pk": 4,
+  "fields": {
+    "ten_danh_muc": "Thanh toán",
+    "mo_ta": "Hỗ trợ phương thức thanh toán, giao dịch và các vấn đề thanh toán.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T08:41:14.311Z",
+    "thoi_diem_cap_nhat": "2026-10-31T08:41:14.311Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 1,
+  "fields": {
+    "danh_muc": 1,
+    "cau_hoi": "Làm thế nào để kiểm tra trạng thái đơn hàng?",
+    "cau_tra_loi": "Khách hàng đăng nhập vào tài khoản, truy cập mục đơn hàng và chọn đơn hàng cần kiểm tra để xem trạng thái xử lý hiện tại.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-24T10:29:58.186Z",
+    "thoi_diem_cap_nhat": "2026-10-24T10:31:33.138Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 2,
+  "fields": {
+    "danh_muc": 1,
+    "cau_hoi": "Tôi có thể thay đổi địa chỉ giao hàng sau khi đặt hàng không?",
+    "cau_tra_loi": "Khách hàng vui lòng liên hệ bộ phận chăm sóc khách hàng HULO để được kiểm tra khả năng thay đổi địa chỉ giao hàng.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-28T12:20:54.084Z",
+    "thoi_diem_cap_nhat": "2026-10-28T12:41:37.537Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 3,
+  "fields": {
+    "danh_muc": 1,
+    "cau_hoi": "Tôi có thể hủy đơn hàng sau khi đặt không?",
+    "cau_tra_loi": "Bạn có thể gửi yêu cầu hủy đơn hàng nếu đơn hàng chưa được xử lý hoặc bàn giao cho đơn vị vận chuyển. Vui lòng liên hệ nhân viên hỗ trợ và cung cấp mã đơn hàng để được kiểm tra.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.360Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.360Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 4,
+  "fields": {
+    "danh_muc": 1,
+    "cau_hoi": "Tôi cần làm gì khi đặt sai thông tin đơn hàng?",
+    "cau_tra_loi": "Nếu phát hiện thông tin đơn hàng chưa chính xác, bạn nên liên hệ nhân viên hỗ trợ càng sớm càng tốt. Hãy cung cấp mã đơn hàng và thông tin cần điều chỉnh để được kiểm tra.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.387Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.387Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 5,
+  "fields": {
+    "danh_muc": 2,
+    "cau_hoi": "Tôi có thể thay đổi địa chỉ giao hàng không?",
+    "cau_tra_loi": "Bạn có thể gửi yêu cầu thay đổi địa chỉ giao hàng khi đơn hàng chưa được bàn giao cho đơn vị vận chuyển. Vui lòng cung cấp mã đơn hàng và địa chỉ mới cho nhân viên hỗ trợ.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.391Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.391Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 6,
+  "fields": {
+    "danh_muc": 2,
+    "cau_hoi": "Làm thế nào để kiểm tra trạng thái đơn hàng?",
+    "cau_tra_loi": "Bạn có thể truy cập mục Đơn hàng để kiểm tra tình trạng xử lý. Nếu cần biết thêm thông tin về quá trình giao hàng, hãy cung cấp mã đơn hàng cho nhân viên hỗ trợ.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.395Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.395Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 7,
+  "fields": {
+    "danh_muc": 2,
+    "cau_hoi": "Tại sao đơn hàng của tôi giao chậm?",
+    "cau_tra_loi": "Đơn hàng có thể giao chậm do quá trình vận chuyển, thời tiết hoặc các yếu tố phát sinh trong quá trình giao nhận. Bạn vui lòng cung cấp mã đơn hàng để nhân viên hỗ trợ kiểm tra cụ thể.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.398Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.398Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 8,
+  "fields": {
+    "danh_muc": 2,
+    "cau_hoi": "Tôi chưa nhận được hàng nhưng hệ thống báo đã giao?",
+    "cau_tra_loi": "Nếu hệ thống hiển thị đã giao nhưng bạn chưa nhận được hàng, hãy kiểm tra lại với người thân hoặc bộ phận nhận hàng tại địa chỉ giao. Nếu vẫn chưa tìm thấy, vui lòng liên hệ nhân viên hỗ trợ để được xác minh.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.402Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.402Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 9,
+  "fields": {
+    "danh_muc": 3,
+    "cau_hoi": "Tôi có thể yêu cầu đổi trả sản phẩm không?",
+    "cau_tra_loi": "Bạn có thể gửi yêu cầu đổi trả nếu sản phẩm đáp ứng các điều kiện theo chính sách đổi trả của cửa hàng. Vui lòng cung cấp mã đơn hàng và tình trạng sản phẩm để được hỗ trợ.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.406Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.406Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 10,
+  "fields": {
+    "danh_muc": 3,
+    "cau_hoi": "Sản phẩm bị lỗi thì tôi phải làm gì?",
+    "cau_tra_loi": "Nếu nhận được sản phẩm bị lỗi hoặc hư hỏng, bạn nên chụp ảnh tình trạng sản phẩm và liên hệ nhân viên hỗ trợ. Hãy cung cấp mã đơn hàng để được hướng dẫn xử lý.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.409Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.409Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 11,
+  "fields": {
+    "danh_muc": 3,
+    "cau_hoi": "Tôi cần chuẩn bị gì khi yêu cầu đổi trả?",
+    "cau_tra_loi": "Bạn nên chuẩn bị mã đơn hàng, hình ảnh sản phẩm và thông tin mô tả lý do đổi trả. Nhân viên hỗ trợ sẽ kiểm tra và hướng dẫn các bước tiếp theo.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.413Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.413Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 12,
+  "fields": {
+    "danh_muc": 3,
+    "cau_hoi": "Sau bao lâu tôi nhận được kết quả xử lý đổi trả?",
+    "cau_tra_loi": "Thời gian xử lý phụ thuộc vào tình trạng sản phẩm và quá trình xác minh yêu cầu. Bạn có thể liên hệ nhân viên hỗ trợ để kiểm tra tiến độ xử lý yêu cầu đổi trả của mình.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.417Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.417Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 13,
+  "fields": {
+    "danh_muc": 4,
+    "cau_hoi": "Tôi có thể thanh toán bằng những hình thức nào?",
+    "cau_tra_loi": "Các hình thức thanh toán được áp dụng sẽ phụ thuộc vào phương thức mà cửa hàng hỗ trợ tại thời điểm đặt hàng. Bạn có thể kiểm tra thông tin thanh toán trong đơn hàng hoặc liên hệ nhân viên hỗ trợ.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.421Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.421Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 14,
+  "fields": {
+    "danh_muc": 4,
+    "cau_hoi": "Tôi đã thanh toán nhưng đơn hàng chưa được cập nhật?",
+    "cau_tra_loi": "Đôi khi thông tin thanh toán cần thêm thời gian để được xác nhận và cập nhật. Bạn vui lòng giữ lại biên lai hoặc mã giao dịch và liên hệ nhân viên hỗ trợ để được kiểm tra.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.424Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.424Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 15,
+  "fields": {
+    "danh_muc": 4,
+    "cau_hoi": "Tôi bị trừ tiền hai lần khi thanh toán thì phải làm sao?",
+    "cau_tra_loi": "Nếu phát hiện giao dịch bị trừ tiền nhiều lần, bạn không nên thực hiện thanh toán lại. Hãy lưu lại thông tin giao dịch và liên hệ nhân viên hỗ trợ để được kiểm tra và hướng dẫn xử lý.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.427Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.427Z"
+  }
+},
+{
+  "model": "support.faqarticle",
+  "pk": 16,
+  "fields": {
+    "danh_muc": 4,
+    "cau_hoi": "Tôi có được hoàn tiền khi đơn hàng bị hủy không?",
+    "cau_tra_loi": "Việc hoàn tiền phụ thuộc vào trạng thái đơn hàng và phương thức thanh toán đã sử dụng. Bạn vui lòng cung cấp mã đơn hàng và thông tin giao dịch để nhân viên hỗ trợ kiểm tra.",
+    "dang_hien_thi": true,
+    "thoi_diem_tao": "2026-10-31T09:45:35.430Z",
+    "thoi_diem_cap_nhat": "2026-10-31T09:45:35.430Z"
+  }
+}
+]

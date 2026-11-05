@@ -1,0 +1,236 @@
+[
+{
+  "model": "chatbot.chatrule",
+  "pk": 3,
+  "fields": {
+    "ten_chu_de": "Đổi trả",
+    "tu_khoa": "đổi trả",
+    "cau_tra_loi": "HULO sẵn sàng hỗ trợ yêu cầu đổi trả sản phẩm. Bạn vui lòng chuẩn bị mã đơn hàng, lý do đổi trả và hình ảnh sản phẩm nếu có. Nhân viên sẽ kiểm tra điều kiện áp dụng theo chính sách của HULO.",
+    "thu_tu_uu_tien": 7,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-24T03:09:33.049Z",
+    "thoi_diem_cap_nhat": "2026-10-24T03:09:33.049Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 4,
+  "fields": {
+    "ten_chu_de": "Thanh toán",
+    "tu_khoa": "thanh toán",
+    "cau_tra_loi": "Bạn cần hỗ trợ về thanh toán? Vui lòng mô tả phương thức thanh toán và vấn đề đang gặp phải. HULO sẽ hỗ trợ kiểm tra yêu cầu. Lưu ý không cung cấp mật khẩu, mã OTP hoặc thông tin thẻ đầy đủ qua Chatbot.",
+    "thu_tu_uu_tien": 6,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-24T03:10:09.730Z",
+    "thoi_diem_cap_nhat": "2026-10-24T03:10:09.730Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 5,
+  "fields": {
+    "ten_chu_de": "Sản phẩm bị lỗi sau khi mua",
+    "tu_khoa": "lỗi",
+    "cau_tra_loi": "Sản phẩm gặp lỗi sau khi mua cần được kiểm tra để xác định nguyên nhân và hướng xử lý phù hợp.\r\n\r\n**1. Thông tin cần chuẩn bị**\r\n- Tên sản phẩm hoặc mã sản phẩm.\r\n- Mã đơn hàng.\r\n- Mô tả cụ thể tình trạng lỗi.\r\n- Hình ảnh hoặc video thể hiện lỗi (nếu có).\r\n\r\n**2. Cách gửi yêu cầu hỗ trợ**\r\nBạn hãy chọn chức năng **Cần nhân viên hỗ trợ** và cung cấp các thông tin liên quan.\r\nNhân viên sẽ tiếp nhận, kiểm tra và xem xét phương án xử lý phù hợp như bảo hành, đổi trả hoặc hỗ trợ khác theo quy trình của CRM HULO.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T06:48:27.345Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:25:30.967Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 6,
+  "fields": {
+    "ten_chu_de": "Sản phẩm hoạt động không bình thường",
+    "tu_khoa": "sản phẩm hoạt động không bình thường",
+    "cau_tra_loi": "Nếu sản phẩm hoạt động không ổn định hoặc có biểu hiện khác với trạng thái bình thường, bạn nên kiểm tra lại hướng dẫn sử dụng của nhà sản xuất.\r\nĐể được hỗ trợ cụ thể, bạn hãy mô tả biểu hiện bất thường, thời điểm bắt đầu xuất hiện và thông tin sản phẩm. Bạn cũng có thể gửi hình ảnh hoặc video để minh họa tình trạng thực tế.\r\nNếu vấn đề vẫn tiếp diễn, hãy chọn **Cần nhân viên hỗ trợ** để gửi yêu cầu kiểm tra và được hướng dẫn phương án xử lý phù hợp.",
+    "thu_tu_uu_tien": 30,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T06:49:52.471Z",
+    "thoi_diem_cap_nhat": "2026-10-31T06:49:52.471Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 7,
+  "fields": {
+    "ten_chu_de": "Sản phẩm không lên nguồn",
+    "tu_khoa": "không lên nguồn",
+    "cau_tra_loi": "Đối với tình trạng sản phẩm không lên nguồn, bạn có thể kiểm tra nguồn điện, pin hoặc bộ sạc theo hướng dẫn của nhà sản xuất nếu việc kiểm tra an toàn.\r\nNếu sản phẩm vẫn không khởi động được, bạn vui lòng chuẩn bị thông tin mua hàng và mô tả tình trạng gặp phải.\r\nHãy chọn **Cần nhân viên hỗ trợ** để gửi yêu cầu kiểm tra. Bộ phận phụ trách sẽ tiếp nhận thông tin và xem xét hướng xử lý hoặc bảo hành phù hợp.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T06:50:51.710Z",
+    "thoi_diem_cap_nhat": "2026-10-31T06:50:51.710Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 8,
+  "fields": {
+    "ten_chu_de": "Sản phẩm bị hư hỏng",
+    "tu_khoa": "hư hỏng",
+    "cau_tra_loi": "Sản phẩm bị hư hỏng cần được ghi nhận tình trạng để bộ phận phụ trách kiểm tra và xác định hướng giải quyết.\r\nBạn vui lòng mô tả bộ phận bị hư hỏng, mức độ hư hỏng và thời điểm phát hiện. Nếu có thể, hãy chuẩn bị hình ảnh thể hiện rõ tình trạng sản phẩm cùng thông tin mua hàng.\r\nSau đó, chọn **Cần nhân viên hỗ trợ** để gửi yêu cầu. Nhân viên sẽ tiếp nhận và xem xét phương án hỗ trợ phù hợp theo quy trình xử lý khiếu nại.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T06:51:31.324Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:18:37.818Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 9,
+  "fields": {
+    "ten_chu_de": "Sản phẩm bị nứt hoặc vỡ",
+    "tu_khoa": "nứt vỡ",
+    "cau_tra_loi": "Đối với sản phẩm bị nứt hoặc vỡ, bạn nên ngừng sử dụng nếu tình trạng hư hỏng có thể gây mất an toàn.\r\nBạn vui lòng chụp ảnh vị trí bị nứt, vỡ và cung cấp thông tin mua hàng để làm căn cứ kiểm tra.\r\nHãy chọn **Cần nhân viên hỗ trợ** và gửi thông tin kèm hình ảnh sản phẩm. Bộ phận phụ trách sẽ tiếp nhận, đánh giá tình trạng và hướng dẫn phương án giải quyết phù hợp.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T06:52:03.800Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:18:55.790Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 10,
+  "fields": {
+    "ten_chu_de": "Sản phẩm bị thiếu phụ kiện",
+    "tu_khoa": "thiếu phụ kiện",
+    "cau_tra_loi": "Sản phẩm không đầy đủ phụ kiện hoặc linh kiện đi kèm có thể ảnh hưởng đến quá trình sử dụng.\r\n\r\n**1. Kiểm tra sản phẩm**\r\nBạn hãy kiểm tra lại danh sách phụ kiện đi kèm theo thông tin sản phẩm để xác định bộ phận nào còn thiếu.\r\n\r\n**2. Chuẩn bị thông tin**\r\n- Tên sản phẩm hoặc mã sản phẩm.\r\n- Mã đơn hàng.\r\n- Tên phụ kiện hoặc linh kiện bị thiếu.\r\n- Hình ảnh sản phẩm thực tế (nếu có).\r\n\r\n**3. Gửi yêu cầu hỗ trợ**\r\nChọn chức năng **Cần nhân viên hỗ trợ** và cung cấp thông tin về phụ kiện còn thiếu. Nhân viên sẽ tiếp nhận, kiểm tra và xem xét phương án bổ sung phụ kiện hoặc hỗ trợ phù hợp theo quy trình của CRM HULO.",
+    "thu_tu_uu_tien": 30,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T06:59:41.695Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:35:01.756Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 11,
+  "fields": {
+    "ten_chu_de": "Sản phẩm bị thiếu phụ kiện",
+    "tu_khoa": "thiếu linh kiện",
+    "cau_tra_loi": "Sản phẩm không đầy đủ phụ kiện hoặc linh kiện đi kèm có thể ảnh hưởng đến quá trình sử dụng.\r\n\r\n**1. Kiểm tra sản phẩm**\r\nBạn hãy kiểm tra lại danh sách phụ kiện đi kèm theo thông tin sản phẩm để xác định bộ phận nào còn thiếu.\r\n\r\n**2. Chuẩn bị thông tin**\r\n- Tên sản phẩm hoặc mã sản phẩm.\r\n- Mã đơn hàng.\r\n- Tên phụ kiện hoặc linh kiện bị thiếu.\r\n- Hình ảnh sản phẩm thực tế (nếu có).\r\n\r\n**3. Gửi yêu cầu hỗ trợ**\r\nChọn chức năng **Cần nhân viên hỗ trợ** và cung cấp thông tin về phụ kiện còn thiếu. Nhân viên sẽ tiếp nhận, kiểm tra và xem xét phương án bổ sung phụ kiện hoặc hỗ trợ phù hợp theo quy trình của CRM HULO.",
+    "thu_tu_uu_tien": 30,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:00:13.813Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:34:50.395Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 12,
+  "fields": {
+    "ten_chu_de": "Sản phẩm phát sinh lỗi khi sử dụng",
+    "tu_khoa": "lỗi khi sử dụng",
+    "cau_tra_loi": "Nếu sản phẩm phát sinh lỗi trong quá trình sử dụng, bạn nên ghi nhận cụ thể biểu hiện và thời điểm xảy ra sự cố để thuận tiện cho việc kiểm tra.\r\nBạn vui lòng mô tả lỗi xuất hiện trong hoàn cảnh nào, tần suất xảy ra và sản phẩm có còn hoạt động bình thường hay không.\r\nHãy chuẩn bị thông tin mua hàng và hình ảnh hoặc video minh họa nếu có. Sau đó, chọn **Cần nhân viên hỗ trợ** để gửi yêu cầu kiểm tra.\r\nBộ phận phụ trách sẽ tiếp nhận và xem xét hướng xử lý phù hợp theo tình trạng sản phẩm.",
+    "thu_tu_uu_tien": 30,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:01:07.510Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:18:00.573Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 13,
+  "fields": {
+    "ten_chu_de": "Sản phẩm không đúng mô tả",
+    "tu_khoa": "không đúng mô tả",
+    "cau_tra_loi": "Sản phẩm thực tế không giống với thông tin mô tả hoặc giới thiệu có thể là vấn đề cần được tiếp nhận và kiểm tra.\r\n\r\n**1. Xác định nội dung chưa đúng**\r\nBạn hãy đối chiếu sản phẩm thực tế với thông tin đã được giới thiệu, chẳng hạn như màu sắc, kích thước, chất liệu, tính năng hoặc các đặc điểm khác.\r\n\r\n**2. Chuẩn bị thông tin liên quan**\r\n- Tên sản phẩm hoặc mã sản phẩm.\r\n- Mã đơn hàng.\r\n- Nội dung mô tả mà bạn cho rằng chưa chính xác.\r\n- Hình ảnh sản phẩm thực tế và thông tin giới thiệu (nếu có).\r\n\r\n**3. Gửi yêu cầu khiếu nại**\r\nChọn chức năng **Cần nhân viên hỗ trợ** để gửi thông tin và bằng chứng liên quan. Bộ phận phụ trách sẽ tiếp nhận, đối chiếu thông tin và xem xét phương án giải quyết phù hợp theo quy trình xử lý khiếu nại của CRM HULO.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:40:45.924Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:40:45.924Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 14,
+  "fields": {
+    "ten_chu_de": "Không hài lòng về chất lượng sản phẩm",
+    "tu_khoa": "chất lượng kém",
+    "cau_tra_loi": "Chất lượng sản phẩm không đáp ứng kỳ vọng là vấn đề cần được ghi nhận để bộ phận phụ trách xem xét và hỗ trợ.\r\n\r\n**1. Mô tả vấn đề**\r\nBạn hãy cho biết điểm nào của sản phẩm khiến bạn chưa hài lòng, chẳng hạn như chất liệu, độ hoàn thiện, độ bền hoặc khả năng sử dụng.\r\n\r\n**2. Chuẩn bị thông tin**\r\n- Tên sản phẩm hoặc mã sản phẩm.\r\n- Mã đơn hàng.\r\n- Mô tả cụ thể vấn đề về chất lượng.\r\n- Hình ảnh hoặc video minh họa (nếu có).\r\n\r\n**3. Gửi phản ánh**\r\nChọn chức năng **Cần nhân viên hỗ trợ** để gửi phản ánh kèm thông tin liên quan. Bộ phận phụ trách sẽ tiếp nhận, xem xét nội dung phản ánh và tư vấn phương án hỗ trợ phù hợp theo quy trình chăm sóc khách hàng của CRM HULO.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:42:02.036Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:42:02.036Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 15,
+  "fields": {
+    "ten_chu_de": "Yêu cầu đổi sản phẩm bị lỗi",
+    "tu_khoa": "đổi",
+    "cau_tra_loi": "Nếu sản phẩm gặp lỗi hoặc không đáp ứng yêu cầu sử dụng, bạn có thể gửi yêu cầu đổi sản phẩm để bộ phận phụ trách xem xét.\r\n\r\n**1. Thông tin cần chuẩn bị**\r\n- Tên sản phẩm và mã đơn hàng.\r\n- Mô tả tình trạng lỗi hoặc vấn đề gặp phải.\r\n- Hình ảnh hoặc video sản phẩm (nếu có).\r\n\r\n**2. Gửi yêu cầu đổi sản phẩm**\r\nBạn hãy chọn chức năng **Cần nhân viên hỗ trợ** và trình bày rõ mong muốn đổi sản phẩm.\r\nNhân viên sẽ tiếp nhận thông tin, kiểm tra tình trạng sản phẩm và xem xét điều kiện đổi hàng theo chính sách áp dụng. Sau khi được kiểm tra, bạn sẽ được thông báo về phương án xử lý tiếp theo.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:45:10.313Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:45:10.313Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 16,
+  "fields": {
+    "ten_chu_de": "Kiểm tra điều kiện bảo hành",
+    "tu_khoa": "bảo hành",
+    "cau_tra_loi": "Bạn có thể yêu cầu kiểm tra điều kiện bảo hành để biết sản phẩm của mình có được hỗ trợ theo chính sách bảo hành hay không.\r\n\r\n**1. Thông tin cần chuẩn bị**\r\n- Tên sản phẩm hoặc mã sản phẩm.\r\n- Mã đơn hàng hoặc thông tin mua hàng.\r\n- Thời điểm mua sản phẩm.\r\n- Mô tả tình trạng hiện tại của sản phẩm.\r\n\r\n**2. Gửi yêu cầu kiểm tra bảo hành**\r\nBạn hãy chọn chức năng **Cần nhân viên hỗ trợ** và cung cấp những thông tin trên. Bộ phận phụ trách sẽ kiểm tra thông tin mua hàng, thời hạn và điều kiện bảo hành áp dụng cho sản phẩm. Sau khi xác minh, nhân viên sẽ thông báo kết quả và hướng dẫn bạn thực hiện các bước tiếp theo nếu sản phẩm đủ điều kiện bảo hành.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:46:51.957Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:46:51.957Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 17,
+  "fields": {
+    "ten_chu_de": "Yêu cầu sửa chữa sản phẩm",
+    "tu_khoa": "sửa",
+    "cau_tra_loi": "Nếu sản phẩm đang gặp sự cố và cần sửa chữa, bạn có thể gửi yêu cầu để bộ phận phụ trách kiểm tra và hướng dẫn xử lý.\r\n\r\n**1. Thông tin cần cung cấp**\r\n- Tên sản phẩm hoặc mã sản phẩm.\r\n- Mã đơn hàng hoặc thông tin mua hàng.\r\n- Mô tả cụ thể tình trạng hư hỏng.\r\n- Hình ảnh hoặc video minh họa (nếu có).\r\n\r\n**2. Gửi yêu cầu sửa chữa**\r\nBạn hãy chọn chức năng **Cần nhân viên hỗ trợ** và trình bày tình trạng sản phẩm cần sửa chữa. Nhân viên sẽ tiếp nhận thông tin, kiểm tra tình trạng sản phẩm và xác định phương án hỗ trợ phù hợp. Nếu sản phẩm thuộc phạm vi bảo hành, bộ phận phụ trách sẽ hướng dẫn bạn thực hiện quy trình bảo hành tương ứng.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:48:16.773Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:48:16.773Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 18,
+  "fields": {
+    "ten_chu_de": "Khiếu nại về dịch vụ chăm sóc khách hàng",
+    "tu_khoa": "không hài lòng",
+    "cau_tra_loi": "CRM HULO ghi nhận phản ánh của bạn về chất lượng dịch vụ chăm sóc khách hàng.\r\n\r\n**1. Nội dung cần phản ánh**\r\nBạn vui lòng mô tả cụ thể vấn đề gặp phải, chẳng hạn như nhân viên tư vấn chưa rõ ràng, phản hồi chưa phù hợp hoặc quá trình hỗ trợ chưa đáp ứng mong đợi.\r\n\r\n**2. Gửi khiếu nại**\r\nĐể phản ánh được tiếp nhận và xem xét, bạn hãy chọn chức năng **Cần nhân viên hỗ trợ** và cung cấp:\r\n- Nội dung sự việc cần phản ánh.\r\n- Thời điểm xảy ra sự việc (nếu có).\r\n- Thông tin liên quan đến lần hỗ trợ trước đó (nếu có).\r\nBộ phận chăm sóc khách hàng sẽ tiếp nhận phản ánh, kiểm tra thông tin và xem xét hướng giải quyết phù hợp.\r\nCảm ơn bạn đã phản hồi để CRM HULO có cơ sở cải thiện chất lượng dịch vụ.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:49:26.808Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:49:26.808Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 19,
+  "fields": {
+    "ten_chu_de": "Theo dõi tiến độ xử lý khiếu nại",
+    "tu_khoa": "theo dõi khiếu nại",
+    "cau_tra_loi": "Sau khi gửi khiếu nại, bạn có thể theo dõi tiến độ xử lý để nắm được tình trạng yêu cầu của mình.\r\n\r\n**1. Thông tin cần chuẩn bị**\r\n- Mã Ticket hoặc mã yêu cầu hỗ trợ đã được cấp.\r\n- Nội dung khiếu nại đã gửi.\r\n- Thời điểm gửi yêu cầu (nếu có).\r\n\r\n**2. Kiểm tra tiến độ xử lý**\r\nBạn hãy truy cập mục quản lý yêu cầu hỗ trợ trên hệ thống và sử dụng mã Ticket để tra cứu tình trạng xử lý.\r\n\r\n**3. Nếu chưa nhận được phản hồi**\r\nNếu yêu cầu chưa được cập nhật hoặc thời gian xử lý kéo dài, bạn có thể chọn **Cần nhân viên hỗ trợ** để đề nghị kiểm tra lại tiến độ. Nhân viên phụ trách sẽ kiểm tra thông tin và phản hồi tình trạng xử lý cho bạn.",
+    "thu_tu_uu_tien": 35,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:50:18.806Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:50:18.806Z"
+  }
+},
+{
+  "model": "chatbot.chatrule",
+  "pk": 20,
+  "fields": {
+    "ten_chu_de": "Bổ sung bằng chứng khiếu nại",
+    "tu_khoa": "bổ sung bằng chứng",
+    "cau_tra_loi": "Bạn có thể bổ sung hình ảnh, video hoặc tài liệu liên quan để giúp bộ phận phụ trách có thêm cơ sở kiểm tra và đánh giá khiếu nại.\r\n\r\n**1. Các loại bằng chứng có thể cung cấp**\r\n\r\n- Hình ảnh sản phẩm bị lỗi hoặc hư hỏng.\r\n- Video thể hiện tình trạng bất thường của sản phẩm.\r\n- Hóa đơn, phiếu mua hàng hoặc giấy tờ liên quan.\r\n- Các tài liệu khác có liên quan đến nội dung khiếu nại.\r\n\r\n**2. Cách bổ sung bằng chứng**\r\n\r\nBạn hãy mở cuộc trò chuyện hỗ trợ và sử dụng chức năng đính kèm tệp (nếu được hỗ trợ) để gửi hình ảnh hoặc tài liệu liên quan.\r\n\r\n**3. Sau khi gửi bằng chứng**\r\nThông tin bổ sung sẽ được ghi nhận cùng nội dung hỗ trợ để bộ phận phụ trách có cơ sở xem xét và xử lý yêu cầu của bạn.\r\nLưu ý: Bạn nên cung cấp bằng chứng rõ ràng, đúng với vấn đề đang phản ánh để thuận tiện cho quá trình kiểm tra.",
+    "thu_tu_uu_tien": 40,
+    "dang_hoat_dong": true,
+    "thoi_diem_tao": "2026-10-31T07:51:11.322Z",
+    "thoi_diem_cap_nhat": "2026-10-31T07:51:11.322Z"
+  }
+}
+]

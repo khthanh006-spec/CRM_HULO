@@ -1,0 +1,316 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    /* ===============================
+       UC-2.7 - BO SUNG YEU CAU
+       =============================== */
+
+    .m2-bs-page {
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        min-height: 75vh;
+        padding: 40px 20px;
+        background: #f4f7fb;
+        font-family: inherit;
+    }
+
+    .m2-bs-page *,
+    .m2-bs-page *::before,
+    .m2-bs-page *::after {
+        box-sizing: border-box;
+    }
+
+    /* Khung form chính */
+    .m2-bs-card {
+        width: 100%;
+        max-width: 720px;
+        height: fit-content;
+        padding: 36px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Phần tiêu đề */
+    .m2-bs-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .m2-bs-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 54px;
+        height: 54px;
+        flex-shrink: 0;
+        background: #eff6ff;
+        color: #2563eb;
+        border-radius: 14px;
+        font-size: 25px;
+    }
+
+    .m2-bs-title {
+        margin: 0 0 5px;
+        color: #1e293b;
+        font-size: 25px;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    .m2-bs-subtitle {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    /* Nội dung giới thiệu */
+    .m2-bs-description {
+        margin: 0 0 24px;
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    /* Thông báo */
+    .m2-bs-notice {
+        padding: 15px 18px;
+        margin-bottom: 28px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        border-radius: 10px;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* Phần nhập nội dung */
+    .m2-bs-form-group {
+        margin-bottom: 24px;
+    }
+
+    .m2-bs-label {
+        display: block;
+        margin-bottom: 10px;
+        color: #334155;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .m2-bs-required {
+        color: #dc2626;
+    }
+
+    .m2-bs-form-group textarea {
+        display: block;
+        width: 100%;
+        min-height: 160px;
+        padding: 14px 16px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        color: #1e293b;
+        font-family: inherit;
+        font-size: 15px;
+        line-height: 1.6;
+        resize: vertical;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .m2-bs-form-group textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .m2-bs-form-group textarea::placeholder {
+        color: #94a3b8;
+    }
+
+    .m2-bs-hint {
+        margin-top: 9px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .m2-bs-error {
+        margin-top: 7px;
+        color: #dc2626;
+        font-size: 13px;
+    }
+
+    /* Nút gửi */
+    .m2-bs-actions {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 10px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .m2-bs-submit {
+        padding: 13px 26px;
+        background: #2563eb;
+        border: none;
+        border-radius: 10px;
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .m2-bs-submit:disabled {
+        background: #cbd5e1;
+        color: #475569;
+        cursor: not-allowed;
+    }
+
+    /* Giao diện điện thoại */
+    @media (max-width: 600px) {
+        .m2-bs-page {
+            padding: 20px 12px;
+        }
+
+        .m2-bs-card {
+            padding: 24px 18px;
+            border-radius: 14px;
+        }
+
+        .m2-bs-title {
+            font-size: 21px;
+        }
+
+        .m2-bs-icon {
+            width: 46px;
+            height: 46px;
+        }
+
+        .m2-bs-submit {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="m2-bs-page">
+
+    <div class="m2-bs-card">
+
+        <!-- TIÊU ĐỀ -->
+        <div class="m2-bs-header">
+
+            <div class="m2-bs-icon">
+                &#9998;
+            </div>
+
+            <div>
+                <h2 class="m2-bs-title">
+                    Bổ sung thông tin yêu cầu
+                </h2>
+
+                <p class="m2-bs-subtitle">
+                    HULO - Hỗ trợ khách hàng
+                </p>
+            </div>
+
+        </div>
+
+        <!-- MÔ TẢ -->
+        <p class="m2-bs-description">
+            Vui lòng nhập thông tin bổ sung để nhân viên
+            chăm sóc khách hàng có thể tiếp tục xử lý
+            yêu cầu hỗ trợ của bạn.
+        </p>
+
+        <!-- THÔNG BÁO -->
+        <div class="m2-bs-notice">
+            <strong>Thông báo:</strong>
+            Chức năng gửi thông tin đang được chuẩn bị
+            để kết nối với hệ thống Ticket.
+        </div>
+
+        <!-- FORM BỔ SUNG -->
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="m2-bs-form-group">
+
+                <label
+                    class="m2-bs-label"
+                    for="{{ form.noi_dung_bo_sung.id_for_label }}"
+                >
+                    Nội dung bổ sung
+                    <span class="m2-bs-required">*</span>
+                </label>
+
+                {{ form.noi_dung_bo_sung }}
+
+                <p class="m2-bs-hint">
+                    Vui lòng nhập ít nhất 10 ký tự,
+                    tối đa 2.000 ký tự.
+                </p>
+
+                {% for error in form.noi_dung_bo_sung.errors %}
+                    <div class="m2-bs-error">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <!-- NÚT GỬI -->
+            <div class="m2-bs-actions">
+
+                <button type="submit" class="m2-bs-submit">
+                    Kiểm tra nội dung
+                </button>
+
+            </div>
+
+        </form>
+
+        <!-- UC-2.7: Xem trước nội dung bổ sung -->
+        {% if noi_dung_xem_truoc %}
+
+        <div style="
+            margin-top: 28px;
+            padding: 22px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+        ">
+
+            <h3 style="color: #1e293b; font-size: 19px;">
+                Nội dung bổ sung đã kiểm tra
+            </h3>
+
+            <div style="
+                color: #334155;
+                line-height: 1.7;
+                white-space: pre-wrap;
+                overflow-wrap: anywhere;
+            ">{{ noi_dung_xem_truoc }}</div>
+
+            <p style="color: #64748b; font-size: 13px;">
+                Đây chỉ là bản xem trước.
+                Thông tin chưa được gửi đến nhân viên hỗ trợ.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,381 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Cần nhân viên hỗ trợ - HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* GIAO DIỆN UC-2.3 - MODULE 2 */
+
+    .m2-page {
+        max-width: 800px;
+        margin: 35px auto;
+        padding: 20px;
+        color: #173b68;
+    }
+
+    .m2-card {
+        background: white;
+        border-radius: 15px;
+        border: 1px solid #dce7f3;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 60, 120, .08);
+    }
+
+    /* Phần tiêu đề */
+
+    .m2-header {
+        background: #196cbd;
+        color: white;
+        padding: 25px 30px;
+    }
+
+    .m2-header h1 {
+        color: white;
+        margin: 0 0 10px;
+        font-size: 26px;
+    }
+
+    .m2-header p {
+        margin: 0;
+        color: #e5f2ff;
+    }
+
+    /* Nội dung */
+
+    .m2-body {
+        padding: 30px;
+    }
+
+    .m2-description {
+        line-height: 1.7;
+        margin-bottom: 25px;
+    }
+
+    .m2-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    /* Ô chọn loại vấn đề */
+
+    .m2-select {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        border: 1px solid #cbdbea;
+        border-radius: 8px;
+        margin-bottom: 22px;
+        background: white;
+        color: #173b68;
+        box-sizing: border-box;
+    }
+
+    /* Ô xác nhận */
+
+    .m2-confirm {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    .m2-confirm input {
+        margin-top: 6px;
+    }
+
+    /* Nút thao tác */
+
+    .m2-button {
+        display: inline-block;
+        background: #1677d2;
+        color: white;
+        padding: 12px 22px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: inherit;
+        font-size: 15px;
+    }
+
+    .m2-button:hover {
+        background: #095dab;
+        color: white;
+        text-decoration: none;
+    }
+
+    .m2-back {
+        display: inline-block;
+        color: #1268bd;
+        text-decoration: none;
+        padding: 12px 5px;
+    }
+
+    .m2-back:hover {
+        text-decoration: underline;
+    }
+
+    .m2-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    /* Thông báo */
+
+    .m2-alert {
+        padding: 18px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        line-height: 1.7;
+    }
+
+    .m2-error {
+        background: #fff0f0;
+        color: #a42424;
+    }
+
+    .m2-success {
+        background: #eaf7ee;
+        color: #22643b;
+    }
+
+    .m2-success h2 {
+        color: #176337;
+        margin-top: 0;
+    }
+
+    .m2-success p {
+        margin-bottom: 15px;
+    }
+
+    /* Hiển thị trên điện thoại */
+
+    @media (max-width: 600px) {
+        .m2-body,
+        .m2-header {
+            padding: 20px;
+        }
+
+        .m2-page {
+            padding: 10px;
+        }
+
+        .m2-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .m2-actions a,
+        .m2-actions button {
+            text-align: center;
+        }
+    }
+</style>
+
+
+<!-- ===================================== -->
+<!-- UC-2.3: CHUYỂN SANG NHÂN VIÊN HỖ TRỢ -->
+<!-- ===================================== -->
+
+<div class="m2-page">
+
+    <div class="m2-card">
+
+        <!-- PHẦN TIÊU ĐỀ -->
+
+        <div class="m2-header">
+
+            <h1>Cần nhân viên hỗ trợ</h1>
+
+            <p>
+                HULO luôn sẵn sàng tiếp nhận
+                yêu cầu của bạn.
+            </p>
+
+        </div>
+
+
+        <!-- PHẦN NỘI DUNG -->
+
+        <div class="m2-body">
+
+            {% if da_xac_nhan %}
+
+                <!-- ========================= -->
+                <!-- XÁC NHẬN THÀNH CÔNG       -->
+                <!-- ========================= -->
+
+                <div class="m2-alert m2-success">
+
+                    <h2>Đã xác nhận thành công!</h2>
+
+                    <p>
+                        Bạn đã chọn loại vấn đề:
+
+                        {% for ma, ten in danh_sach_loai %}
+                            {% if ma == loai_da_chon %}
+                                <strong>{{ ten }}</strong>
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+
+                    <p>
+                        Thông tin lựa chọn đã được lưu tạm.
+                        Bước tiếp theo là khai báo
+                        thông tin yêu cầu hỗ trợ.
+                    </p>
+
+                    <p>
+                        Lưu ý: Yêu cầu chưa được gửi
+                        đến nhân viên và chưa tạo Ticket.
+                    </p>
+
+                </div>
+
+
+                <!-- NÚT CHUYỂN SANG UC-2.4 -->
+
+                <div class="m2-actions">
+
+                    <a
+                        href="{% url 'chatbot:khai_bao_yeu_cau' %}"
+                        class="m2-button"
+                    >
+                        Tiếp tục khai báo yêu cầu →
+                    </a>
+
+                    <a
+                        href="{% url 'chatbot:home' %}"
+                        class="m2-back"
+                    >
+                        Quay lại Chatbot
+                    </a>
+
+                </div>
+
+
+            {% else %}
+
+                <!-- ========================= -->
+                <!-- BIỂU MẪU CHỌN VẤN ĐỀ      -->
+                <!-- ========================= -->
+
+                <p class="m2-description">
+                    Nếu HULO Assistant chưa giải quyết
+                    được vấn đề của bạn, vui lòng chọn
+                    loại vấn đề cần nhân viên hỗ trợ.
+                </p>
+
+
+                <!-- HIỂN THỊ LỖI NẾU CÓ -->
+
+                {% if loi %}
+
+                    <div class="m2-alert m2-error">
+                        {{ loi }}
+                    </div>
+
+                {% endif %}
+
+
+                <!-- FORM CHỌN LOẠI VẤN ĐỀ -->
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <label
+                        for="loai_van_de"
+                        class="m2-label"
+                    >
+                        Loại vấn đề cần hỗ trợ
+                    </label>
+
+
+                    <select
+                        name="loai_van_de"
+                        id="loai_van_de"
+                        class="m2-select"
+                        required
+                    >
+
+                        <option value="">
+                            -- Chọn loại vấn đề --
+                        </option>
+
+                        {% for ma, ten in danh_sach_loai %}
+
+                            <option
+                                value="{{ ma }}"
+                                {% if ma == loai_da_chon %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ ten }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+                    <!-- XÁC NHẬN YÊU CẦU -->
+
+                    <label class="m2-confirm">
+
+                        <input
+                            type="checkbox"
+                            name="xac_nhan"
+                            required
+                        >
+
+                        <span>
+                            Tôi xác nhận muốn chuyển sang
+                            quy trình tiếp nhận yêu cầu
+                            hỗ trợ của nhân viên HULO.
+                        </span>
+
+                    </label>
+
+
+                    <!-- NÚT XÁC NHẬN -->
+
+                    <div class="m2-actions">
+
+                        <button
+                            type="submit"
+                            class="m2-button"
+                        >
+                            Xác nhận tiếp tục
+                        </button>
+
+                        <a
+                            href="{% url 'chatbot:home' %}"
+                            class="m2-back"
+                        >
+                            Quay lại Chatbot
+                        </a>
+
+                    </div>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

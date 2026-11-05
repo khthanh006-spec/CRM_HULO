@@ -1,27 +1,460 @@
 
 {% extends 'base.html' %}
 
-{% block title %}
-Chatbot - CRM HULO
-{% endblock %}
+{% block title %}HULO Assistant - CRM HULO{% endblock %}
 
 {% block content %}
 
-<div class="content-container">
+<style>
+    .hulo-page {
+        max-width: 1250px;
+        margin: 25px auto;
+        padding: 0 20px 35px;
+        font-family: Arial, sans-serif;
+        color: #173a67;
+    }
 
-    <h1>Chatbot hỗ trợ khách hàng HULO</h1>
+    .hulo-page * {
+        box-sizing: border-box;
+    }
 
-    <p>
-        Chào mừng bạn đến với hệ thống Chatbot HULO!
-    </p>
+    .hulo-banner {
+        background: linear-gradient(110deg, #e9f4ff, #c9e4ff);
+        border-radius: 15px;
+        padding: 35px;
+        margin-bottom: 25px;
+    }
 
-    <p>
-        Đây là trang khởi đầu của Module 2.
-        Chức năng trò chuyện tự động, tra cứu FAQ
-        và lưu lịch sử hội thoại sẽ được
-        xây dựng trong module này.
-    </p>
+    .hulo-banner h1 {
+        font-size: 32px;
+        color: #0756a5;
+        margin-bottom: 10px;
+    }
+
+    .hulo-banner p {
+        color: #496784;
+        font-size: 16px;
+    }
+
+    .hulo-title {
+        text-align: center;
+        font-size: 23px;
+        margin: 25px 0;
+    }
+
+    .hulo-topics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .hulo-topic {
+        background: white;
+        border: 1px solid #d6e4f2;
+        border-radius: 12px;
+        padding: 20px 12px;
+        color: #1262b0;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .hulo-topic:hover {
+        background: #eaf5ff;
+        border-color: #1680e5;
+    }
+
+    .hulo-main {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 20px;
+    }
+
+    .hulo-panel {
+        background: white;
+        border: 1px solid #dce7f2;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(0, 65, 130, .06);
+    }
+
+    .hulo-panel-title {
+        padding: 18px;
+        background: #f0f7ff;
+        font-weight: bold;
+        color: #145da8;
+    }
+
+    .hulo-help-content {
+        padding: 20px;
+    }
+
+    .hulo-help-content p {
+        color: #56708c;
+        line-height: 1.6;
+    }
+
+    .hulo-question {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: #f8fbff;
+        border: 1px solid #e1ebf5;
+        border-radius: 8px;
+        padding: 13px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        color: #17436f;
+    }
+
+    .hulo-question:hover {
+        background: #eaf5ff;
+    }
+
+    .hulo-chat-header {
+        background: #176cc1;
+        color: white;
+        padding: 17px 20px;
+    }
+
+    .hulo-chat-header h2 {
+        margin: 0 0 6px;
+        font-size: 20px;
+    }
+
+    .hulo-chat-header small {
+        color: #e0f3ff;
+    }
+
+    .hulo-messages {
+        height: 355px;
+        overflow-y: auto;
+        padding: 20px;
+        background: #fafcff;
+    }
+
+    .hulo-message {
+        width: fit-content;
+        max-width: 85%;
+        padding: 12px 15px;
+        margin-bottom: 12px;
+        border-radius: 14px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+    }
+
+    .hulo-bot {
+        background: #e5f1ff;
+        color: #173b68;
+        margin-right: auto;
+    }
+
+    .hulo-customer {
+        background: #1776d1;
+        color: white;
+        margin-left: auto;
+    }
+
+    .hulo-chat-form {
+        display: flex;
+        gap: 10px;
+        padding: 15px;
+        border-top: 1px solid #e0ebf5;
+    }
+
+    .hulo-chat-input {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid #cbdbea;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .hulo-send {
+        background: #1677d2;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+
+    .hulo-send:disabled {
+        opacity: .6;
+        cursor: wait;
+    }
+
+    .hulo-bottom {
+        text-align: center;
+        margin-top: 22px;
+        padding: 22px;
+        background: #eef6ff;
+        border-radius: 12px;
+    }
+
+    .hulo-support-btn {
+        background: #1677d2;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 22px;
+    }
+
+    .hulo-support-btn:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 750px) {
+        .hulo-main {
+            grid-template-columns: 1fr;
+        }
+
+        .hulo-topics {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .hulo-banner {
+            padding: 22px;
+        }
+
+        .hulo-banner h1 {
+            font-size: 25px;
+        }
+    }
+</style>
+
+<div class="hulo-page">
+
+    <!-- Banner -->
+    <section class="hulo-banner">
+        <h1>HULO có thể giúp gì cho bạn?</h1>
+        <p>
+            Tìm câu trả lời hoặc trò chuyện cùng HULO Assistant.
+            Chúng tôi luôn sẵn sàng hỗ trợ bạn!
+        </p>
+    </section>
+
+    <!-- Chủ đề hỗ trợ -->
+    <h2 class="hulo-title">Các chủ đề hỗ trợ phổ biến</h2>
+
+    <div class="hulo-topics">
+
+        <button type="button" class="hulo-topic"
+                data-question="Tôi muốn hỏi về đơn hàng">
+            📦 Đơn hàng
+        </button>
+
+        <button type="button" class="hulo-topic"
+                data-question="Tôi muốn hỏi về giao hàng">
+            🚚 Giao hàng
+        </button>
+
+        <button type="button" class="hulo-topic"
+                data-question="Tôi muốn hỏi về đổi trả">
+            🔄 Đổi trả
+        </button>
+
+        <button type="button" class="hulo-topic"
+                data-question="Tôi muốn hỏi về thanh toán">
+            💳 Thanh toán
+        </button>
+
+    </div>
+
+    <div class="hulo-main">
+
+        <!-- Câu hỏi gợi ý -->
+        <section class="hulo-panel">
+            <div class="hulo-panel-title">
+                ❓ Câu hỏi thường gặp
+            </div>
+
+            <div class="hulo-help-content">
+                <p>
+                    Chọn một câu hỏi để HULO Assistant
+                    hỗ trợ tra cứu nhanh.
+                </p>
+
+                <button type="button" class="hulo-question"
+                        data-question="Tôi muốn hỏi về giao hàng">
+                    Khi nào đơn hàng được giao?
+                </button>
+
+                <button type="button" class="hulo-question"
+                        data-question="Làm sao để theo dõi đơn hàng?">
+                    Làm sao để theo dõi đơn hàng?
+                </button>
+
+                <button type="button" class="hulo-question"
+                        data-question="Tôi muốn đổi trả sản phẩm">
+                    Chính sách đổi trả sản phẩm?
+                </button>
+
+                <button type="button" class="hulo-question"
+                        data-question="Tôi muốn hỏi về thanh toán">
+                    Có những phương thức thanh toán nào?
+                </button>
+
+                <p>
+                    Nếu chưa tìm được câu trả lời,
+                    bạn có thể nhập câu hỏi trực tiếp
+                    vào HULO Assistant.
+                </p>
+            </div>
+        </section>
+
+        <!-- Chatbot -->
+        <section class="hulo-panel">
+
+            <div class="hulo-chat-header">
+                <h2>🤖 HULO Assistant</h2>
+                <small>● Hỗ trợ tự động</small>
+            </div>
+
+            <div class="hulo-messages" id="hulo-messages">
+
+                <div class="hulo-message hulo-bot">Xin chào {{ request.user.username }}! Mình là HULO Assistant. Bạn cần hỗ trợ vấn đề gì hôm nay?</div>
+
+                <!-- Lịch sử tin nhắn -->
+                {% for msg in tin_nhan %}
+
+                    {% if msg.ben_gui == 'KHACH_HANG' %}
+                        <div class="hulo-message hulo-customer">{{ msg.noi_dung }}</div>
+                    {% else %}
+                        <div class="hulo-message hulo-bot">{{ msg.noi_dung }}</div>
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+            <!-- Form gửi câu hỏi -->
+            <form id="hulo-chat-form" class="hulo-chat-form">
+                {% csrf_token %}
+
+                <input
+                    type="text"
+                    id="hulo-input"
+                    class="hulo-chat-input"
+                    placeholder="Nhập câu hỏi của bạn..."
+                    maxlength="1000"
+                    required
+                >
+
+                <button type="submit"
+                        id="hulo-send"
+                        class="hulo-send">
+                    Gửi
+                </button>
+            </form>
+
+        </section>
+    </div>
+
+    <!-- Chuyển sang nhân viên hỗ trợ -->
+    <div class="hulo-bottom">
+        <p>Thông tin trên đã giải quyết được vấn đề của bạn chưa?</p>
+
+
+        <a href="{% url 'chatbot:chuyen_ho_tro' %}"
+           class="hulo-support-btn"
+           style="display: inline-block; color: white; text-decoration: none; cursor: pointer;">
+           Cần nhân viên hỗ trợ
+        </a>
+
+    </div>
 
 </div>
+
+<script>
+    const chatForm = document.getElementById("hulo-chat-form");
+    const chatInput = document.getElementById("hulo-input");
+    const chatBox = document.getElementById("hulo-messages");
+    const sendButton = document.getElementById("hulo-send");
+
+    const sendUrl = "{% url 'chatbot:send_message' %}";
+
+    function addMessage(content, sender) {
+        const message = document.createElement("div");
+
+        message.className = "hulo-message " +
+            (sender === "customer" ? "hulo-customer" : "hulo-bot");
+
+        message.textContent = content;
+
+        chatBox.appendChild(message);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage(question) {
+        question = question.trim();
+
+        if (!question || sendButton.disabled) {
+            return;
+        }
+
+        sendButton.disabled = true;
+
+        try {
+            const response = await fetch(sendUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": chatForm.querySelector(
+                        "[name=csrfmiddlewaretoken]"
+                    ).value
+                },
+                body: JSON.stringify({
+                    cau_hoi: question
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    result.error || "Không gửi được câu hỏi."
+                );
+            }
+
+            addMessage(question, "customer");
+            addMessage(result.cau_tra_loi, "bot");
+
+            chatInput.value = "";
+
+        } catch (error) {
+            addMessage(
+                "Không thể gửi tin nhắn: " + error.message,
+                "bot"
+            );
+        } finally {
+            sendButton.disabled = false;
+            chatInput.focus();
+        }
+    }
+
+    chatForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        sendMessage(chatInput.value);
+    });
+
+    document.querySelectorAll(
+        ".hulo-topic, .hulo-question"
+    ).forEach(function(button) {
+
+        button.addEventListener("click", function() {
+            const question = button.dataset.question;
+            chatInput.value = question;
+            sendMessage(question);
+        });
+
+    });
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+</script>
 
 {% endblock %}
