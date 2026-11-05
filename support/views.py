@@ -260,7 +260,9 @@ def faq_detail(request, faq_id):
         )
 
         da_danh_gia = (
-            str(faq.id) in [str(x) for x in danh_sach_da_danh_gia]
+            str(faq.id) in [
+                str(x) for x in danh_sach_da_danh_gia
+            ]
         )
 
     faq_lien_quan = FAQArticle.objects.filter(
@@ -322,7 +324,10 @@ def faq_feedback(request, faq_id):
 
         if request.user.is_authenticated:
 
-            feedback, da_tao_moi = FAQFeedback.objects.get_or_create(
+            # Cap nhat danh gia neu da ton tai,
+            # tao moi neu day la lan danh gia dau tien.
+
+            feedback, da_tao_moi = FAQFeedback.objects.update_or_create(
                 faq=faq,
                 khach_hang=request.user,
                 defaults={
@@ -330,106 +335,97 @@ def faq_feedback(request, faq_id):
                 }
             )
 
-            # Danh gia lan dau.
-
-            if da_tao_moi:
-
-                if feedback.huu_ich:
-
-                    messages.success(
-                        request,
-                        "Cảm ơn bạn đã đánh giá. "
-                        "Chúng tôi rất vui vì thông tin này "
-                        "đã giúp ích cho bạn!"
-                    )
-
-                else:
-
-                    messages.warning(
-                        request,
-                        "Bạn vẫn chưa giải quyết được vấn đề? "
-                        "Hãy tiếp tục trò chuyện cùng HULO Assistant "
-                        "để được hỗ trợ chi tiết hơn nhé!"
-                    )
-
-            # Da danh gia truoc do.
-            # Khong ghi de ket qua cu.
-
-            else:
-
-                if feedback.huu_ich:
-
-                    messages.success(
-                        request,
-                        "Bạn đã đánh giá câu hỏi này trước đó. "
-                        "Đánh giá hữu ích trước đó vẫn được giữ nguyên."
-                    )
-
-                else:
-
-                    messages.warning(
-                        request,
-                        "Bạn đã đánh giá câu hỏi này trước đó. "
-                        "Đánh giá không hữu ích trước đó vẫn được giữ nguyên."
-                    )
-
         # ==============================================
         # KHACH VANG LAI
         # ==============================================
 
         else:
 
-            danh_sach_da_danh_gia = request.session.get(
-                "faq_da_danh_gia",
-                []
+            # Moi session an danh se luu ID feedback rieng.
+            # Tranh cap nhat nham danh gia cua khach khac.
+
+            feedback_ids = request.session.get(
+                "faq_feedback_ids",
+                {}
             )
 
-            # Ho tro ca danh sach ID dang so va dang chuoi.
+            feedback_id = feedback_ids.get(str(faq.id))
 
-            danh_sach_id = [
-                str(item)
-                for item in danh_sach_da_danh_gia
-            ]
+            feedback = None
 
-            if str(faq.id) not in danh_sach_id:
+            if feedback_id:
 
-                FAQFeedback.objects.create(
+                feedback = FAQFeedback.objects.filter(
+                    pk=feedback_id,
+                    faq=faq,
+                    khach_hang__isnull=True
+                ).first()
+
+            if feedback is not None:
+
+                # Cap nhat dung feedback cua session hien tai.
+
+                feedback.huu_ich = gia_tri_bool
+
+                feedback.save(
+                    update_fields=["huu_ich"]
+                )
+
+            else:
+
+                # Tao feedback moi cho session nay.
+
+                feedback = FAQFeedback.objects.create(
                     faq=faq,
                     khach_hang=None,
                     huu_ich=gia_tri_bool
                 )
 
+                feedback_ids[str(faq.id)] = feedback.pk
+
+                request.session["faq_feedback_ids"] = (
+                    feedback_ids
+                )
+
+            # Giu lai danh sach cu de cac phan khac
+            # dang su dung khong bi anh huong.
+
+            danh_sach_da_danh_gia = request.session.get(
+                "faq_da_danh_gia",
+                []
+            )
+
+            if str(faq.id) not in [
+                str(item) for item in danh_sach_da_danh_gia
+            ]:
+
                 danh_sach_da_danh_gia.append(faq.id)
 
-                request.session["faq_da_danh_gia"] = (
-                    danh_sach_da_danh_gia
-                )
+            request.session["faq_da_danh_gia"] = (
+                danh_sach_da_danh_gia
+            )
 
-                if gia_tri_bool:
+        # ==============================================
+        # THONG BAO THEO DUNG LUA CHON VUA GUI
+        # ==============================================
 
-                    messages.success(
-                        request,
-                        "Cảm ơn bạn đã đánh giá. "
-                        "Chúng tôi rất vui vì thông tin này "
-                        "đã giúp ích cho bạn!"
-                    )
+        if gia_tri_bool:
 
-                else:
+            messages.success(
+                request,
+                "Cảm ơn bạn đã đánh giá. "
+                "Chúng tôi rất vui vì thông tin này "
+                "đã giúp ích cho bạn!"
+            )
 
-                    messages.warning(
-                        request,
-                        "Bạn vẫn chưa giải quyết được vấn đề? "
-                        "Hãy tiếp tục trò chuyện cùng HULO Assistant "
-                        "để được hỗ trợ chi tiết hơn nhé!"
-                    )
+        else:
 
-            else:
-
-                messages.info(
-                    request,
-                    "Bạn đã đánh giá câu hỏi này trước đó. "
-                    "Đánh giá cũ vẫn được giữ nguyên."
-                )
+            messages.warning(
+                request,
+                "Bạn vẫn chưa giải quyết được vấn đề? "
+                "Hãy tiếp tục trò chuyện cùng HULO Assistant "
+                "để được hỗ trợ chi tiết hơn nhé!"
+            )
 
     # ==================================================
     # 13. QUAY LAI FAQ VUA DANH GIA
@@ -452,6 +448,7 @@ def faq_feedback(request, faq_id):
     }
 
     if keyword:
+
         parameters["q"] = keyword
 
     url = (
