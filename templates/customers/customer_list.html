@@ -1,0 +1,338 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Danh sách khách hàng - CRM HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .m5-customer-list {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .m5-customer-list h1 {
+        color: #103b78;
+        margin-bottom: 10px;
+    }
+
+    .m5-description {
+        color: #607da8;
+        margin-bottom: 25px;
+    }
+
+    /* THANH ĐIỀU HƯỚNG MODULE 5 */
+    .m5-tabs {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin: 25px 0 30px;
+    }
+
+    .m5-tab {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        min-height: 85px;
+        padding: 14px 10px;
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 10px;
+        color: #103b78;
+        text-decoration: none;
+        text-align: center;
+        font-weight: 600;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+
+    .m5-tab.active {
+        background: #eaf2ff;
+        border: 2px solid #2878e7;
+        color: #103b78;
+    }
+
+    .m5-tab.disabled {
+        color: #7489a8;
+        background: #f8faff;
+        cursor: default;
+    }
+
+    .m5-tab-icon {
+        font-size: 23px;
+    }
+
+    .m5-tab small {
+        font-size: 11px;
+        font-weight: 400;
+        color: #7489a8;
+    }
+
+    .m5-section-title {
+        color: #103b78;
+        margin: 0 0 10px;
+    }
+
+    /* TÌM KIẾM */
+    .m5-search {
+        display: flex;
+        gap: 10px;
+        margin: 25px 0;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .m5-search input {
+        flex: 1;
+        min-width: 220px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .m5-search button {
+        padding: 12px 24px;
+        background: #103b78;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .m5-search button:hover {
+        background: #0a2b57;
+    }
+
+    .m5-search a {
+        padding: 12px;
+        color: #103b78;
+        text-decoration: underline;
+    }
+
+    /* BẢNG KHÁCH HÀNG */
+    .m5-table-wrapper {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .m5-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+    }
+
+    .m5-table th,
+    .m5-table td {
+        padding: 14px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .m5-table th {
+        background: #103b78;
+        color: white;
+        white-space: nowrap;
+    }
+
+    .m5-table tbody tr:hover {
+        background: #f2f6fc;
+    }
+
+    .m5-table td {
+        color: #17365d;
+    }
+
+    .m5-action-btn {
+        display: inline-block;
+        padding: 8px 14px;
+        background: #eaf2ff;
+        color: #103b78;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .m5-action-btn:hover {
+        background: #103b78;
+        color: white;
+    }
+
+    .m5-empty {
+        padding: 24px;
+        text-align: center !important;
+        color: #666;
+    }
+
+    .m5-back {
+        display: inline-block;
+        margin-top: 25px;
+        color: #103b78;
+        text-decoration: none;
+    }
+
+    .m5-back:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 850px) {
+        .m5-tabs {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 480px) {
+        .m5-tabs {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="content-container m5-customer-list">
+
+    <h1>Quản lý khách hàng</h1>
+
+    <p class="m5-description">
+        Quản lý hồ sơ, hoạt động hậu mãi,
+        mức độ hài lòng và khách hàng thân thiết.
+    </p>
+
+    <!-- 4 MỤC CHÍNH MODULE 5 -->
+    <nav class="m5-tabs" aria-label="Điều hướng Module 5">
+
+        <a href="{% url 'customers:list' %}"
+           class="m5-tab active"
+           aria-current="page">
+            <span class="m5-tab-icon">👥</span>
+            <span>Danh sách khách hàng</span>
+        </a>
+
+        <a href="{% url 'customers:after_sales_overview' %}"
+   class="m5-tab">
+    <span class="m5-tab-icon" aria-hidden="true">💝</span>
+    <span>Hậu mãi &amp; Giữ chân</span>
+    <small>Chương trình chăm sóc và Voucher</small>
+</a>
+
+        <a href="{% url 'customers:csat_overview' %}" class="m5-tab">
+    <span class="m5-tab-icon">💬</span>
+    <span>CSAT &amp; Chăm sóc</span>
+    <small>Theo dõi đánh giá và chăm sóc</small>
+        </a>
+
+        <a href="{% url 'customers:loyalty_overview' %}" class="m5-tab">
+    <span class="m5-tab-icon" aria-hidden="true">🎁</span>
+    <span>Loyalty</span>
+    <small>Điểm thưởng và hạng thành viên</small>
+        </a>
+
+    </nav>
+
+    <!-- NỘI DUNG DANH SÁCH KHÁCH HÀNG -->
+    <h2 class="m5-section-title">
+        Danh sách khách hàng
+    </h2>
+
+    <p>
+        Tra cứu và quản lý thông tin khách hàng
+        trong hệ thống CRM HULO.
+    </p>
+
+    <!-- THANH TÌM KIẾM -->
+    <form method="get"
+          action="{% url 'customers:list' %}"
+          class="m5-search">
+
+        <input
+            type="text"
+            name="q"
+            value="{{ keyword }}"
+            placeholder="Nhập mã, tên hoặc email khách hàng..."
+            aria-label="Tìm kiếm khách hàng"
+        >
+
+        <button type="submit">
+            Tìm kiếm
+        </button>
+
+        <a href="{% url 'customers:list' %}">
+        </a>
+
+    </form>
+
+    <!-- BẢNG DANH SÁCH KHÁCH HÀNG -->
+    <div class="m5-table-wrapper">
+
+        <table class="m5-table">
+
+            <thead>
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for customer in customers %}
+
+                <tr>
+                    <td>
+                        {{ customer.ma_khach_hang }}
+                    </td>
+
+                    <td>
+                        {{ customer.ho_ten }}
+                    </td>
+
+                    <td>
+                        {{ customer.email }}
+                    </td>
+
+                    <td>
+                        {{ customer.so_dien_thoai|default:"Chưa cập nhật" }}
+                    </td>
+
+                    <td>
+                        {{ customer.thoi_diem_tao|date:"d/m/Y" }}
+                    </td>
+
+                    <td>
+                        <a class="m5-action-btn"
+                           href="{% url 'customers:detail' customer.ma_khach_hang %}">
+                            Xem hồ sơ
+                        </a>
+                    </td>
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="6" class="m5-empty">
+                        Không tìm thấy khách hàng phù hợp.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</div>
+
+{% endblock %}

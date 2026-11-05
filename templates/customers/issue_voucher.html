@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Cấp Voucher - CRM HULO{% endblock %}
+{% block content %}
+<style>
+.m5-issue{max-width:1100px;margin:auto;color:#17365d}.m5-issue h1,.m5-issue h2{color:#103b78}.m5-issue .panel{padding:24px;margin:20px 0;background:#fff;border:1px solid #d5e3fa;border-radius:12px}.m5-issue .muted{color:#607da8;line-height:1.6}.m5-issue label{display:block;margin-bottom:10px;font-weight:600}.m5-issue select{width:100%;padding:12px;border:1px solid #cbd8ea;border-radius:7px;font:inherit;box-sizing:border-box}.m5-issue button{padding:12px 22px;margin-top:18px;background:#103b78;color:#fff;border:0;border-radius:7px;cursor:pointer;font:inherit}.m5-issue .notice{padding:14px;margin:12px 0;border-radius:7px;background:#eaf2ff;line-height:1.6}.m5-issue .errorlist{color:#b42318;line-height:1.6}.m5-issue .table-wrap{overflow-x:auto}.m5-issue table{width:100%;border-collapse:collapse}.m5-issue th,.m5-issue td{padding:12px;text-align:left;border-bottom:1px solid #e0e7f0}.m5-issue th{background:#103b78;color:#fff;white-space:nowrap}.m5-issue code{overflow-wrap:anywhere}.m5-issue a{color:#103b78}.m5-issue .text{line-height:1.7;overflow-wrap:anywhere}
+</style>
+<div class="content-container m5-issue">
+{% if retention_case %}<a href="{% url 'customers:retention_detail' retention_case.pk %}">← Quay về {{ retention_case.case_code }}</a>{% else %}<a href="{% url 'customers:after_sales_overview' %}?tab=campaigns">← Quay về chương trình tri ân</a>{% endif %}
+<h1>{% if retention_case %}Cấp Voucher đền bù{% else %}Cấp Voucher cho khách hàng{% endif %}</h1>
+{% for message in messages %}<div class="notice" role="status">{{ message }}</div>{% endfor %}
+{% if retention_case %}<div class="notice">Ca {{ retention_case.case_code }} — {{ retention_case.customer.ho_ten }}. Voucher và lịch sử sẽ gắn với ca này.</div>{% endif %}
+<div class="panel"><p class="muted">{{ benefit.program.code }} — {{ benefit.program.name }}</p><h2>{{ benefit.name }}</h2><div class="text">{{ benefit.description|linebreaksbr }}</div><p><strong>Hiệu lực:</strong> {{ benefit.valid_from|date:"d/m/Y H:i" }} – {{ benefit.valid_until|date:"d/m/Y H:i" }}</p><strong>Điều kiện sử dụng</strong><div class="text">{{ benefit.terms|linebreaksbr }}</div></div>
+<div class="panel"><form method="post">{% csrf_token %}{{ form.non_field_errors }}
+{% if preview %}<h2>Kiểm tra trước khi cấp</h2><p><strong>Khách hàng:</strong> {{ selected_customer.ho_ten }} — {{ selected_customer.pk }}</p><p><strong>Email:</strong> {{ selected_customer.email }}</p><p><strong>Voucher:</strong> {{ benefit.name }}</p><div class="notice">Voucher sẽ được cấp trên CRM và ghi vào Customer 360°. Chưa gửi email. Cấp Voucher không tự đánh dấu khách hàng hài lòng lại.</div><input type="hidden" name="customer" value="{{ selected_customer.pk }}"><button type="submit" name="action" value="confirm">Xác nhận cấp Voucher</button><a href="{% url 'customers:issue_voucher' benefit.pk %}{% if retention_case %}?case={{ retention_case.pk }}{% endif %}">Quay lại lựa chọn</a>
+{% else %}<h2>Chọn khách hàng</h2>{{ form.customer.label_tag }}{{ form.customer }}{{ form.customer.errors }}<button type="submit" name="action" value="preview">Xem trước</button>{% endif %}
+</form></div>
+<div class="panel"><h2>20 lượt cấp gần nhất của Voucher này</h2><div class="table-wrap"><table><thead><tr><th>Khách hàng</th><th>Mã Voucher</th><th>Thời gian cấp</th><th>Trạng thái</th><th>Hồ sơ</th></tr></thead><tbody>{% for delivery in recent_deliveries %}<tr><td>{{ delivery.customer.ho_ten }}</td><td><code>{{ delivery.reference_code }}</code></td><td>{{ delivery.issued_at|date:"d/m/Y H:i" }}</td><td>{{ delivery.get_status_display }}</td><td><a href="{% url 'customers:detail' delivery.customer.pk %}">Customer 360°</a></td></tr>{% empty %}<tr><td colspan="5">Chưa có lượt cấp.</td></tr>{% endfor %}</tbody></table></div></div>
+</div>
+{% endblock %}

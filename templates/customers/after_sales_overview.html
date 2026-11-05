@@ -1,0 +1,692 @@
+{% extends 'base.html' %}
+
+{% block title %}Hậu mãi & Giữ chân - CRM HULO{% endblock %}
+
+{% block content %}
+<style>
+    .m5-after-sales {
+        max-width: 1200px;
+        margin: 0 auto;
+        color: #17365d;
+    }
+
+    .m5-after-sales * {
+        box-sizing: border-box;
+    }
+
+    .m5-after-sales h1 {
+        margin: 0 0 10px;
+        color: #103b78;
+    }
+
+    .m5-after-sales .intro {
+        margin-bottom: 25px;
+        color: #607da8;
+        line-height: 1.6;
+    }
+
+    .m5-after-sales .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .m5-after-sales .stat {
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 12px;
+    }
+
+    .m5-after-sales .stat-label {
+        color: #607da8;
+        font-size: 14px;
+    }
+
+    .m5-after-sales .stat-value {
+        margin-top: 12px;
+        color: #103b78;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .m5-after-sales .stat.warning .stat-value {
+        color: #b54708;
+    }
+
+    .m5-after-sales .filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 12px;
+    }
+
+    .m5-after-sales .field {
+        flex: 1 1 180px;
+    }
+
+    .m5-after-sales .field.search {
+        flex-grow: 2;
+    }
+
+    .m5-after-sales label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .m5-after-sales input,
+    .m5-after-sales select {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        border: 1px solid #cbd8ea;
+        border-radius: 7px;
+        background: #fff;
+        color: #17365d;
+        font: inherit;
+    }
+
+    .m5-after-sales input:focus,
+    .m5-after-sales select:focus {
+        outline: 2px solid #2878e7;
+        outline-offset: 2px;
+    }
+
+    .m5-after-sales button {
+        min-height: 44px;
+        padding: 10px 20px;
+        border: 0;
+        border-radius: 7px;
+        background: #103b78;
+        color: #fff;
+        cursor: pointer;
+        font: inherit;
+    }
+
+    .m5-after-sales button:hover {
+        background: #0a2b57;
+    }
+
+    .m5-after-sales .clear {
+        padding: 12px 0;
+        color: #103b78;
+    }
+
+    .m5-after-sales .section-title {
+        margin: 0 0 16px;
+        color: #103b78;
+        font-size: 20px;
+    }
+
+    .m5-after-sales .programs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .m5-after-sales .program {
+        padding: 22px;
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 12px;
+    }
+
+    .m5-after-sales .program-top {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .m5-after-sales .code {
+        color: #607da8;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .m5-after-sales .badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #edf2f7;
+        color: #52657e;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .m5-after-sales .badge.ACTIVE {
+        background: #e7f6ec;
+        color: #17683b;
+    }
+
+    .m5-after-sales .badge.UPCOMING {
+        background: #eaf2ff;
+        color: #1859a5;
+    }
+
+    .m5-after-sales .badge.EXPIRED {
+        background: #fff0e7;
+        color: #b54708;
+    }
+
+    .m5-after-sales h3 {
+        margin: 16px 0 10px;
+        color: #103b78;
+        font-size: 19px;
+    }
+
+    .m5-after-sales .description {
+        color: #60718c;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .m5-after-sales .meta {
+        margin: 12px 0;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .m5-after-sales .benefit {
+        padding: 14px;
+        margin-top: 12px;
+        background: #f5f8ff;
+        border: 1px solid #e0e9f8;
+        border-radius: 8px;
+    }
+
+    .m5-after-sales .benefit p {
+        margin: 8px 0 0;
+        font-size: 14px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .m5-after-sales details {
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    .m5-after-sales summary {
+        color: #103b78;
+        cursor: pointer;
+    }
+
+    .m5-after-sales .muted {
+        color: #7489a8;
+        font-size: 13px;
+    }
+
+    .m5-after-sales .empty {
+        grid-column: 1 / -1;
+        padding: 40px 20px;
+        text-align: center;
+        background: #fff;
+        border: 1px dashed #cbd8ea;
+        border-radius: 12px;
+        color: #607da8;
+    }
+
+    .m5-after-sales .back {
+        display: inline-block;
+        margin-top: 25px;
+        color: #103b78;
+        text-decoration: none;
+    }
+        .m5-after-sales .m5-inline-history {
+        margin-top: 35px;
+        padding-top: 25px;
+        border-top: 1px solid #d5e3fa;
+        scroll-margin-top: 25px;
+    }
+
+    .m5-after-sales .m5-inline-history small {
+        display: block;
+        margin-top: 6px;
+        color: #607da8;
+        line-height: 1.5;
+    }
+
+    .m5-after-sales .m5-inline-history code {
+        display: inline-block;
+        max-width: 220px;
+        overflow-wrap: anywhere;
+        user-select: all;
+    }
+
+    .m5-after-sales .back:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+        .m5-after-sales .stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .m5-after-sales .programs {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .m5-after-sales .stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .m5-after-sales .subtabs {display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:24px 0;}
+    .m5-after-sales .subtabs a {padding:12px 16px; border-radius:8px; background:#fff; color:#103b78; border:1px solid #d5e3fa; text-decoration:none;}
+    .m5-after-sales .subtabs a.selected {background:#103b78; color:#fff;}
+    .m5-after-sales .notice {padding:15px; background:#eaf2ff; border-radius:8px; margin:12px 0;}
+    .m5-after-sales .table-wrap {overflow-x:auto; background:#fff; border:1px solid #d5e3fa; border-radius:10px;}
+    .m5-after-sales table {width:100%; border-collapse:collapse;}
+    .m5-after-sales th,.m5-after-sales td {padding:14px; border-bottom:1px solid #e0e7f0; text-align:left; vertical-align:top;}
+    .m5-after-sales th {background:#103b78; color:#fff; white-space:nowrap;}
+    .m5-after-sales td a {color:#103b78;}
+    /* Đồng bộ với nút Xem hồ sơ */
+a.m5-case-detail-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: #eaf2ff;
+    color: #103b78;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-decoration: none;
+    white-space: nowrap;
+}
+/* Đồng bộ với nút Xem hồ sơ */
+a.m5-case-detail-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: #eaf2ff;
+    color: #103b78;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+a.m5-case-detail-btn:hover {
+    background: #103b78;
+    color: #fff;
+    text-decoration: none;
+}
+
+a.m5-case-detail-btn:focus-visible {
+    outline: 3px solid #9fc5ff;
+    outline-offset: 3px;
+}
+h1.m5-after-sales-title {
+    padding-top: 20px;
+}
+</style>
+
+<div class="content-container m5-after-sales">
+    <h1 class="m5-after-sales-title">Hậu mãi &amp; Giữ chân</h1>
+
+    <p class="intro">
+        Theo dõi ca cần chăm sóc, phản hồi khách hàng và chương trình tri ân.
+        Các chỉ số tính trên toàn bộ dữ liệu, theo số ca và lượt cấp Voucher.
+    </p>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-label">Ca khẩn cấp chờ xử lý</div>
+            <div class="stat-value">{{ urgent_count }}</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Ca đang chăm sóc</div>
+            <div class="stat-value">{{ progress_count }}</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Ca xác nhận hài lòng lại</div>
+            <div class="stat-value">{{ saved_count }}</div>
+        </div>
+
+        <div class="stat warning">
+            <div class="stat-label">Voucher đền bù đã cấp</div>
+            <div class="stat-value">{{ apology_count }}</div>
+        </div>
+    </div>
+
+
+    {% for message in messages %}<div class="notice" role="status">{{ message }}</div>{% endfor %}
+    <nav class="subtabs" aria-label="Hậu mãi và giữ chân">
+        <a class="{% if active_tab == 'retention' %}selected{% endif %}" href="{% url 'customers:after_sales_overview' %}">Ca giữ chân</a>
+        <a class="{% if active_tab == 'campaigns' %}selected{% endif %}" href="{% url 'customers:after_sales_overview' %}?tab=campaigns">Chương trình tri ân</a>
+        <a class="{% if active_tab == 'history' %}selected{% endif %}"
+   href="{% url 'customers:after_sales_overview' %}?tab=history">
+    Lịch sử cấp Voucher
+        </a>
+    </nav>
+    {% if active_tab == 'retention' %}
+    <div class="program-top">
+        <h2 class="section-title">Ca giữ chân chủ động</h2>
+        <form method="post" action="{% url 'customers:sync_retention_cases' %}">
+            {% csrf_token %}<button type="submit">Đồng bộ ca từ CSAT / Ticket</button>
+
+        </form>
+    </div>
+    <form method="get" class="filters">
+        <input type="hidden" name="tab" value="retention">
+        <div class="field"><label for="case-q">Khách hàng / Ticket / Mã ca</label><input id="case-q" name="q" value="{{ keyword }}" placeholder="Tên, email, mã Ticket hoặc RC..."></div>
+        <div class="field"><label for="case-status">Trạng thái</label><select id="case-status" name="case_status"><option value="">Tất cả</option>{% for value,label in case_status_choices %}<option value="{{ value }}" {% if case_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="case-risk">Rủi ro</label><select id="case-risk" name="risk"><option value="">Tất cả</option>{% for value,label in risk_choices %}<option value="{{ value }}" {% if risk == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="case-owner">Phụ trách</label><select id="case-owner" name="owner"><option value="">Tất cả</option><option value="mine" {% if owner == 'mine' %}selected{% endif %}>Ca của tôi</option><option value="unassigned" {% if owner == 'unassigned' %}selected{% endif %}>Chưa phân công</option></select></div>
+        <button type="submit">Lọc kết quả</button><a href="{% url 'customers:after_sales_overview' %}"></a>
+    </form>
+    <p>{{ case_page.paginator.count }} ca phù hợp</p>
+    <div class="table-wrap"><table><thead><tr><th>Ca / Khách hàng</th><th>Nguồn kích hoạt</th><th>Rủi ro</th><th>Phụ trách</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
+    {% for case in case_page %}<tr>
+        <td><strong>{{ case.case_code }}</strong><br><a href="{% url 'customers:detail' case.customer_id %}">{{ case.customer.ho_ten }}</a><br><small>{{ case.triggered_at|date:"d/m/Y H:i" }}</small></td>
+        <td>{% if case.source == 'LOW_CSAT' %}<span class="badge EXPIRED">CSAT {{ case.source_csat.score }}/5</span>{% else %}<span class="badge EXPIRED">Ticket mở lại</span>{% endif %}<br>{{ case.ticket }}</td>
+        <td>{{ case.get_risk_level_display }}</td><td>{% if case.assigned_to %}{{ case.assigned_to.get_full_name|default:case.assigned_to.username }}{% else %}Chưa phân công{% endif %}</td>
+        <td>{{ case.get_status_display }}</td><td><a href="{% url 'customers:retention_detail' case.pk %}"><a class="m5-case-detail-btn">{% if case.status == 'PENDING' %}Xử lý ngay {% else %}Xem ca {% endif %}</a></td>
+    </tr>{% empty %}<tr><td colspan="6" class="empty">Chưa có ca phù hợp. Bấm Đồng bộ ca để kiểm tra nguồn; 10 khách hàng demo chưa có sẵn Ticket hoặc CSAT.</td></tr>{% endfor %}
+    </tbody></table></div>
+    {% if case_page.has_other_pages %}<nav class="subtabs" aria-label="Phân trang">
+    {% if case_page.has_previous %}<a href="?{{ filter_query }}&amp;page={{ case_page.previous_page_number }}">← Trước</a>{% endif %}
+    <span>Trang {{ case_page.number }} / {{ case_page.paginator.num_pages }}</span>
+    {% if case_page.has_next %}<a href="?{{ filter_query }}&amp;page={{ case_page.next_page_number }}">Sau →</a>{% endif %}</nav>{% endif %}
+    {% elif active_tab == 'campaigns' %}
+    <form method="get"
+          action="{% url 'customers:after_sales_overview' %}"
+          class="filters">
+        <input type="hidden" name="tab" value="campaigns">
+
+        <div class="field search">
+            <label for="program-search">Tìm chương trình</label>
+            <input id="program-search"
+                   type="search"
+                   name="q"
+                   value="{{ keyword }}"
+                   placeholder="Nhập mã hoặc tên chương trình">
+        </div>
+
+        <div class="field">
+            <label for="program-type">Loại chương trình</label>
+            <select id="program-type" name="type">
+                <option value="">Tất cả loại</option>
+                {% for value, label in type_choices %}
+                    <option value="{{ value }}"
+                        {% if selected_type == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="program-status">Trạng thái</label>
+            <select id="program-status" name="status">
+                <option value="">Tất cả trạng thái</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}"
+                        {% if selected_status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit">Lọc kết quả</button>
+
+        <a class="clear"
+           href="{% url 'customers:after_sales_overview' %}?tab=campaigns">
+        </a>
+    </form>
+
+
+    <h2 class="section-title">Danh sách chương trình</h2>
+
+    <div class="programs">
+        {% for program in programs %}
+            <article class="program">
+                <div class="program-top">
+                    <span class="code">{{ program.code }}</span>
+                    <span class="badge {{ program.status }}">
+                        {{ program.status_label }}
+                    </span>
+                </div>
+
+                <h3>{{ program.name }}</h3>
+
+                <p class="description">
+                    {{ program.description|default:"Chưa có mô tả." }}
+                </p>
+
+                <div class="meta">
+                    <strong>Loại:</strong>
+                    {{ program.get_program_type_display }}
+                    <br>
+
+                    <strong>Thời gian:</strong>
+                    {{ program.starts_at|date:"d/m/Y H:i" }}
+                    –
+                    {{ program.ends_at|date:"d/m/Y H:i" }}
+                    <br>
+
+                    <strong>Đối tượng:</strong>
+                    {% for tier in program.eligible_tiers.all %}
+                        {{ tier.get_code_display }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        Mọi khách hàng
+                    {% endfor %}
+                </div>
+
+                {% for benefit in program.benefits.all %}
+                    <div class="benefit">
+                        <strong>
+                            {{ benefit.get_benefit_type_display }}:
+                            {{ benefit.name }}
+                        </strong>
+
+                        <p>{{ benefit.description }}</p>
+
+                        <p class="muted">
+                            Hiệu lực:
+                            {{ benefit.valid_from|date:"d/m/Y H:i" }}
+                            –
+                            {{ benefit.valid_until|date:"d/m/Y H:i" }}
+                        </p>
+
+                        {% if not benefit.is_enabled %}
+                            <p class="muted">Quyền lợi đang tạm dừng.</p>
+                        {% endif %}
+
+                        {% if benefit.terms %}
+                            <details>
+                                <summary>Điều kiện sử dụng</summary>
+                                <div>{{ benefit.terms|linebreaksbr }}</div>
+                            </details>
+                        {% endif %}
+                                                {% if benefit.benefit_type == 'VOUCHER' %}
+                            {% if benefit.is_apology %}
+                                <p class="muted">Voucher đền bù — cấp từ trang xử lý ca giữ chân.</p>
+                            {% elif benefit.is_active %}
+                                <p>
+                                    <a href="{% url 'customers:issue_voucher' benefit.pk %}">
+                                        Cấp Voucher →
+                                    </a>
+                                </p>
+                            {% else %}
+                                <p class="muted">
+                                    Chưa thể cấp: chương trình hoặc
+                                    Voucher không trong thời gian hiệu lực,
+                                    hoặc đang tạm dừng.
+                                </p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p class="muted">
+                        Chương trình chưa có Voucher hoặc quyền lợi.
+                    </p>
+                {% endfor %}
+            </article>
+        {% empty %}
+            <div class="empty">
+                Không có chương trình phù hợp.
+                Hãy kiểm tra bộ lọc hoặc tạo chương trình trong admin.
+            </div>
+        {% endfor %}
+    </div>
+
+
+    {% elif active_tab == 'history' %}
+        <section id="voucher-history" class="m5-inline-history">
+        <h2 class="section-title">Lịch sử cấp Voucher</h2>
+
+        <form method="get"
+              action="{% url 'customers:after_sales_overview' %}#voucher-history"
+              class="filters">
+
+            {% for key, value in history_preserved_filters %}
+                <input type="hidden"
+                       name="{{ key }}"
+                       value="{{ value }}">
+            {% endfor %}
+
+            <div class="field search">
+                <label for="history-search">
+                    Tìm lịch sử cấp Voucher
+                </label>
+
+                <input id="history-search"
+                       type="search"
+                       name="history_q"
+                       value="{{ history_keyword }}"
+                       placeholder="Khách hàng, email, chương trình hoặc mã Voucher...">
+            </div>
+
+            <button type="submit">Tìm kiếm</button>
+
+            <a href="{% url 'customers:after_sales_overview' %}{% if history_clear_query %}?{{ history_clear_query }}{% endif %}#voucher-history">
+            </a>
+        </form>
+
+        <p>
+            Tìm thấy <strong>{{ history_total }}</strong> lượt cấp.
+        </p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Khách hàng</th>
+                        <th>Chương trình / Voucher</th>
+                        <th>Mã Voucher</th>
+                        <th>Người cấp</th>
+                        <th>Thời gian cấp</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for delivery in history_page %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'customers:detail' delivery.customer.pk %}">
+                                    {{ delivery.customer.ho_ten }}
+                                </a>
+                                <small>{{ delivery.customer.email }}</small>
+                            </td>
+
+                            <td>
+                                <strong>{{ delivery.benefit.name }}</strong>
+
+                                <small>
+                                    {{ delivery.benefit.program.code }} —
+                                    {{ delivery.benefit.program.name }}
+                                </small>
+
+                                {% if delivery.is_apology %}
+                                    <span class="badge EXPIRED">
+                                        Voucher đền bù
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <code>{{ delivery.reference_code }}</code>
+                            </td>
+
+                            <td>
+                                {% if delivery.performed_by %}
+                                    {{ delivery.performed_by.get_full_name|default:delivery.performed_by.get_username }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ delivery.issued_at|date:"d/m/Y H:i" }}
+                            </td>
+
+                            <td>
+                                {{ delivery.get_status_display }}
+                                <small>{{ delivery.get_channel_display }}</small>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty">
+                                {% if history_keyword %}
+                                    Không tìm thấy lượt cấp phù hợp.
+                                {% else %}
+                                    Chưa có Voucher được cấp.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if history_page.has_other_pages %}
+            <nav class="subtabs"
+                 aria-label="Phân trang lịch sử cấp Voucher">
+
+                {% if history_page.has_previous %}
+                    <a href="?{% if history_query %}{{ history_query }}&amp;{% endif %}history_page={{ history_page.previous_page_number }}#voucher-history">
+                        ← Trang trước
+                    </a>
+                {% endif %}
+
+                <span>
+                    Trang {{ history_page.number }}
+                    / {{ history_page.paginator.num_pages }}
+                </span>
+
+                {% if history_page.has_next %}
+                    <a href="?{% if history_query %}{{ history_query }}&amp;{% endif %}history_page={{ history_page.next_page_number }}#voucher-history">
+                        Trang sau →
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </section>
+        </section>
+
+    {% endif %}
+
+    </a>
+</div>
+{% endblock %}

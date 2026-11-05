@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+
+{% block title %}Giao dịch Loyalty - CRM HULO{% endblock %}
+
+{% block content %}
+<style>
+.m5-adjust-page,
+.m5-adjust-page * {
+    box-sizing: border-box;
+}
+
+.m5-adjust-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 0 30px;
+    font-family: inherit;
+    color: #17365d;
+    line-height: 1.6;
+}
+
+.m5-adjust-page * {
+    font-family: inherit;
+}
+
+.m5-adjust-page h1 {
+    margin: 0 0 10px;
+    color: #103b78;
+    font-size: 32px;
+    line-height: 1.3;
+}
+
+.m5-adjust-page h2 {
+    margin: 0 0 16px;
+    color: #103b78;
+    font-size: 20px;
+}
+
+.m5-adjust-page .subtitle,
+.m5-adjust-page .customer-meta {
+    color: #607da8;
+}
+
+.m5-adjust-page .subtitle {
+    margin: 0 0 25px;
+}
+
+.m5-adjust-page .panel {
+    min-width: 0;
+    margin-bottom: 20px;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #d5e3fa;
+    border-radius: 10px;
+}
+
+.m5-adjust-page .customer-name {
+    color: #103b78;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+.m5-adjust-page .customer-meta {
+    overflow-wrap: anywhere;
+}
+
+.m5-adjust-page .points-box {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 22px 0;
+}
+
+.m5-adjust-page .point {
+    padding: 20px;
+    background: #f4f8ff;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.m5-adjust-page .point strong {
+    display: block;
+    color: #103b78;
+    font-size: 28px;
+}
+
+.m5-adjust-page .point span {
+    color: #607da8;
+    font-size: 14px;
+}
+
+.m5-adjust-page .field {
+    margin-bottom: 18px;
+}
+
+.m5-adjust-page label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.m5-adjust-page select,
+.m5-adjust-page input:not([type="hidden"]),
+.m5-adjust-page textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbdcf5;
+    border-radius: 8px;
+    background: #fbfdff;
+    color: #17365d;
+    font: inherit;
+}
+
+.m5-adjust-page textarea {
+    resize: vertical;
+}
+
+.m5-adjust-page .errors {
+    color: #b42318;
+    font-size: 14px;
+}
+
+.m5-adjust-page .errors ul {
+    padding-left: 20px;
+}
+
+.m5-adjust-page .notice {
+    margin: 16px 0;
+    padding: 14px 16px;
+    border: 1px solid #d5e3fa;
+    border-radius: 8px;
+    background: #eaf2ff;
+    color: #45658e;
+}
+
+.m5-adjust-page .preview {
+    margin: 20px 0;
+    padding: 20px;
+    border: 1px solid #9fc5ff;
+    border-radius: 8px;
+    background: #f4f8ff;
+}
+
+.m5-adjust-page .preview p {
+    margin: 8px 0;
+}
+
+.m5-adjust-page .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.m5-adjust-page .back-link {
+    color: #103b78;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.m5-adjust-page .back-link:hover {
+    text-decoration: underline;
+}
+
+.m5-adjust-page button {
+    padding: 11px 20px;
+    border: 1px solid #103b78;
+    border-radius: 6px;
+    background: #103b78;
+    color: white;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.m5-adjust-page button:hover {
+    background: #0a2b57;
+}
+
+.m5-adjust-page :focus-visible {
+    outline: 3px solid #9fc5ff;
+    outline-offset: 3px;
+}
+
+.m5-adjust-page .table-wrap {
+    overflow-x: auto;
+}
+
+.m5-adjust-page table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.m5-adjust-page th {
+    padding: 14px;
+    background: #103b78;
+    color: white;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.m5-adjust-page td {
+    padding: 14px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+}
+
+.m5-adjust-page tbody tr:hover {
+    background: #f2f6fc;
+}
+
+.m5-adjust-page code {
+    overflow-wrap: anywhere;
+}
+
+.m5-adjust-page [hidden] {
+    display: none !important;
+}
+
+@media (max-width: 600px) {
+    .m5-adjust-page h1 {
+        font-size: 26px;
+    }
+
+    .m5-adjust-page .panel {
+        padding: 16px;
+    }
+
+    .m5-adjust-page .points-box {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="m5-adjust-page">
+    <h1>Giao dịch điểm Loyalty</h1>
+
+    <p class="subtitle">
+        Cộng điểm và đổi điểm lấy Voucher cho khách hàng.
+    </p>
+
+    {% for message in messages %}
+        <div class="notice" role="status">{{ message }}</div>
+    {% endfor %}
+
+    <section class="panel">
+        <div class="customer-name">{{ customer.ho_ten }}</div>
+
+        <div class="customer-meta">
+            KH{{ customer.ma_khach_hang|stringformat:"03d" }}
+            · {{ customer.email }}
+        </div>
+
+        <div class="points-box">
+            <div class="point">
+                <strong>{{ loyalty_account.points_balance }}</strong>
+                <span>Điểm khả dụng</span>
+            </div>
+
+            <div class="point">
+                <strong>{{ loyalty_account.total_points_earned }}</strong>
+                <span>Tổng điểm tích lũy</span>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.idempotency_key }}
+
+            <div class="errors" role="alert">
+                {{ form.non_field_errors }}
+                {{ form.idempotency_key.errors }}
+            </div>
+
+            <div class="field">
+                {{ form.transaction_type.label_tag }}
+                {{ form.transaction_type }}
+                <div class="errors">
+                    {{ form.transaction_type.errors }}
+                </div>
+            </div>
+
+            <div class="field" id="earn-field">
+                {{ form.points.label_tag }}
+                {{ form.points }}
+                <div class="errors">{{ form.points.errors }}</div>
+            </div>
+
+            <div class="field" id="reward-field">
+                {{ form.reward.label_tag }}
+                {{ form.reward }}
+                <div class="errors">{{ form.reward.errors }}</div>
+
+                <p class="customer-meta">
+                    Điểm cần đổi được lấy từ Voucher đã chọn.
+                </p>
+            </div>
+
+            <div class="field">
+                {{ form.description.label_tag }}
+                {{ form.description }}
+                <div class="errors">{{ form.description.errors }}</div>
+            </div>
+
+            {% if preview %}
+                <section class="preview" id="voucher-preview">
+                    <h2>Xác nhận đổi Voucher</h2>
+
+                    <p>
+                        <strong>Voucher:</strong>
+                        {{ preview.reward.name }}
+                    </p>
+
+                    <p>
+                        <strong>Giá trị giảm:</strong>
+                        {{ preview.reward.discount_amount }}đ
+                    </p>
+
+                    <p>
+                        <strong>Điểm sẽ trừ:</strong>
+                        {{ preview.reward.points_cost }}
+                    </p>
+
+                    <p>
+                        <strong>Điểm còn lại dự kiến:</strong>
+                        {{ preview.remaining_balance }}
+                    </p>
+
+                    <p>
+                        <strong>Hiệu lực:</strong>
+                        {{ preview.reward.validity_days }} ngày từ lúc đổi.
+                    </p>
+
+                    <p>
+                        <strong>Điều kiện:</strong>
+                        {{ preview.reward.terms|default:"Không có điều kiện bổ sung."|linebreaksbr }}
+                    </p>
+
+                    <input
+                        type="hidden"
+                        name="preview_token"
+                        value="{{ preview_token }}"
+                    >
+
+                    <button
+                        type="submit"
+                        name="action"
+                        value="confirm"
+                    >
+                        Xác nhận đổi và trừ điểm
+                    </button>
+                </section>
+            {% endif %}
+
+            <div class="notice">
+                Đổi Voucher chỉ trừ điểm khả dụng.
+                Tổng điểm tích lũy và hạng thành viên được giữ nguyên.
+                Mã Voucher được cấp trên CRM; áp dụng vào đơn hàng
+                cần kết nối với chức năng đơn hàng.
+            </div>
+
+            <div class="actions">
+                <a
+                    class="back-link"
+                    href="{% url 'customers:loyalty_detail' customer.ma_khach_hang %}"
+                >
+                    ← Quay lại Loyalty
+                </a>
+
+                <button
+                    id="transaction-submit"
+                    type="submit"
+                    name="action"
+                    value="earn"
+                >
+                    Xác nhận cộng điểm
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Danh mục Voucher đổi điểm</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Voucher</th>
+                        <th>Điểm cần đổi</th>
+                        <th>Giá trị giảm</th>
+                        <th>Hiệu lực</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for reward in rewards %}
+                        <tr>
+                            <td>{{ reward.name }}</td>
+                            <td>{{ reward.points_cost }}</td>
+                            <td>{{ reward.discount_amount }}đ</td>
+                            <td>{{ reward.validity_days }} ngày</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4">Chưa có Voucher cho phép đổi.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Voucher Loyalty đã đổi gần đây</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Voucher / Mã</th>
+                        <th>Điểm đã đổi</th>
+                        <th>Giá trị giảm</th>
+                        <th>Ngày cấp</th>
+                        <th>Hết hạn</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for voucher in vouchers %}
+                        <tr>
+                            <td>
+                                <strong>{{ voucher.voucher_name }}</strong>
+                                <br>
+                                <code>{{ voucher.reference_code }}</code>
+                            </td>
+                            <td>{{ voucher.points_spent }}</td>
+                            <td>{{ voucher.discount_amount }}đ</td>
+                            <td>{{ voucher.issued_at|date:"d/m/Y H:i" }}</td>
+                            <td>{{ voucher.expires_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5">Khách hàng chưa đổi Voucher.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script>
+(function () {
+    const typeSelect = document.getElementById("id_transaction_type");
+    const earnField = document.getElementById("earn-field");
+    const rewardField = document.getElementById("reward-field");
+    const pointsInput = document.getElementById("id_points");
+    const rewardSelect = document.getElementById("id_reward");
+    const descriptionInput = document.getElementById("id_description");
+    const submitButton = document.getElementById("transaction-submit");
+    const preview = document.getElementById("voucher-preview");
+
+    function updateMode() {
+        const redeem = typeSelect.value === "REDEEM";
+
+        earnField.hidden = redeem;
+        rewardField.hidden = !redeem;
+
+        pointsInput.disabled = redeem;
+        pointsInput.required = !redeem;
+
+        rewardSelect.disabled = !redeem;
+        rewardSelect.required = redeem;
+
+        submitButton.value = redeem ? "preview" : "earn";
+        submitButton.textContent = redeem
+            ? "Xem trước Voucher"
+            : "Xác nhận cộng điểm";
+    }
+
+    function invalidatePreview() {
+        if (preview) {
+            preview.hidden = true;
+            const confirmButton = preview.querySelector("button");
+            if (confirmButton) confirmButton.disabled = true;
+        }
+    }
+
+    typeSelect.addEventListener("change", function () {
+        invalidatePreview();
+        updateMode();
+    });
+
+    rewardSelect.addEventListener("change", invalidatePreview);
+    descriptionInput.addEventListener("input", invalidatePreview);
+
+    updateMode();
+})();
+</script>
+{% endblock %}

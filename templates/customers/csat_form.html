@@ -1,0 +1,517 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .m5-csat-page {
+        max-width: 1220px;
+        margin: 28px auto 70px;
+        padding: 0 18px;
+        font-family: inherit;
+        color: #143b73;
+    }
+
+    .m5-hero {
+        background: linear-gradient(115deg, #f0f7ff, #d7eaff);
+        border-radius: 16px;
+        padding: 42px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .m5-hero h1 {
+        color: #0d438b;
+        font-size: 30px;
+        font-weight: 800;
+        margin: 0 0 10px;
+    }
+
+    .m5-hero p {
+        color: #6789af;
+        margin-bottom: 20px;
+    }
+
+    .m5-help-link {
+        display: inline-block;
+        background: white;
+        color: #2572d6;
+        padding: 12px 20px;
+        border: 1px solid #d5e5fa;
+        border-radius: 9px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .m5-hero-art {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-width: 260px;
+    }
+
+    .m5-art-item {
+        background: white;
+        box-shadow: 0 8px 30px #a7c9f155;
+        border-radius: 15px;
+        padding: 20px;
+        font-size: 34px;
+    }
+
+    .m5-art-item:nth-child(2) {
+        transform: translateY(-16px);
+    }
+
+    .m5-csat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+        align-items: start;
+    }
+
+    .m5-card {
+        background: #fff;
+        border: 1px solid #d9e6f8;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 4px 15px #123e7410;
+    }
+
+    .m5-card h2 {
+        font-size: 19px;
+        color: #17478e;
+        font-weight: 750;
+        margin: 0 0 16px;
+    }
+
+    .m5-ticket-info {
+        background: #f5f8fc;
+        border-radius: 9px;
+        padding: 17px;
+    }
+
+    .m5-info-row {
+        display: grid;
+        grid-template-columns: 125px 1fr;
+        gap: 12px;
+        padding: 9px 0;
+        border-bottom: 1px solid #e5edf7;
+        font-size: 14px;
+    }
+
+    .m5-info-row:last-child {
+        border-bottom: 0;
+    }
+
+    .m5-info-label {
+        color: #7790af;
+    }
+
+    .m5-info-value {
+        color: #243b5a;
+        font-weight: 500;
+        overflow-wrap: anywhere;
+    }
+
+    .m5-description {
+        font-size: 14px;
+        color: #7290b1;
+        margin-bottom: 12px;
+    }
+
+    .m5-stars {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 4px;
+        margin: 18px 0 26px;
+    }
+
+    .m5-stars input {
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+    }
+
+    .m5-stars label {
+        font-size: 49px;
+        line-height: 1;
+        color: #d1d8e4;
+        cursor: pointer;
+        transition: color 0.15s, transform 0.15s;
+    }
+
+    .m5-stars input:checked ~ label,
+    .m5-stars label:hover,
+    .m5-stars label:hover ~ label {
+        color: #ffba12;
+    }
+
+    .m5-stars label:hover {
+        transform: scale(1.08);
+    }
+
+    .m5-stars input:focus-visible + label {
+        outline: 2px solid #1972df;
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
+
+    .m5-field-label {
+        display: block;
+        color: #194887;
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+
+    .m5-comment {
+        width: 100%;
+        min-height: 125px;
+        padding: 14px;
+        border: 1px solid #d8e5f5;
+        border-radius: 9px;
+        resize: vertical;
+        font: inherit;
+        font-size: 14px;
+        outline-color: #2876df;
+    }
+
+    .m5-comment::placeholder {
+        color: #a4b3c5;
+    }
+
+    .m5-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .m5-btn {
+        display: inline-block;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 7px;
+        padding: 12px 15px;
+        font-size: 14px;
+        font-weight: 650;
+        cursor: pointer;
+    }
+
+    .m5-btn-primary {
+        color: #fff;
+        background: #2276e5;
+        border: 1px solid #2276e5;
+    }
+
+    .m5-btn-secondary {
+        color: #2874d5;
+        background: #f4f9ff;
+        border: 1px solid #a8cdfb;
+    }
+
+    .m5-btn-block {
+        width: 100%;
+        margin-top: 14px;
+    }
+
+    .m5-success {
+        color: #157347;
+        background: #e9f7ef;
+        padding: 15px;
+        border-radius: 9px;
+        margin-bottom: 16px;
+    }
+
+    .m5-warning {
+        color: #936112;
+        background: #fff6df;
+        padding: 15px;
+        border-radius: 9px;
+    }
+
+    .m5-errors {
+        color: #bb3030;
+        font-size: 13px;
+        margin: 8px 0;
+    }
+
+    @media (max-width: 760px) {
+        .m5-hero {
+            padding: 28px 22px;
+        }
+
+        .m5-hero-art {
+            display: none;
+        }
+
+        .m5-hero h1 {
+            font-size: 23px;
+        }
+
+        .m5-csat-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .m5-card {
+            padding: 18px;
+        }
+
+        .m5-stars label {
+            font-size: 43px;
+        }
+    }
+</style>
+
+<div class="m5-csat-page">
+
+    <!-- Banner HULO -->
+    <section class="m5-hero">
+        <div>
+            <h1>HULO có thể giúp gì cho bạn?</h1>
+
+            <p>
+                Tìm câu trả lời hoặc trò chuyện với
+                HULO Assistant.
+            </p>
+
+            <a href="/support/" class="m5-help-link">
+                🔎 Truy cập trung tâm hỗ trợ
+            </a>
+        </div>
+
+        <div class="m5-hero-art" aria-hidden="true">
+            <div class="m5-art-item">📦</div>
+            <div class="m5-art-item">🛍️</div>
+            <div class="m5-art-item">✈️</div>
+        </div>
+    </section>
+
+    <div class="m5-csat-grid">
+
+        <!-- CỘT TRÁI: THÔNG TIN TICKET -->
+        <section class="m5-card">
+
+            <h2>
+                Thông tin yêu cầu đã xử lý ✅
+            </h2>
+
+            <div class="m5-ticket-info">
+
+                <div class="m5-info-row">
+                    <span class="m5-info-label">Mã Ticket</span>
+                    <span class="m5-info-value">
+                        {{ ticket.ma_ticket }}
+                    </span>
+                </div>
+
+                <div class="m5-info-row">
+                    <span class="m5-info-label">Tiêu đề</span>
+                    <span class="m5-info-value">
+                        {{ ticket.tieu_de }}
+                    </span>
+                </div>
+
+                <div class="m5-info-row">
+                    <span class="m5-info-label">Khách hàng</span>
+                    <span class="m5-info-value">
+                        {{ ticket.khach_hang.ho_ten }}
+                    </span>
+                </div>
+
+                <div class="m5-info-row">
+                    <span class="m5-info-label">Danh mục</span>
+                    <span class="m5-info-value">
+                        {% if ticket.danh_muc %}
+                            {{ ticket.danh_muc.ten_danh_muc }}
+                        {% else %}
+                            Chưa phân loại
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="m5-info-row">
+                    <span class="m5-info-label">Ngày tạo</span>
+                    <span class="m5-info-value">
+                        {{ ticket.thoi_diem_tao|date:"d/m/Y H:i" }}
+                    </span>
+                </div>
+
+                <div class="m5-info-row">
+                    <span class="m5-info-label">Cập nhật cuối</span>
+                    <span class="m5-info-value">
+                        {{ ticket.thoi_diem_cap_nhat|date:"d/m/Y H:i" }}
+                    </span>
+                </div>
+
+                <div class="m5-info-row">
+                    <span class="m5-info-label">Trạng thái</span>
+                    <span class="m5-info-value">
+                        {{ ticket.trang_thai }}
+                    </span>
+                </div>
+
+                <div class="m5-info-row">
+                    <span class="m5-info-label">Kết quả xử lý</span>
+                    <span class="m5-info-value">
+                        {{ ticket.ket_qua_xu_ly|default:"Chưa cập nhật" }}
+                    </span>
+                </div>
+
+            </div>
+
+            <a href="/support/" class="m5-btn m5-btn-primary m5-btn-block">
+                Bạn cần hỗ trợ thêm?
+            </a>
+
+        </section>
+
+        <!-- CỘT PHẢI: ĐÁNH GIÁ CSAT -->
+        <section class="m5-card">
+
+            <h2>Bạn hài lòng với kết quả này chứ?</h2>
+
+            <p class="m5-description">
+                Đánh giá của bạn sẽ giúp HULO
+                cải thiện dịch vụ tốt hơn.
+            </p>
+
+            {% if existing_csat %}
+
+                <!-- ĐÃ GỬI ĐÁNH GIÁ -->
+                <div class="m5-success">
+                    ✅ Cảm ơn bạn đã gửi đánh giá!
+                </div>
+
+                <p>
+                    <strong>Mức độ hài lòng:</strong>
+                    {{ existing_csat.score }}/5 sao
+                </p>
+
+                <p>
+                    <strong>Nhận xét:</strong>
+                    {{ existing_csat.comment|default:"Không có nhận xét" }}
+                </p>
+
+                <p class="m5-description">
+                    Ticket này đã được đánh giá.
+                    Bạn không thể gửi lại.
+                </p>
+
+            {% elif not can_rate %}
+
+                <!-- CHƯA ĐỦ ĐIỀU KIỆN -->
+                <div class="m5-warning">
+                    Ticket cần được giải quyết và
+                    khách hàng xác nhận đồng ý kết quả
+                    trước khi đánh giá.
+                </div>
+
+                <a
+                    class="m5-btn m5-btn-secondary"
+                    href="/tickets/customer/{{ ticket.pk }}/result/"
+                >
+                    Xem kết quả xử lý
+                </a>
+
+            {% else %}
+
+                <!-- FORM GỬI ĐÁNH GIÁ -->
+                <form method="post">
+                    {% csrf_token %}
+
+                    <label class="m5-field-label">
+                        Chọn mức độ hài lòng (1–5 sao)
+                    </label>
+
+                    <div class="m5-stars" role="group"
+                         aria-label="Mức độ hài lòng">
+
+                        {% for point in rating_values %}
+
+                            <input
+                                type="radio"
+                                name="score"
+                                id="m5-star-{{ point }}"
+                                value="{{ point }}"
+                                required
+                                {% if selected_score == point %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            <label
+                                for="m5-star-{{ point }}"
+                                title="{{ point }} sao"
+                                aria-label="{{ point }} sao"
+                            >★</label>
+
+                        {% endfor %}
+                    </div>
+
+                    {% if form.score.errors %}
+                        <div class="m5-errors">
+                            {{ form.score.errors }}
+                        </div>
+                    {% endif %}
+
+                    <label
+                        for="m5-comment"
+                        class="m5-field-label"
+                    >
+                        Nhận xét của bạn
+                    </label>
+
+                    <textarea
+                        id="m5-comment"
+                        name="comment"
+                        class="m5-comment"
+                        placeholder="Đánh giá của bạn sẽ giúp HULO cải thiện dịch vụ tốt hơn..."
+                    >{{ form.comment.value|default_if_none:"" }}</textarea>
+
+                    {% if form.comment.errors %}
+                        <div class="m5-errors">
+                            {{ form.comment.errors }}
+                        </div>
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        <div class="m5-errors">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="m5-buttons">
+
+                        <a
+                            href="/tickets/customer/{{ ticket.pk }}/result/"
+                            class="m5-btn m5-btn-secondary"
+                        >
+                            Quay lại
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="m5-btn m5-btn-primary"
+                        >
+                            Gửi đánh giá
+                        </button>
+
+                    </div>
+
+                </form>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+</div>
+
+{% endblock %}

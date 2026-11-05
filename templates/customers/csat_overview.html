@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}CSAT & Chăm sóc - CRM HULO{% endblock %}
+
+{% block content %}
+
+<style>
+    .m5-csat-overview {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .m5-csat-overview h1 {
+        color: #103b78;
+        margin-bottom: 10px;
+    }
+
+    .m5-csat-overview .m5-description {
+        color: #607da8;
+        margin-bottom: 25px;
+    }
+
+    /* THỐNG KÊ */
+    .m5-csat-overview .m5-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin: 25px 0 30px;
+    }
+
+    .m5-csat-overview .m5-stat-card {
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+    .m5-csat-overview .m5-stat-label {
+        color: #607da8;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .m5-csat-overview .m5-stat-value {
+        color: #103b78;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .m5-csat-overview .m5-stat-card.warning .m5-stat-value {
+        color: #c45a21;
+    }
+
+    /* TÌM KIẾM */
+    .m5-csat-overview .m5-search {
+        display: flex;
+        gap: 10px;
+        margin: 25px 0;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .m5-csat-overview .m5-search input {
+        flex: 1;
+        min-width: 0;
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .m5-csat-overview .m5-search button {
+        padding: 12px 24px;
+        background: #103b78;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .m5-csat-overview .m5-search button:hover {
+        background: #0a2b57;
+    }
+
+    .m5-csat-overview .m5-search a {
+        padding: 12px;
+        color: #103b78;
+        text-decoration: underline;
+    }
+
+    /* BẢNG TỔNG HỢP CSAT */
+    .m5-csat-overview .m5-table-wrapper {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .m5-csat-overview .m5-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+    }
+
+    .m5-csat-overview .m5-table th,
+    .m5-csat-overview .m5-table td {
+        padding: 14px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .m5-csat-overview .m5-table th {
+        background: #103b78;
+        color: #fff;
+        white-space: nowrap;
+    }
+
+    .m5-csat-overview .m5-table tbody tr:hover {
+        background: #f2f6fc;
+    }
+
+    .m5-csat-overview .m5-table td {
+        color: #17365d;
+    }
+
+    .m5-csat-overview .m5-csat-low {
+        color: #c45a21;
+        font-weight: 700;
+    }
+
+    .m5-csat-overview .m5-csat-normal {
+        color: #17683b;
+        font-weight: 700;
+    }
+
+    .m5-csat-overview .m5-csat-empty {
+        color: #7489a8;
+    }
+
+    .m5-csat-overview .m5-action-btn {
+        display: inline-block;
+        padding: 8px 14px;
+        background: #eaf2ff;
+        color: #103b78;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .m5-csat-overview .m5-action-btn:hover {
+        background: #103b78;
+        color: #fff;
+    }
+
+    .m5-csat-overview .m5-empty {
+        padding: 24px;
+        text-align: center !important;
+        color: #666;
+    }
+
+    .m5-csat-overview .m5-back {
+        display: inline-block;
+        margin-top: 25px;
+        color: #103b78;
+        text-decoration: none;
+    }
+
+    .m5-csat-overview .m5-back:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 850px) {
+        .m5-csat-overview .m5-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .m5-csat-overview .m5-search input {
+            flex-basis: 100%;
+        }
+    }
+</style>
+
+<div class="content-container m5-csat-overview">
+
+    <h1>CSAT &amp; Chăm sóc</h1>
+
+    <p class="m5-description">
+        Theo dõi mức độ hài lòng của khách hàng
+        và lựa chọn khách hàng cần chăm sóc.
+    </p>
+
+    <!-- THỐNG KÊ -->
+    <div class="m5-stats">
+
+        <div class="m5-stat-card">
+            <div class="m5-stat-label">
+                Tổng số đánh giá CSAT
+            </div>
+            <div class="m5-stat-value">
+                {{ total_reviews|default:0 }}
+            </div>
+        </div>
+
+        <div class="m5-stat-card">
+            <div class="m5-stat-label">
+                Điểm CSAT trung bình
+            </div>
+            <div class="m5-stat-value">
+                {% if average_score is not None %}
+                    {{ average_score|floatformat:1 }}/5
+                {% else %}
+                    Chưa có
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="m5-stat-card warning">
+            <div class="m5-stat-label">
+                Đánh giá thấp (1–3 sao)
+            </div>
+            <div class="m5-stat-value">
+                {{ low_reviews|default:0 }}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TÌM KIẾM -->
+    <form method="get"
+          action="{% url 'customers:csat_overview' %}"
+          class="m5-search">
+
+        <input type="text"
+               name="q"
+               value="{{ keyword|default:'' }}"
+               placeholder="Nhập mã, tên hoặc email khách hàng..."
+               aria-label="Tìm kiếm khách hàng">
+
+        <button type="submit">Tìm kiếm</button>
+
+    </form>
+
+    <!-- BẢNG TỔNG HỢP CSAT -->
+    <div class="m5-table-wrapper">
+        <table class="m5-table">
+            <thead>
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Số đánh giá</th>
+                    <th>CSAT gần nhất</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for customer in customers %}
+                    <tr>
+                        <td>{{ customer.ma_khach_hang }}</td>
+                        <td>{{ customer.ho_ten }}</td>
+                        <td>{{ customer.email }}</td>
+                        <td>{{ customer.csat_count }}</td>
+
+                        <td>
+                            {% if customer.latest_csat_score is not None %}
+                                {% if customer.latest_csat_score <= 3 %}
+                                    <span class="m5-csat-low">
+                                        {{ customer.latest_csat_score }}/5 sao
+                                    </span>
+                                {% else %}
+                                    <span class="m5-csat-normal">
+                                        {{ customer.latest_csat_score }}/5 sao
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="m5-csat-empty">
+                                    Chưa có đánh giá
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a class="m5-action-btn"
+                               href="{% url 'customers:csat_care' customer.ma_khach_hang %}">
+                                Chăm sóc
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="m5-empty">
+                            Không tìm thấy khách hàng phù hợp.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a class="m5-back" href="{% url 'customers:list' %}">
+        ← Quay về danh sách khách hàng
+    </a>
+
+</div>
+
+{% endblock %}
