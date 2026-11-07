@@ -165,6 +165,9 @@ def ticket_home(request):
 
 @login_required(login_url='login')
 @role_required('CSKH', 'MANAGER', 'ADMIN')
+
+@login_required(login_url='login')
+@role_required('CSKH', 'MANAGER', 'ADMIN')
 def ticket_detail(request, pk):
 
     ticket = get_object_or_404(
@@ -180,8 +183,12 @@ def ticket_detail(request, pk):
 
     staff = getattr(request.user, 'staff_profile', None)
 
-    # CSKH được xem Ticket NEW chưa phân công
-    # hoặc Ticket đã được giao cho chính mình
+    # ==========================================
+    # 1. KIỂM TRA QUYỀN TRUY CẬP
+    # ==========================================
+
+    # CSKH chỉ được xem Ticket NEW chưa phân công
+    # hoặc Ticket đã được giao cho chính mình.
     if staff is not None and staff.vai_tro == 'CSKH':
 
         la_ticket_moi_chua_phan_cong = (
@@ -197,13 +204,16 @@ def ticket_detail(request, pk):
                 "Bạn không có quyền xem Ticket này."
             )
 
-    # Xác định vai trò người đang đăng nhập
+    # Xác định vai trò người đang đăng nhập.
     user_role = (
         staff.vai_tro if staff is not None
         else ('ADMIN' if request.user.is_superuser else None)
     )
 
-    # Danh sách nhân viên CSKH để phân công Ticket mới
+    # ==========================================
+    # 2. DANH SÁCH NHÂN VIÊN ĐỂ PHÂN CÔNG
+    # ==========================================
+
     staff_options = Staff.objects.none()
 
     if ticket.trang_thai == 'NEW' and user_role in ('MANAGER', 'ADMIN'):
@@ -212,7 +222,7 @@ def ticket_detail(request, pk):
         ).order_by('ho_ten')
 
     # ==========================================
-    # UC-3.6 - TRẠNG THÁI VÀ THỜI GIAN SLA
+    # 3. TRẠNG THÁI VÀ THỜI GIAN SLA
     # ==========================================
 
     now = timezone.now()
@@ -259,7 +269,7 @@ def ticket_detail(request, pk):
             ticket.sla_remaining = f"Còn {duration_text}"
 
     # ==========================================
-    # LỊCH SỬ XỬ LÝ TICKET
+    # 4. LỊCH SỬ XỬ LÝ TICKET
     # ==========================================
 
     logs = ticket.logs.select_related(
@@ -268,18 +278,49 @@ def ticket_detail(request, pk):
 
     ticket_messages = ticket.messages.select_related(
         'nguoi_gui'
-    ).order_by('thoi_diem_gui', 'pk')
+    ).order_by(
+        'thoi_diem_gui',
+        'pk'
+    )
 
     # ==========================================
-    # DANH SÁCH BẰNG CHỨNG ĐÍNH KÈM
+    # 5. DANH SÁCH MINH CHỨNG ĐÍNH KÈM
     # ==========================================
 
-    danh_sach_bang_chung = (
-        ticket.attachments.all().order_by(
+    danh_sach_bang_chung = list(
+        ticket.attachments.select_related(
+            'nguoi_tai_len'
+        ).order_by(
             'thoi_diem_tai_len',
             'pk'
         )
     )
+
+    # ==========================================
+    # 6. PHÂN LOẠI MINH CHỨNG
+    # ==========================================
+
+    # Minh chứng ban đầu:
+    # Tệp được ghi nhận từ nguồn tạo Ticket,
+    # có mã nhận diện ảnh nguồn.
+    bang_chung_ban_dau = [
+        item
+        for item in danh_sach_bang_chung
+        if item.ma_anh_nguon
+    ]
+
+    # Minh chứng bổ sung:
+    # Tệp được tải lên trực tiếp sau đó,
+    # không có mã ảnh nguồn.
+    bang_chung_bo_sung = [
+        item
+        for item in danh_sach_bang_chung
+        if not item.ma_anh_nguon
+    ]
+
+    # ==========================================
+    # 7. TRẢ VỀ GIAO DIỆN
+    # ==========================================
 
     return render(
         request,
@@ -292,9 +333,16 @@ def ticket_detail(request, pk):
             'resolve_form': TicketResolveForm(),
             'user_role': user_role,
             'staff_options': staff_options,
+
+            # Giữ biến cũ để tương thích giao diện.
             'danh_sach_bang_chung': danh_sach_bang_chung,
+
+            # Hai danh sách phân loại mới.
+            'bang_chung_ban_dau': bang_chung_ban_dau,
+            'bang_chung_bo_sung': bang_chung_bo_sung,
         }
     )
+
 # ==========================================================
 # UC-3.2 - TIẾP NHẬN TICKET
 # ASSIGNED -> IN_PROGRESS
@@ -366,7 +414,17 @@ def ticket_accept(request, pk):
 @login_required(login_url='login')
 @role_required('CSKH')
 @require_POST
+
+@login_required(login_url='login')
+@role_required('CSKH')
+@require_POST
 def ticket_add_message(request, pk):
+
+    from .models import TicketEvidenceRequest
+
+    # ==========================================
+    # 1. KIỂM TRA NHÂN VIÊN CSKH
+    # ==========================================
 
     staff = getattr(request.user, 'staff_profile', None)
 
@@ -374,6 +432,10 @@ def ticket_add_message(request, pk):
         return HttpResponseForbidden(
             "Bạn không có quyền phản hồi Ticket."
         )
+
+    # ==========================================
+    # 2. KIỂM TRA BIỂU MẪU
+    # ==========================================
 
     form = TicketMessageForm(request.POST)
 
@@ -384,6 +446,28 @@ def ticket_add_message(request, pk):
             "Vui lòng chọn loại nội dung và nhập phản hồi."
         )
         return redirect('tickets:detail', pk=pk)
+
+    # Checkbox sẽ được thêm vào giao diện ở bước sau.
+    # Nếu không chọn, đây là phản hồi thông thường.
+    yeu_cau_bo_sung = (
+        request.POST.get('yeu_cau_bo_sung') == 'on'
+    )
+
+    # Yêu cầu bổ sung luôn phải là phản hồi PUBLIC.
+    if (
+        yeu_cau_bo_sung
+        and form.cleaned_data['loai_tin_nhan'] != 'PUBLIC'
+    ):
+        messages.error(
+            request,
+            "Yêu cầu bổ sung minh chứng phải được gửi "
+            "dưới dạng phản hồi công khai (PUBLIC)."
+        )
+        return redirect('tickets:detail', pk=pk)
+
+    # ==========================================
+    # 3. LƯU DỮ LIỆU TRONG TRANSACTION
+    # ==========================================
 
     with transaction.atomic():
 
@@ -402,25 +486,96 @@ def ticket_add_message(request, pk):
                 request,
                 "Chỉ được gửi phản hồi khi Ticket đang xử lý."
             )
-            return redirect('tickets:detail', pk=ticket.pk)
+            return redirect(
+                'tickets:detail',
+                pk=ticket.pk
+            )
 
-        # Lưu TicketMessage
+        # ======================================
+        # 3.1. KIỂM TRA YÊU CẦU CHỜ BỔ SUNG
+        # ======================================
+
+        if yeu_cau_bo_sung:
+
+            da_co_yeu_cau_cho = (
+                TicketEvidenceRequest.objects.filter(
+                    ticket=ticket,
+                    trang_thai='PENDING'
+                ).exists()
+            )
+
+            if da_co_yeu_cau_cho:
+                messages.warning(
+                    request,
+                    "Ticket đã có yêu cầu bổ sung minh chứng "
+                    "đang chờ khách hàng phản hồi. "
+                    "Vui lòng sử dụng yêu cầu hiện tại."
+                )
+                return redirect(
+                    'tickets:detail',
+                    pk=ticket.pk
+                )
+
+        # ======================================
+        # 3.2. LƯU TIN NHẮN
+        # ======================================
+
         ticket_message = form.save(commit=False)
         ticket_message.ticket = ticket
         ticket_message.nguoi_gui = request.user
         ticket_message.save()
 
-        # Phân biệt PUBLIC và INTERNAL
-        if ticket_message.loai_tin_nhan == 'PUBLIC':
+        # ======================================
+        # 3.3. TẠO YÊU CẦU BỔ SUNG MINH CHỨNG
+        # ======================================
+
+        if yeu_cau_bo_sung:
+
+            TicketEvidenceRequest.objects.create(
+                ticket=ticket,
+                tin_nhan_yeu_cau=ticket_message,
+                yeu_cau_tep=True,
+                trang_thai='PENDING',
+            )
+
+            hanh_dong = 'YEU_CAU_BO_SUNG_MINH_CHUNG'
+
+            noi_dung_log = (
+                f"Nhân viên {staff.ho_ten} yêu cầu "
+                "khách hàng bổ sung minh chứng. "
+                f"Tin nhắn #{ticket_message.pk}. "
+                "Trạng thái: PENDING."
+            )
+
+        # ======================================
+        # 3.4. PHẢN HỒI CÔNG KHAI THÔNG THƯỜNG
+        # ======================================
+
+        elif ticket_message.loai_tin_nhan == 'PUBLIC':
+
             hanh_dong = 'PHẢN HỒI KHÁCH HÀNG'
+
             noi_dung_log = (
-                f"Nhân viên {staff.ho_ten} tạo phản hồi công khai."
+                f"Nhân viên {staff.ho_ten} "
+                "tạo phản hồi công khai."
             )
+
+        # ======================================
+        # 3.5. GHI CHÚ NỘI BỘ
+        # ======================================
+
         else:
+
             hanh_dong = 'GHI CHÚ NỘI BỘ'
+
             noi_dung_log = (
-                f"Nhân viên {staff.ho_ten} thêm ghi chú nội bộ."
+                f"Nhân viên {staff.ho_ten} "
+                "thêm ghi chú nội bộ."
             )
+
+        # ======================================
+        # 3.6. GHI LỊCH SỬ
+        # ======================================
 
         TicketLog.objects.create(
             ticket=ticket,
@@ -429,18 +584,49 @@ def ticket_add_message(request, pk):
             noi_dung=noi_dung_log
         )
 
+        # ======================================
+        # 3.7. CẬP NHẬT TICKET
+        # ======================================
+
         ticket.thoi_diem_cap_nhat = timezone.now()
-        ticket.save(update_fields=['thoi_diem_cap_nhat'])
 
-    messages.success(
-        request,
-        "Đã lưu phản hồi thành công!"
-        if ticket_message.loai_tin_nhan == 'PUBLIC'
-        else "Đã lưu ghi chú nội bộ thành công!"
+        ticket.save(
+            update_fields=[
+                'thoi_diem_cap_nhat'
+            ]
+        )
+
+    # ==========================================
+    # 4. THÔNG BÁO KẾT QUẢ
+    # ==========================================
+
+    if yeu_cau_bo_sung:
+
+        messages.success(
+            request,
+            "Đã gửi yêu cầu bổ sung minh chứng. "
+            "Hệ thống đã ghi nhận yêu cầu "
+            "đang chờ khách hàng phản hồi."
+        )
+
+    elif ticket_message.loai_tin_nhan == 'PUBLIC':
+
+        messages.success(
+            request,
+            "Đã lưu phản hồi công khai thành công!"
+        )
+
+    else:
+
+        messages.success(
+            request,
+            "Đã lưu ghi chú nội bộ thành công!"
+        )
+
+    return redirect(
+        'tickets:detail',
+        pk=ticket.pk
     )
-
-    return redirect('tickets:detail', pk=ticket.pk)
-
 
 # ==========================================================
 # UC-3.5 - HOÀN TẤT XỬ LÝ TICKET

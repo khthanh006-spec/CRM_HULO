@@ -35,6 +35,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Định dạng số điểm, số tiền trong giao diện Loyalty
+    'django.contrib.humanize',
+
     # App dùng chung: tài khoản và phân quyền
     'accounts',
 

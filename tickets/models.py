@@ -3,7 +3,10 @@ from django.db import models
 from django.conf import settings
 
 
+# ==========================================================
 # 1. DANH MỤC VẤN ĐỀ
+# ==========================================================
+
 class TicketCategory(models.Model):
     ten_danh_muc = models.CharField(max_length=100, unique=True)
     mo_ta = models.TextField(blank=True)
@@ -15,6 +18,8 @@ class TicketCategory(models.Model):
 
     def __str__(self):
         return self.ten_danh_muc
+
+
 # ==========================================================
 # UC-3.1 - QUY TẮC PHÂN LOẠI TICKET TỰ ĐỘNG
 # ==========================================================
@@ -27,18 +32,18 @@ class TicketClassificationRule(models.Model):
     )
 
     danh_muc = models.ForeignKey(
-        'TicketCategory',
+        "TicketCategory",
         on_delete=models.PROTECT,
-        related_name='classification_rules'
+        related_name="classification_rules"
     )
 
     muc_uu_tien = models.CharField(
         max_length=10,
         choices=[
-            ('LOW', 'Thấp'),
-            ('MEDIUM', 'Trung bình'),
-            ('HIGH', 'Cao'),
-            ('URGENT', 'Khẩn cấp'),
+            ("LOW", "Thấp"),
+            ("MEDIUM", "Trung bình"),
+            ("HIGH", "Cao"),
+            ("URGENT", "Khẩn cấp"),
         ]
     )
 
@@ -59,21 +64,25 @@ class TicketClassificationRule(models.Model):
 
 class TicketCategoryQueue(models.Model):
     danh_muc = models.OneToOneField(
-        'TicketCategory',
+        "TicketCategory",
         on_delete=models.PROTECT,
-        related_name='queue_mapping'
+        related_name="queue_mapping"
     )
 
     queue = models.ForeignKey(
-        'TicketQueue',
+        "TicketQueue",
         on_delete=models.PROTECT,
-        related_name='category_mappings'
+        related_name="category_mappings"
     )
 
     def __str__(self):
         return f"{self.danh_muc} → {self.queue}"
 
+
+# ==========================================================
 # 2. HÀNG ĐỢI TICKET
+# ==========================================================
+
 class TicketQueue(models.Model):
     ten_queue = models.CharField(max_length=100, unique=True)
     mo_ta = models.TextField(blank=True)
@@ -83,19 +92,22 @@ class TicketQueue(models.Model):
         return self.ten_queue
 
 
+# ==========================================================
 # 3. CẤU HÌNH SLA
+# ==========================================================
+
 class SLAConfig(models.Model):
     PRIORITY_CHOICES = [
-        ('LOW', 'Thấp'),
-        ('MEDIUM', 'Trung bình'),
-        ('HIGH', 'Cao'),
-        ('URGENT', 'Khẩn cấp'),
+        ("LOW", "Thấp"),
+        ("MEDIUM", "Trung bình"),
+        ("HIGH", "Cao"),
+        ("URGENT", "Khẩn cấp"),
     ]
 
     danh_muc = models.ForeignKey(
         TicketCategory,
         on_delete=models.PROTECT,
-        related_name='sla_configs'
+        related_name="sla_configs"
     )
 
     muc_uu_tien = models.CharField(
@@ -109,8 +121,8 @@ class SLAConfig(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['danh_muc', 'muc_uu_tien'],
-                name='unique_category_priority_sla'
+                fields=["danh_muc", "muc_uu_tien"],
+                name="unique_category_priority_sla"
             )
         ]
 
@@ -122,7 +134,10 @@ class SLAConfig(models.Model):
         )
 
 
+# ==========================================================
 # 4. TICKET CHÍNH
+# ==========================================================
+
 class Ticket(models.Model):
 
     # ==========================================
@@ -130,15 +145,15 @@ class Ticket(models.Model):
     # ==========================================
 
     CONFIRMATION_CHOICES = [
-        ('PENDING', 'Chờ xác nhận'),
-        ('AGREED', 'Đã đồng ý'),
-        ('DISAGREED', 'Không đồng ý'),
+        ("PENDING", "Chờ xác nhận"),
+        ("AGREED", "Đã đồng ý"),
+        ("DISAGREED", "Không đồng ý"),
     ]
 
     trang_thai_xac_nhan = models.CharField(
         max_length=20,
         choices=CONFIRMATION_CHOICES,
-        default='PENDING'
+        default="PENDING"
     )
 
     ly_do_khong_dong_y = models.TextField(
@@ -150,16 +165,15 @@ class Ticket(models.Model):
         blank=True
     )
 
-
     PRIORITY_CHOICES = SLAConfig.PRIORITY_CHOICES
 
     STATUS_CHOICES = [
-        ('NEW', 'Mới tạo'),
-        ('ASSIGNED', 'Đã phân công'),
-        ('IN_PROGRESS', 'Đang xử lý'),
-        ('RESOLVED', 'Đã giải quyết'),
-        ('CLOSED', 'Đã đóng'),
-        ('REOPENED', 'Mở lại'),
+        ("NEW", "Mới tạo"),
+        ("ASSIGNED", "Đã phân công"),
+        ("IN_PROGRESS", "Đang xử lý"),
+        ("RESOLVED", "Đã giải quyết"),
+        ("CLOSED", "Đã đóng"),
+        ("REOPENED", "Mở lại"),
     ]
 
     ma_ticket = models.CharField(
@@ -169,9 +183,8 @@ class Ticket(models.Model):
         blank=True
     )
 
-
-    # Mã yêu cầu nguồn từ M1 hoặc M2
-    # Dùng để chống tạo Ticket trùng khi gửi lại
+    # Mã yêu cầu nguồn từ M1 hoặc M2.
+    # Dùng để chống tạo Ticket trùng khi gửi lại.
     source_request_id = models.CharField(
         max_length=100,
         unique=True,
@@ -179,11 +192,10 @@ class Ticket(models.Model):
         blank=True
     )
 
-
     khach_hang = models.ForeignKey(
-        'customers.Customer',
+        "customers.Customer",
         on_delete=models.PROTECT,
-        related_name='tickets'
+        related_name="tickets"
     )
 
     tieu_de = models.CharField(max_length=255)
@@ -206,7 +218,7 @@ class Ticket(models.Model):
     trang_thai = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='NEW'
+        default="NEW"
     )
 
     queue = models.ForeignKey(
@@ -217,11 +229,11 @@ class Ticket(models.Model):
     )
 
     nguoi_phu_trach = models.ForeignKey(
-        'accounts.Staff',
+        "accounts.Staff",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name='tickets_duoc_giao'
+        related_name="tickets_duoc_giao"
     )
 
     sla_config = models.ForeignKey(
@@ -236,20 +248,19 @@ class Ticket(models.Model):
         blank=True
     )
 
-
     ket_qua_xu_ly = models.TextField(blank=True)
 
-    # UC3.4 - Theo dõi yêu cầu thẩm định trong M3
+    # UC-3.4 - Theo dõi yêu cầu thẩm định trong M3.
     ASSESSMENT_STATUS_CHOICES = [
-        ('NOT_REQUESTED', 'Chưa yêu cầu'),
-        ('WAITING', 'Đang chờ kết quả'),
-        ('COMPLETED', 'Đã có kết quả'),
+        ("NOT_REQUESTED", "Chưa yêu cầu"),
+        ("WAITING", "Đang chờ kết quả"),
+        ("COMPLETED", "Đã có kết quả"),
     ]
 
     trang_thai_tham_dinh = models.CharField(
         max_length=20,
         choices=ASSESSMENT_STATUS_CHOICES,
-        default='NOT_REQUESTED'
+        default="NOT_REQUESTED"
     )
 
     thoi_diem_yeu_cau_tham_dinh = models.DateTimeField(
@@ -260,18 +271,20 @@ class Ticket(models.Model):
     thoi_diem_tao = models.DateTimeField(auto_now_add=True)
     thoi_diem_cap_nhat = models.DateTimeField(auto_now=True)
 
-
     def __str__(self):
         return self.ma_ticket or f"Ticket #{self.pk}"
 
 
+# ==========================================================
 # 5. LỊCH SỬ XỬ LÝ TICKET
+# ==========================================================
+
 class TicketLog(models.Model):
 
     ticket = models.ForeignKey(
         Ticket,
         on_delete=models.CASCADE,
-        related_name='logs'
+        related_name="logs"
     )
 
     nguoi_thuc_hien = models.ForeignKey(
@@ -291,18 +304,21 @@ class TicketLog(models.Model):
         return f"{self.ticket} - {self.hanh_dong}"
 
 
+# ==========================================================
 # 6. PHẢN HỒI VÀ GHI CHÚ
+# ==========================================================
+
 class TicketMessage(models.Model):
 
     MESSAGE_TYPE_CHOICES = [
-        ('PUBLIC', 'Phản hồi công khai'),
-        ('INTERNAL', 'Ghi chú nội bộ'),
+        ("PUBLIC", "Phản hồi công khai"),
+        ("INTERNAL", "Ghi chú nội bộ"),
     ]
 
     ticket = models.ForeignKey(
         Ticket,
         on_delete=models.CASCADE,
-        related_name='messages'
+        related_name="messages"
     )
 
     nguoi_gui = models.ForeignKey(
@@ -326,17 +342,20 @@ class TicketMessage(models.Model):
         )
 
 
+# ==========================================================
 # 7. TỆP ĐÍNH KÈM CỦA TICKET
+# ==========================================================
+
 class TicketAttachment(models.Model):
 
     ticket = models.ForeignKey(
         Ticket,
         on_delete=models.CASCADE,
-        related_name='attachments'
+        related_name="attachments"
     )
 
     tep_dinh_kem = models.FileField(
-        upload_to='ticket_attachments/%Y/%m/%d/'
+        upload_to="ticket_attachments/%Y/%m/%d/"
     )
 
     ten_tep_goc = models.CharField(
@@ -377,3 +396,95 @@ class TicketAttachment(models.Model):
                 name="unique_ticket_attachment_source",
             )
         ]
+
+
+# ==========================================================
+# 8. YÊU CẦU KHÁCH HÀNG BỔ SUNG MINH CHỨNG
+# ==========================================================
+
+class TicketEvidenceRequest(models.Model):
+    """
+    Theo dõi yêu cầu bổ sung thông tin hoặc minh chứng
+    do nhân viên CSKH gửi cho khách hàng.
+
+    PENDING:
+        Khách hàng chưa đáp ứng yêu cầu.
+
+    FULFILLED:
+        Khách hàng đã gửi thông tin hoặc tệp bổ sung
+        đáp ứng điều kiện của yêu cầu.
+
+    Mỗi yêu cầu liên kết với một tin nhắn PUBLIC
+    cụ thể của nhân viên CSKH.
+    """
+
+    STATUS_CHOICES = [
+        ("PENDING", "Đang chờ bổ sung"),
+        ("FULFILLED", "Đã bổ sung"),
+    ]
+
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name="evidence_requests",
+        verbose_name="Ticket"
+    )
+
+    tin_nhan_yeu_cau = models.OneToOneField(
+        TicketMessage,
+        on_delete=models.PROTECT,
+        related_name="evidence_request",
+        verbose_name="Tin nhắn yêu cầu bổ sung"
+    )
+
+    yeu_cau_tep = models.BooleanField(
+        default=True,
+        verbose_name="Yêu cầu đính kèm tệp minh chứng"
+    )
+
+    trang_thai = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="PENDING",
+        verbose_name="Trạng thái bổ sung"
+    )
+
+    tin_nhan_phan_hoi = models.ForeignKey(
+        TicketMessage,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="evidence_requests_fulfilled",
+        verbose_name="Tin nhắn khách hàng bổ sung"
+    )
+
+    thoi_diem_tao = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Thời điểm yêu cầu"
+    )
+
+    thoi_diem_hoan_thanh = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Thời điểm khách hàng bổ sung"
+    )
+
+    thoi_diem_cskh_xem = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Thời điểm CSKH xem minh chứng",
+    )
+
+    class Meta:
+        verbose_name = "Yêu cầu bổ sung minh chứng"
+        verbose_name_plural = "Yêu cầu bổ sung minh chứng"
+        ordering = [
+            "-thoi_diem_tao",
+            "-pk",
+        ]
+
+    def __str__(self):
+        return (
+            f"Ticket #{self.ticket_id} - "
+            f"{self.get_trang_thai_display()}"
+        )

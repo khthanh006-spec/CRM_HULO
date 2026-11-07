@@ -1,0 +1,696 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Chi tiết khách hàng - CRM HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .customer-detail {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 20px 18px 45px;
+        color: #17365d;
+    }
+
+    .customer-detail * {
+        box-sizing: border-box;
+    }
+
+    .customer-detail .hero {
+        background: #dcecff;
+        padding: 28px 32px;
+        border-radius: 17px;
+        margin-bottom: 20px;
+    }
+
+    .customer-detail .hero h1 {
+        color: #103b78;
+        font-size: 25px;
+        margin: 0 0 8px;
+    }
+
+    .customer-detail .hero p {
+        color: #607da8;
+        font-size: 13px;
+        margin: 0;
+        line-height: 1.7;
+    }
+
+    .customer-detail .back-link {
+        display: inline-block;
+        color: #176cc1;
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 16px;
+        text-decoration: none;
+    }
+
+    .customer-detail .panel {
+        background: #fff;
+        border: 1px solid #dbe7f6;
+        border-radius: 15px;
+        padding: 22px;
+        margin-bottom: 20px;
+    }
+
+    .customer-detail .panel-title {
+        color: #103b78;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 18px;
+    }
+
+    .customer-detail .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .customer-detail .summary-card {
+        background: #fff;
+        border: 1px solid #dbe7f6;
+        border-radius: 13px;
+        padding: 18px;
+        margin-bottom: 20px;
+    }
+
+    .customer-detail .summary-label {
+        color: #607da8;
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+
+    .customer-detail .summary-value {
+        color: #103b78;
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .customer-detail .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .customer-detail .info-label {
+        font-size: 12px;
+        color: #7489a8;
+        margin-bottom: 6px;
+    }
+
+    .customer-detail .info-value {
+        color: #17365d;
+        font-size: 14px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .customer-detail .order-card {
+        border: 1px solid #dbe7f6;
+        border-radius: 13px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        background: #fff;
+    }
+
+    .customer-detail .order-header {
+        background: #edf5ff;
+        padding: 17px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .customer-detail .order-code {
+        color: #103b78;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .customer-detail .order-meta {
+        color: #607da8;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .customer-detail .order-body {
+        padding: 20px;
+    }
+
+    .customer-detail .subheading {
+        font-weight: 700;
+        font-size: 14px;
+        color: #103b78;
+        margin-bottom: 12px;
+    }
+
+    .customer-detail .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #e2ebf6;
+        border-radius: 10px;
+    }
+
+    .customer-detail table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .customer-detail th,
+    .customer-detail td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e7eef8;
+        vertical-align: middle;
+        font-size: 12px;
+    }
+
+    .customer-detail th {
+        color: #103b78;
+        background: #f4f8ff;
+        font-weight: 700;
+    }
+
+    .customer-detail tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .customer-detail .support-section {
+        margin-top: 20px;
+        padding: 17px;
+        background: #f8fbff;
+        border: 1px solid #e2ebf6;
+        border-radius: 11px;
+    }
+
+    .customer-detail .support-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .customer-detail .support-heading h3 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #103b78;
+        margin: 0;
+    }
+
+    .customer-detail .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .customer-detail .badge-blue {
+        background: #e6f0ff;
+        color: #176cc1;
+    }
+
+    .customer-detail .badge-green {
+        background: #e6f6ec;
+        color: #24754c;
+    }
+
+    .customer-detail .badge-yellow {
+        background: #fff4d9;
+        color: #a76a13;
+    }
+
+    .customer-detail .badge-red {
+        background: #fde8eb;
+        color: #c7364b;
+    }
+
+    .customer-detail .badge-gray {
+        background: #eef2f6;
+        color: #62748a;
+    }
+
+    .customer-detail .ticket-link {
+        color: #176cc1;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .customer-detail .ticket-link:hover {
+        text-decoration: underline;
+    }
+
+    .customer-detail .empty-state {
+        text-align: center;
+        padding: 25px;
+        font-size: 13px;
+        color: #7489a8;
+    }
+
+    .customer-detail .notice {
+        background: #fff9ed;
+        border: 1px solid #f2dfb5;
+        color: #795619;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 12px;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 750px) {
+        .customer-detail .profile-grid,
+        .customer-detail .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .customer-detail .hero {
+            padding: 22px;
+        }
+
+        .customer-detail .hero h1 {
+            font-size: 21px;
+        }
+
+        .customer-detail .panel {
+            padding: 15px;
+        }
+    }
+</style>
+
+<div class="customer-detail">
+
+    <!-- QUAY LẠI DANH SÁCH -->
+    <a
+        href="{% url 'manager_customer_list' %}"
+        class="back-link"
+    >
+        ← Quay lại danh sách khách hàng
+    </a>
+
+    <!-- BANNER -->
+    <section class="hero">
+        <h1>{{ customer.ho_ten }}</h1>
+
+        <p>
+            Hồ sơ khách hàng KH{{ customer.ma_khach_hang }}
+            · Theo dõi lịch sử đơn hàng và yêu cầu hỗ trợ.
+        </p>
+    </section>
+
+    <!-- THỐNG KÊ -->
+    <section class="summary-grid">
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Tổng đơn hàng
+            </div>
+            <div class="summary-value">
+                {{ total_orders }}
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Tổng yêu cầu hỗ trợ
+            </div>
+            <div class="summary-value">
+                {{ total_tickets }}
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Yêu cầu đã liên kết đơn hàng
+            </div>
+            <div class="summary-value">
+                {{ linked_ticket_count }}
+            </div>
+        </div>
+
+    </section>
+
+    <!-- THÔNG TIN KHÁCH HÀNG -->
+    <section class="panel">
+
+        <h2 class="panel-title">
+            Thông tin khách hàng
+        </h2>
+
+        <div class="profile-grid">
+
+            <div>
+                <div class="info-label">
+                    Mã khách hàng
+                </div>
+                <div class="info-value">
+                    KH{{ customer.ma_khach_hang }}
+                </div>
+            </div>
+
+            <div>
+                <div class="info-label">
+                    Họ và tên
+                </div>
+                <div class="info-value">
+                    {{ customer.ho_ten }}
+                </div>
+            </div>
+
+            <div>
+                <div class="info-label">
+                    Tài khoản
+                </div>
+                <div class="info-value">
+                    {{ customer.ma_tai_khoan.username }}
+                </div>
+            </div>
+
+            <div>
+                <div class="info-label">
+                    Email
+                </div>
+                <div class="info-value">
+                    {{ customer.email|default:"Chưa cập nhật" }}
+                </div>
+            </div>
+
+            <div>
+                <div class="info-label">
+                    Số điện thoại
+                </div>
+                <div class="info-value">
+                    {{ customer.so_dien_thoai|default:"Chưa cập nhật" }}
+                </div>
+            </div>
+
+            <div>
+                <div class="info-label">
+                    Ngày tạo hồ sơ
+                </div>
+                <div class="info-value">
+                    {{ customer.thoi_diem_tao|date:"d/m/Y H:i" }}
+                </div>
+            </div>
+
+            <div style="grid-column: 1 / -1;">
+                <div class="info-label">
+                    Địa chỉ mặc định
+                </div>
+                <div class="info-value">
+                    {{ customer.dia_chi_mac_dinh|default:"Chưa cập nhật" }}
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- LỊCH SỬ ĐƠN HÀNG -->
+    <section class="panel">
+
+        <h2 class="panel-title">
+            Lịch sử đơn hàng và yêu cầu hỗ trợ
+        </h2>
+
+        {% for row in order_rows %}
+
+        <article class="order-card">
+
+            <div class="order-header">
+
+                <div>
+                    <div class="order-code">
+                        {{ row.order.so_don_hang }}
+                    </div>
+
+                    <div class="order-meta">
+                        Ngày đặt:
+                        {{ row.order.thoi_diem_dat|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+
+                <span class="badge badge-blue">
+                    {{ row.order.get_trang_thai_display }}
+                </span>
+
+            </div>
+
+            <div class="order-body">
+
+                <!-- DANH SÁCH SẢN PHẨM -->
+                <h3 class="subheading">
+                    Sản phẩm trong đơn hàng
+                </h3>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Giá trị đã thanh toán</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for item in row.items %}
+                            <tr>
+                                <td>
+                                    {{ item.ten_san_pham_luc_mua }}
+                                </td>
+
+                                <td>
+                                    {{ item.so_luong }}
+                                </td>
+
+                                <td>
+                                    {{ item.gia_tri_da_thanh_toan }}
+                                    {{ row.order.don_vi_tien_te }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3"
+                                    class="empty-state">
+                                    Chưa có chi tiết sản phẩm.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TICKET THEO ĐƠN HÀNG -->
+                <div class="support-section">
+
+                    <div class="support-heading">
+                        <h3>
+                            Yêu cầu hỗ trợ liên quan
+                        </h3>
+
+                        <span class="badge badge-blue">
+                            {{ row.ticket_count }} yêu cầu
+                        </span>
+                    </div>
+
+                    {% if row.tickets %}
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Nội dung</th>
+                                    <th>CSKH phụ trách</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thẩm định</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            {% for info in row.tickets %}
+                                <tr>
+                                    <td>
+                                        <a
+                                            class="ticket-link"
+                                            href="{% url 'tickets:detail' info.ticket.pk %}"
+                                        >
+                                            {{ info.ticket.ma_ticket }}
+                                        </a>
+                                    </td>
+
+                                    <td>
+                                        {{ info.ticket.tieu_de }}
+                                    </td>
+
+                                    <td>
+                                        {% if info.ticket.nguoi_phu_trach %}
+                                            {{ info.ticket.nguoi_phu_trach.ho_ten }}
+                                        {% else %}
+                                            Chưa phân công
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if info.ticket.trang_thai == "CLOSED" %}
+                                            <span class="badge badge-gray">
+                                                Đã đóng
+                                            </span>
+                                        {% elif info.ticket.trang_thai == "RESOLVED" %}
+                                            <span class="badge badge-green">
+                                                Đã giải quyết
+                                            </span>
+                                        {% elif info.ticket.trang_thai == "REOPENED" %}
+                                            <span class="badge badge-red">
+                                                Mở lại
+                                            </span>
+                                        {% elif info.ticket.trang_thai == "IN_PROGRESS" %}
+                                            <span class="badge badge-yellow">
+                                                Đang xử lý
+                                            </span>
+                                        {% elif info.ticket.trang_thai == "ASSIGNED" %}
+                                            <span class="badge badge-blue">
+                                                Đã phân công
+                                            </span>
+                                        {% elif info.ticket.trang_thai == "NEW" %}
+                                            <span class="badge badge-gray">
+                                                Chờ phân công
+                                            </span>
+                                        {% else %}
+                                            {{ info.ticket.get_trang_thai_display }}
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if info.dispute %}
+                                            <a
+                                                class="ticket-link"
+                                                href="{% url 'disputes:detail' info.dispute.pk %}"
+                                            >
+                                                Hồ sơ #{{ info.dispute.pk }}
+                                            </a>
+
+                                            <div class="info-label"
+                                                 style="margin-top: 6px;">
+                                                {% if info.dispute.ma_nhan_vien_tham_dinh %}
+                                                    {{ info.dispute.ma_nhan_vien_tham_dinh.ho_ten }}
+                                                {% else %}
+                                                    Chưa phân công
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            Không có
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% else %}
+
+                    <div class="empty-state">
+                        Chưa ghi nhận yêu cầu hỗ trợ
+                        liên quan đến đơn hàng này.
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </article>
+
+        {% empty %}
+
+        <div class="empty-state">
+            Khách hàng chưa có đơn hàng trong hệ thống.
+        </div>
+
+        {% endfor %}
+
+    </section>
+
+    <!-- TICKET CHƯA LIÊN KẾT ĐƯỢC ĐƠN HÀNG -->
+    {% if unlinked_tickets %}
+
+    <section class="panel">
+
+        <h2 class="panel-title">
+            Yêu cầu hỗ trợ chưa xác định đơn hàng
+        </h2>
+
+        <div class="notice">
+            Các yêu cầu dưới đây chưa thể ghép chính xác
+            với đơn hàng của khách hàng này.
+
+            Nguyên nhân có thể do yêu cầu không ghi mã đơn,
+            mã đơn không tồn tại hoặc không thuộc khách hàng.
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Nội dung</th>
+                        <th>Mã đơn ghi nhận</th>
+                        <th>Nhân viên phụ trách</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for info in unlinked_tickets %}
+                    <tr>
+                        <td>
+                            <a
+                                class="ticket-link"
+                                href="{% url 'tickets:detail' info.ticket.pk %}"
+                            >
+                                {{ info.ticket.ma_ticket }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ info.ticket.tieu_de }}
+                        </td>
+
+                        <td>
+                            {{ info.order_code|default:"Không có" }}
+                        </td>
+
+                        <td>
+                            {% if info.ticket.nguoi_phu_trach %}
+                                {{ info.ticket.nguoi_phu_trach.ho_ten }}
+                            {% else %}
+                                Chưa phân công
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ info.ticket.get_trang_thai_display }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,3 +1,5 @@
+
+import re
 from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -57,7 +59,9 @@ def _lay_ho_so_de_xu_ly(*, user, ma_ho_so):
 
 def _kiem_tra_ticket_dang_cho_tham_dinh(ticket):
     if ticket.trang_thai != "IN_PROGRESS":
-        raise ValidationError("Ticket phải đang được CSKH xử lý.")
+        raise ValidationError(
+            "Ticket phải đang được CSKH xử lý."
+        )
 
     if ticket.trang_thai_tham_dinh != "WAITING":
         raise ValidationError(
@@ -91,29 +95,129 @@ def _chon_nhan_vien_tham_dinh():
 
     if nhan_vien is None:
         raise ValidationError(
-            "Hiện không có nhân viên thẩm định sẵn sàng nhận hồ sơ."
+            "Hiện không có nhân viên thẩm định "
+            "sẵn sàng nhận hồ sơ."
         )
 
     return nhan_vien
 
 
+# ==========================================================
+# M3 -> M4: NHẬN DIỆN ĐƠN HÀNG TỪ NỘI DUNG TICKET
+# ==========================================================
+
+def _lay_ma_don_tu_ticket(ticket):
+    """
+    Đọc mã đơn hàng từ dòng có cấu trúc:
+        Mã đơn hàng: HULO-DEMO-004
+
+    Không tìm mã trong phần mô tả tự do,
+    tránh gắn nhầm đơn hàng do khách nhắc tới.
+    """
+    noi_dung = ticket.noi_dung or ""
+
+    ket_qua = re.findall(
+        r"^\s*Mã đơn hàng\s*:\s*([^\r\n]*)$",
+        noi_dung,
+        flags=re.MULTILINE | re.IGNORECASE,
+    )
+
+    if not ket_qua:
+        return None
+
+    cac_ma = [
+        ma.strip()
+        for ma in ket_qua
+        if ma.strip()
+    ]
+
+    if not cac_ma:
+        return None
+
+    if len(cac_ma) != 1:
+        raise ValidationError(
+            "Ticket có nhiều dòng mã đơn hàng. "
+            "Cần kiểm tra trước khi thẩm định."
+        )
+
+    return cac_ma[0]
+
+
+def _tim_don_hang_cua_ticket(ticket):
+    """
+    Chỉ tìm đơn hàng thuộc đúng khách hàng của Ticket.
+    """
+    so_don_hang = _lay_ma_don_tu_ticket(ticket)
+
+    if not so_don_hang:
+        return None
+
+    don_hang = (
+        Order.objects
+        .filter(
+            so_don_hang=so_don_hang,
+            ma_khach_hang_id=ticket.khach_hang_id,
+        )
+        .first()
+    )
+
+    if don_hang is None:
+        raise ValidationError(
+            "Không tìm thấy đơn hàng hợp lệ thuộc "
+            "khách hàng của Ticket: "
+            f"{so_don_hang}."
+        )
+
+    return don_hang
+
+
+# ==========================================================
+# M3 -> M4: TẠO HOẶC LẤY HỒ SƠ THẨM ĐỊNH
+# ==========================================================
+
 @transaction.atomic
 def tao_hoac_lay_ho_so(*, ticket, ma_don_hang=None):
-    ticket = Ticket.objects.select_for_update().get(pk=ticket.pk)
+    ticket = Ticket.objects.select_for_update().get(
+        pk=ticket.pk
+    )
 
     if (
         ticket.trang_thai != "IN_PROGRESS"
         or ticket.trang_thai_tham_dinh != "WAITING"
     ):
         raise ValidationError(
-            "Ticket phải đang xử lý và chờ kết quả thẩm định."
+            "Ticket phải đang xử lý và chờ "
+            "kết quả thẩm định."
         )
 
+    # Ưu tiên đối tượng Order được truyền trực tiếp.
+    # Nếu chưa có, đọc mã đơn từ thông tin Ticket.
+    don_hang_tu_ticket = _tim_don_hang_cua_ticket(ticket)
+
     if ma_don_hang is not None:
+        if not isinstance(ma_don_hang, Order):
+            raise ValidationError(
+                "Đơn hàng phải là đối tượng Order hợp lệ."
+            )
+
         if ma_don_hang.ma_khach_hang_id != ticket.khach_hang_id:
             raise ValidationError(
                 "Đơn hàng không thuộc khách hàng của Ticket."
             )
+
+        if (
+            don_hang_tu_ticket is not None
+            and ma_don_hang.pk != don_hang_tu_ticket.pk
+        ):
+            raise ValidationError(
+                "Đơn hàng được chỉ định không khớp "
+                "với mã đơn hàng trong Ticket."
+            )
+
+        don_hang = ma_don_hang
+
+    else:
+        don_hang = don_hang_tu_ticket
 
     ho_so = (
         DisputeCase.objects.select_for_update()
@@ -121,6 +225,7 @@ def tao_hoac_lay_ho_so(*, ticket, ma_don_hang=None):
         .first()
     )
 
+    # Đã có hồ sơ: cập nhật thiếu sót nhưng không tạo trùng.
     if ho_so is not None:
         cap_nhat_fields = []
 
@@ -128,15 +233,19 @@ def tao_hoac_lay_ho_so(*, ticket, ma_don_hang=None):
             ho_so.ma_nhan_vien_tham_dinh = (
                 _chon_nhan_vien_tham_dinh()
             )
-            cap_nhat_fields.append("ma_nhan_vien_tham_dinh")
+            cap_nhat_fields.append(
+                "ma_nhan_vien_tham_dinh"
+            )
 
-        if ma_don_hang is not None:
+        if don_hang is not None:
             if ho_so.ma_don_hang_id is None:
-                ho_so.ma_don_hang = ma_don_hang
+                ho_so.ma_don_hang = don_hang
                 cap_nhat_fields.append("ma_don_hang")
-            elif ho_so.ma_don_hang_id != ma_don_hang.pk:
+
+            elif ho_so.ma_don_hang_id != don_hang.pk:
                 raise ValidationError(
-                    "Hồ sơ đã được liên kết với đơn hàng khác."
+                    "Hồ sơ đã được liên kết "
+                    "với đơn hàng khác."
                 )
 
         if cap_nhat_fields:
@@ -150,16 +259,24 @@ def tao_hoac_lay_ho_so(*, ticket, ma_don_hang=None):
 
         return ho_so
 
+    # Hồ sơ mới: tạo và liên kết đơn hàng nếu có.
     ho_so = DisputeCase(
         ma_ticket=ticket,
-        ma_nhan_vien_tham_dinh=_chon_nhan_vien_tham_dinh(),
-        ma_don_hang=ma_don_hang,
+        ma_nhan_vien_tham_dinh=(
+            _chon_nhan_vien_tham_dinh()
+        ),
+        ma_don_hang=don_hang,
     )
+
     ho_so.full_clean()
     ho_so.save()
 
     return ho_so
 
+
+# ==========================================================
+# M4: NHÂN VIÊN THẨM ĐỊNH TIẾP NHẬN
+# ==========================================================
 
 @transaction.atomic
 def tiep_nhan_ho_so(*, user, ma_ho_so):
@@ -207,6 +324,10 @@ def tiep_nhan_ho_so(*, user, ma_ho_so):
     return ho_so
 
 
+# ==========================================================
+# M4: GHI NHẬN KẾT LUẬN THẨM ĐỊNH
+# ==========================================================
+
 @transaction.atomic
 def ghi_nhan_ket_luan(
     *,
@@ -239,7 +360,10 @@ def ghi_nhan_ket_luan(
             "Bạn cần chọn Có cơ sở hoặc Không có cơ sở."
         )
 
-    if not isinstance(ket_luan, str) or not ket_luan.strip():
+    if (
+        not isinstance(ket_luan, str)
+        or not ket_luan.strip()
+    ):
         raise ValidationError(
             "Bạn cần nhập căn cứ thẩm định."
         )
@@ -248,7 +372,8 @@ def ghi_nhan_ket_luan(
 
     if ho_so.ket_luan or ho_so.ket_qua_tham_dinh:
         raise ValidationError(
-            "Hồ sơ đã có kết luận. Không được ghi đè kết luận cũ."
+            "Hồ sơ đã có kết luận. "
+            "Không được ghi đè kết luận cũ."
         )
 
     so_ban_ghi = DisputeCase.objects.filter(
@@ -272,7 +397,9 @@ def ghi_nhan_ket_luan(
             "Hồ sơ đã thay đổi. Vui lòng tải lại trang."
         )
 
-    ket_qua_hien_thi = cac_ket_qua_hop_le[ket_qua_tham_dinh]
+    ket_qua_hien_thi = cac_ket_qua_hop_le[
+        ket_qua_tham_dinh
+    ]
 
     TicketLog.objects.create(
         ticket=ticket,
@@ -289,6 +416,10 @@ def ghi_nhan_ket_luan(
     ho_so.refresh_from_db()
     return ho_so
 
+
+# ==========================================================
+# M4: LẬP PHƯƠNG ÁN GIẢI QUYẾT
+# ==========================================================
 
 @transaction.atomic
 def lap_phuong_an(
@@ -338,7 +469,9 @@ def lap_phuong_an(
         )
 
     if not isinstance(noi_dung, str) or not noi_dung.strip():
-        raise ValidationError("Bạn cần nhập nội dung phương án.")
+        raise ValidationError(
+            "Bạn cần nhập nội dung phương án."
+        )
 
     if not isinstance(ly_do, str) or not ly_do.strip():
         raise ValidationError(
@@ -348,17 +481,25 @@ def lap_phuong_an(
     try:
         so_tien = Decimal(str(so_tien_hoan))
     except (InvalidOperation, TypeError, ValueError):
-        raise ValidationError("Số tiền hoàn không hợp lệ.")
+        raise ValidationError(
+            "Số tiền hoàn không hợp lệ."
+        )
 
     if not so_tien.is_finite():
-        raise ValidationError("Số tiền hoàn không hợp lệ.")
+        raise ValidationError(
+            "Số tiền hoàn không hợp lệ."
+        )
 
     if so_tien < 0:
-        raise ValidationError("Số tiền hoàn không được âm.")
+        raise ValidationError(
+            "Số tiền hoàn không được âm."
+        )
 
     if loai_phuong_an == "HOAN_TIEN":
         if so_tien <= 0:
-            raise ValidationError("Số tiền hoàn phải lớn hơn 0.")
+            raise ValidationError(
+                "Số tiền hoàn phải lớn hơn 0."
+            )
 
         tong_da_thanh_toan = OrderItem.objects.filter(
             ma_don_hang=don_hang
@@ -372,6 +513,7 @@ def lap_phuong_an(
                 f"đã thanh toán: {tong_da_thanh_toan} "
                 f"{don_hang.don_vi_tien_te}."
             )
+
     elif so_tien != 0:
         raise ValidationError(
             "Chỉ phương án hoàn tiền được nhập số tiền hoàn. "
@@ -383,7 +525,9 @@ def lap_phuong_an(
         or not isinstance(phien_ban_hien_tai, int)
         or phien_ban_hien_tai < 0
     ):
-        raise ValidationError("Phiên bản phương án không hợp lệ.")
+        raise ValidationError(
+            "Phiên bản phương án không hợp lệ."
+        )
 
     phuong_an_cu = (
         CompensationAction.objects.select_for_update()
@@ -428,7 +572,10 @@ def lap_phuong_an(
     if phuong_an_cu:
         phuong_an_cu.trang_thai = "DA_THAY_THE"
         phuong_an_cu.save(
-            update_fields=["trang_thai", "thoi_diem_cap_nhat"]
+            update_fields=[
+                "trang_thai",
+                "thoi_diem_cap_nhat",
+            ]
         )
 
     phuong_an.save()

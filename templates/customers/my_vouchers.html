@@ -1,214 +1,962 @@
-{% extends 'base.html' %}
 
-{% block title %}Voucher của tôi - CRM HULO{% endblock %}
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Ưu đãi của tôi - CRM HULO{% endblock %}
 
 {% block content %}
 <style>
-    .m5-my-vouchers {
-        max-width: 1100px;
+    .offers-page {
+        font-family: Arial, sans-serif;
+        max-width: 1180px;
         margin: 0 auto;
-        color: #17365d;
+        padding: 20px 0 50px;
+        color: #173a67;
     }
 
-    .m5-my-vouchers h1 {
-        color: #103b78;
-        margin-bottom: 10px;
+    .offers-page * {
+        box-sizing: border-box;
     }
 
-    .m5-my-vouchers .intro {
-        color: #607da8;
-        line-height: 1.6;
-        margin-bottom: 24px;
+    .offers-heading h1 {
+        margin: 0 0 8px;
+        color: #0756a5;
+        font-size: 30px;
+        font-weight: 700;
     }
 
-    .m5-my-vouchers .voucher-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .offers-heading p {
+        margin: 0 0 25px;
+        color: #56708c;
+        line-height: 1.7;
+    }
+
+    .member-card {
+        background: linear-gradient(120deg, #e9f4ff, #c9e4ff);
+        color: #173a67;
+        border-radius: 18px;
+        padding: 30px;
+        margin-bottom: 22px;
+        box-shadow: 0 12px 30px rgba(24, 43, 72, .12);
+    }
+
+    .member-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
         gap: 20px;
     }
 
-    .m5-my-vouchers .voucher-card {
-        background: #fff;
-        border: 1px solid #d5e3fa;
-        border-top: 4px solid #2878e7;
-        border-radius: 12px;
-        padding: 24px;
+    .member-eyebrow {
+        color: #496784;
+        font-size: 13px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
     }
 
-    .m5-my-vouchers .card-top {
+    .member-name {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 8px 0;
+    }
+
+    .member-tier {
+        display: inline-block;
+        background: #1677d2;
+        color: #ffffff;
+        padding: 7px 15px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .member-points {
+        text-align: right;
+    }
+
+    .member-points strong {
+        display: block;
+        font-size: 32px;
+        margin: 6px 0;
+        color: #0756a5;
+    }
+
+    .member-progress {
+        margin-top: 27px;
+    }
+
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        flex-wrap: wrap;
+        color: #34516e;
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+
+    .progress-track {
+        height: 9px;
+        border-radius: 20px;
+        background: #d6e4f2;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 20px;
+        background: #1677d2;
+    }
+
+    .progress-note {
+        margin: 12px 0 0;
+        color: #34516e;
+        font-size: 13px;
+    }
+
+    .offers-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 26px;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid #dce7f2;
+        border-radius: 14px;
+        padding: 22px;
+    }
+
+    .stat-card .stat-label {
+        color: #56708c;
+        font-size: 14px;
+    }
+
+    .stat-card strong {
+        display: block;
+        margin-top: 10px;
+        font-size: 25px;
+        color: #145da8;
+    }
+
+    .offers-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #dce7f2;
+        margin-bottom: 24px;
+    }
+
+    .offers-tab {
+        display: inline-block;
+        text-decoration: none;
+        padding: 13px 16px;
+        color: #56708c;
+        font-weight: 600;
+        border-bottom: 3px solid transparent;
+    }
+
+    .offers-tab:hover {
+        color: #145da8;
+    }
+
+    .offers-tab.active {
+        color: #145da8;
+        border-bottom-color: #1677d2;
+    }
+
+    .section-heading {
+        font-size: 21px;
+        color: #145da8;
+        margin: 0 0 18px;
+    }
+
+    .voucher-grid,
+    .reward-grid,
+    .tier-grid,
+    .program-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .offer-card {
+        background: #fff;
+        border: 1px solid #dce7f2;
+        border-radius: 14px;
+        padding: 23px;
+        overflow-wrap: anywhere;
+    }
+
+    .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 12px;
         flex-wrap: wrap;
-        gap: 10px;
     }
 
-    .m5-my-vouchers .program-code {
-        color: #607da8;
-        font-size: 13px;
-        font-weight: 600;
+    .source-label {
+        color: #1262b0;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
     }
 
-    .m5-my-vouchers .badge {
-        padding: 6px 10px;
+    .status-badge {
+        display: inline-block;
+        padding: 6px 11px;
         border-radius: 20px;
         font-size: 12px;
-        background: #edf2f7;
-        color: #52657e;
+        font-weight: 700;
+        background: #eef2f7;
+        color: #34516e;
     }
 
-    .m5-my-vouchers .badge.active {
-        background: #e7f6ec;
-        color: #17683b;
+    .status-badge.active {
+        background: #e6f7ec;
+        color: #166534;
     }
 
-    .m5-my-vouchers .badge.expired {
-        background: #fff0e7;
-        color: #b54708;
+    .status-badge.expired {
+        background: #fff0eb;
+        color: #b45309;
     }
 
-    .m5-my-vouchers .badge.upcoming {
-        background: #eaf2ff;
-        color: #1859a5;
+    .status-badge.upcoming {
+        background: #e8f1ff;
+        color: #1d4ed8;
     }
 
-    .m5-my-vouchers h2 {
-        color: #103b78;
-        font-size: 20px;
-        margin: 18px 0 12px;
+    .offer-card h3 {
+        margin: 18px 0 10px;
+        font-size: 19px;
+        color: #145da8;
     }
 
-    .m5-my-vouchers .voucher-code {
+    .offer-description {
+        color: #56708c;
+        line-height: 1.7;
+        margin: 10px 0;
+    }
+
+    .voucher-code {
+        background: #f0f7ff;
+        border: 1px dashed #8bbce9;
+        border-radius: 10px;
         padding: 14px;
-        margin: 16px 0;
-        background: #f5f8ff;
-        border: 1px dashed #9fbbe2;
-        border-radius: 8px;
+        margin: 18px 0;
     }
 
-    .m5-my-vouchers .voucher-code small {
+    .voucher-code small {
         display: block;
-        color: #607da8;
-        margin-bottom: 8px;
+        color: #56708c;
+        margin-bottom: 7px;
     }
 
-    .m5-my-vouchers code {
-        color: #103b78;
+    .voucher-code code {
+        color: #145da8;
+        font-weight: 700;
         overflow-wrap: anywhere;
         user-select: all;
     }
 
-    .m5-my-vouchers .meta,
-    .m5-my-vouchers .description,
-    .m5-my-vouchers .terms {
-        line-height: 1.7;
-        overflow-wrap: anywhere;
+    .offer-meta {
+        font-size: 13px;
+        color: #56708c;
+        line-height: 1.9;
     }
 
-    .m5-my-vouchers .meta {
-        color: #60718c;
+    .offer-card details {
+        margin-top: 12px;
+        color: #34516e;
+        line-height: 1.7;
+    }
+
+    .offer-card summary {
+        cursor: pointer;
+        color: #145da8;
+        font-weight: 700;
+    }
+
+    .subsection {
+        margin-top: 32px;
+    }
+
+    .tier-card.current {
+        border: 2px solid #1677d2;
+        background: #f0f7ff;
+    }
+
+    .tier-card h3 {
+        margin-top: 0;
+    }
+
+    .tier-points {
+        color: #1262b0;
+        font-weight: 700;
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border: 1px solid #dce7f2;
+    }
+
+    .history-table th,
+    .history-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #dce7f2;
         font-size: 14px;
     }
 
-    .m5-my-vouchers summary {
-        color: #103b78;
-        cursor: pointer;
-        font-weight: 600;
-        margin-top: 14px;
+    .history-table th {
+        background: #f0f7ff;
+        color: #34516e;
     }
 
-    .m5-my-vouchers .notice {
+    .points-plus {
+        color: #15803d;
+        font-weight: 700;
+    }
+
+    .points-minus {
+        color: #b45309;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        padding: 45px 20px;
+        text-align: center;
+        background: #fff;
+        border: 1px dashed #cbdbea;
+        border-radius: 14px;
+        color: #56708c;
+        line-height: 1.7;
+    }
+
+    .info-notice {
+        padding: 15px 18px;
+        background: #eaf5ff;
+        border-radius: 10px;
+        color: #34516e;
+        line-height: 1.7;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    /* Thông báo giao dịch */
+    .offer-message {
         padding: 14px 18px;
-        margin-bottom: 24px;
-        background: #eaf2ff;
-        border-radius: 8px;
-        color: #17365d;
+        border-radius: 10px;
+        margin-bottom: 18px;
+        font-size: 14px;
+        line-height: 1.7;
+        background: #eaf5ff;
+        color: #173a67;
+        border: 1px solid #b9d9f5;
+    }
+
+    .offer-message.success {
+        background: #e6f7ec;
+        color: #166534;
+        border-color: #bbebc8;
+    }
+
+    .offer-message.error {
+        background: #fff0eb;
+        color: #9a3412;
+        border-color: #fed7aa;
+    }
+
+    /* Nút đổi điểm */
+    .reward-action {
+        margin-top: 18px;
+    }
+
+    .redeem-button {
+        display: inline-block;
+        background: #1677d2;
+        color: #fff;
+        border: none;
+        border-radius: 9px;
+        padding: 12px 22px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .2s ease;
+    }
+
+    .redeem-button:hover {
+        background: #0756a5;
+    }
+
+    .redeem-button:focus-visible {
+        outline: 3px solid #8bbce9;
+        outline-offset: 3px;
+    }
+
+    .redeem-button:disabled {
+        background: #dce7f2;
+        color: #56708c;
+        cursor: not-allowed;
+    }
+
+    .reward-notice {
+        margin-top: 12px;
+        font-size: 13px;
+        color: #56708c;
         line-height: 1.6;
     }
 
-    .m5-my-vouchers .empty {
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 45px 20px;
-        border: 1px dashed #cbd8ea;
-        border-radius: 12px;
-        background: #fff;
-        color: #607da8;
-    }
-
-    @media (max-width: 750px) {
-        .m5-my-vouchers .voucher-grid {
+    @media (max-width: 760px) {
+        .offers-stats,
+        .voucher-grid,
+        .reward-grid,
+        .tier-grid,
+        .program-grid {
             grid-template-columns: 1fr;
+        }
+
+        .member-points {
+            text-align: left;
+        }
+
+        .member-card {
+            padding: 22px;
+        }
+
+        .offers-heading h1 {
+            font-size: 25px;
+        }
+
+        .history-scroll {
+            overflow-x: auto;
+        }
+
+        .history-table {
+            min-width: 600px;
         }
     }
 </style>
 
-<div class="content-container m5-my-vouchers">
-    <h1>Voucher của tôi</h1>
+<div class="content-container offers-page">
 
-    <p class="intro">
-        Xin chào {{ customer.ho_ten }}.
-        Đây là các Voucher HULO đã cấp cho bạn.
-    </p>
+    <header class="offers-heading">
+        <h1>Ưu đãi của tôi</h1>
+        <p>
+            Xin chào {{ customer.ho_ten }}!
+            Theo dõi điểm thưởng, hạng thành viên
+            và những ưu đãi dành cho bạn tại HULO.
+        </p>
+    </header>
 
-    <div class="notice">
-        Khi cần sử dụng, hãy cung cấp mã Voucher cho nhân viên
-        để được kiểm tra điều kiện và hướng dẫn áp dụng.
-    </div>
-
-    <div class="voucher-grid">
-        {% for row in voucher_rows %}
-            <article class="voucher-card">
-                <div class="card-top">
-                    <span class="program-code">
-                        {{ row.delivery.benefit.program.code }}
-                    </span>
-
-                    <span class="badge {{ row.badge_class }}">
-                        {{ row.availability }}
-                    </span>
-                </div>
-
-                <h2>{{ row.delivery.benefit.name }}</h2>
-
-                <div class="description">
-                    {{ row.delivery.benefit.description|linebreaksbr }}
-                </div>
-
-                <div class="voucher-code">
-                    <small>Mã Voucher của bạn</small>
-                    <code>{{ row.delivery.reference_code }}</code>
-                </div>
-
-                <p class="meta">
-                    <strong>Chương trình:</strong>
-                    {{ row.delivery.benefit.program.name }}
-                    <br>
-
-                    <strong>Ngày cấp:</strong>
-                    {{ row.delivery.issued_at|date:"d/m/Y H:i" }}
-                    <br>
-
-                    <strong>Hiệu lực:</strong>
-                    {{ row.delivery.benefit.valid_from|date:"d/m/Y H:i" }}
-                    –
-                    {{ row.delivery.benefit.valid_until|date:"d/m/Y H:i" }}
-                </p>
-
-                {% if row.delivery.benefit.terms %}
-                    <details>
-                        <summary>Điều kiện sử dụng</summary>
-                        <div class="terms">
-                            {{ row.delivery.benefit.terms|linebreaksbr }}
-                        </div>
-                    </details>
-                {% endif %}
-            </article>
-        {% empty %}
-            <div class="empty">
-                Bạn chưa có Voucher được cấp.
+    {% if messages %}
+        {% for message in messages %}
+            <div
+                class="offer-message {{ message.tags }}"
+                role="alert">
+                {{ message }}
             </div>
         {% endfor %}
-    </div>
+    {% endif %}
+
+    <!-- THẺ THÀNH VIÊN -->
+    <section class="member-card">
+        <div class="member-top">
+            <div>
+                <div class="member-eyebrow">
+                    HULO Loyalty Member
+                </div>
+
+                <div class="member-name">
+                    {{ customer.ho_ten }}
+                </div>
+
+                <span class="member-tier">
+                    {% if current_tier %}
+                        {{ current_tier.get_code_display }}
+                    {% else %}
+                        Chưa xếp hạng
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="member-points">
+                <div class="member-eyebrow">
+                    Điểm có thể sử dụng
+                </div>
+
+                <strong>{{ balance|intcomma }}</strong>
+                <small>điểm thưởng</small>
+            </div>
+        </div>
+
+        <div class="member-progress">
+            <div class="progress-label">
+                <span>
+                    Tổng điểm tích lũy:
+                    {{ earned|intcomma }}
+                </span>
+
+                {% if next_tier %}
+                    <span>
+                        Mốc {{ next_tier.get_code_display }}:
+                        {{ next_tier.min_total_points|intcomma }} điểm
+                    </span>
+                {% else %}
+                    <span>
+                        Không có mốc hạng tiếp theo
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="progress-track">
+                <div
+                    class="progress-fill"
+                    style="width: {{ progress }}%;">
+                </div>
+            </div>
+
+            <p class="progress-note">
+                {% if next_tier %}
+                    Cần tích lũy thêm
+                    <strong>{{ points_needed|intcomma }} điểm</strong>
+                    để đạt mốc {{ next_tier.get_code_display }}.
+                {% else %}
+                    Bạn đã đạt mốc tích lũy cao nhất
+                    đang được cấu hình.
+                {% endif %}
+            </p>
+        </div>
+    </section>
+
+    <!-- THỐNG KÊ -->
+    <section class="offers-stats">
+        <div class="stat-card">
+            <div class="stat-label">Voucher của tôi</div>
+            <strong>{{ voucher_count|intcomma }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Điểm hiện có</div>
+            <strong>{{ balance|intcomma }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Hạng thành viên</div>
+            <strong>
+                {% if current_tier %}
+                    {{ current_tier.get_code_display }}
+                {% else %}
+                    Chưa xếp hạng
+                {% endif %}
+            </strong>
+        </div>
+    </section>
+
+    <!-- THANH ĐIỀU HƯỚNG -->
+    <nav class="offers-tabs" aria-label="Các mục ưu đãi">
+        <a
+            class="offers-tab {% if tab == 'vouchers' %}active{% endif %}"
+            href="?tab=vouchers">
+            Voucher của tôi
+        </a>
+
+        <a
+            class="offers-tab {% if tab == 'tiers' %}active{% endif %}"
+            href="?tab=tiers">
+            Hạng thành viên và quyền lợi
+        </a>
+
+        <a
+            class="offers-tab {% if tab == 'history' %}active{% endif %}"
+            href="?tab=history">
+            Lịch sử điểm
+        </a>
+
+        <a
+            class="offers-tab {% if tab == 'programs' %}active{% endif %}"
+            href="?tab=programs">
+            Chương trình ưu đãi
+        </a>
+    </nav>
+
+    {% if tab == 'vouchers' %}
+
+        <h2 class="section-heading">Voucher của tôi</h2>
+
+        <div class="info-notice">
+            Khi cần sử dụng voucher, hãy cung cấp mã cho
+            nhân viên HULO để được kiểm tra điều kiện áp dụng.
+            Trạng thái hiển thị dựa trên thời hạn và cấu hình
+            voucher; chưa xác nhận voucher đã được sử dụng hay chưa.
+        </div>
+
+        {% if voucher_rows %}
+            <div class="voucher-grid">
+                {% for row in voucher_rows %}
+                    <article class="offer-card">
+                        <div class="card-header">
+                            <span class="source-label">
+                                {{ row.source }}
+                            </span>
+
+                            <span class="status-badge {{ row.badge }}">
+                                {{ row.status }}
+                            </span>
+                        </div>
+
+                        <h3>{{ row.title }}</h3>
+
+                        {% if row.description %}
+                            <p class="offer-description">
+                                {{ row.description|linebreaksbr }}
+                            </p>
+                        {% endif %}
+
+                        {% if row.kind == 'points' %}
+                            <p class="offer-description">
+                                <strong>Giảm:</strong>
+                                {{ row.discount_amount|intcomma }} VNĐ
+                            </p>
+
+                            <p class="offer-description">
+                                <strong>Điểm đã đổi:</strong>
+                                {{ row.points_spent|intcomma }}
+                            </p>
+                        {% endif %}
+
+                        <div class="voucher-code">
+                            <small>Mã voucher của bạn</small>
+                            <code>{{ row.code }}</code>
+                        </div>
+
+                        <div class="offer-meta">
+                            {% if row.program %}
+                                <div>
+                                    <strong>Chương trình:</strong>
+                                    {{ row.program }}
+                                </div>
+                            {% endif %}
+
+                            <div>
+                                <strong>Ngày cấp:</strong>
+                                {{ row.issued_at|date:"d/m/Y H:i" }}
+                            </div>
+
+                            <div>
+                                <strong>Hiệu lực từ:</strong>
+                                {{ row.valid_from|date:"d/m/Y H:i" }}
+                            </div>
+
+                            <div>
+                                <strong>Hết hạn:</strong>
+                                {{ row.expires_at|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+
+                        {% if row.terms %}
+                            <details>
+                                <summary>Điều kiện sử dụng</summary>
+                                <p>{{ row.terms|linebreaksbr }}</p>
+                            </details>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                Bạn chưa có voucher nào được cấp
+                hoặc đổi bằng điểm.
+            </div>
+        {% endif %}
+
+        <!-- DANH SÁCH VOUCHER CÓ THỂ ĐỔI -->
+        <section class="subsection">
+            <h2 class="section-heading">
+                Voucher có thể đổi bằng điểm
+            </h2>
+
+            <div class="info-notice">
+                Bạn có thể sử dụng điểm Loyalty hiện có
+                để tự đổi voucher ngay tại đây.
+                Sau khi đổi thành công, điểm sẽ được trừ
+                và voucher mới sẽ xuất hiện trong mục
+                Voucher của tôi.
+            </div>
+
+            {% if rewards %}
+                <div class="reward-grid">
+                    {% for reward in rewards %}
+                        <article class="offer-card">
+                            <div class="card-header">
+                                <span class="source-label">
+                                    Đổi điểm Loyalty
+                                </span>
+
+                                {% if balance >= reward.points_cost %}
+                                    <span class="status-badge active">
+                                        Đủ điểm
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge expired">
+                                        Chưa đủ điểm
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <h3>{{ reward.name }}</h3>
+
+                            <p class="offer-description">
+                                Giá trị giảm:
+                                <strong>
+                                    {{ reward.discount_amount|intcomma }}
+                                    VNĐ
+                                </strong>
+                            </p>
+
+                            <p class="tier-points">
+                                Cần {{ reward.points_cost|intcomma }} điểm
+                            </p>
+
+                            <p class="offer-meta">
+                                Thời hạn sau khi đổi:
+                                {{ reward.validity_days }} ngày
+                            </p>
+
+                            {% if reward.terms %}
+                                <details>
+                                    <summary>Điều kiện sử dụng</summary>
+                                    <p>{{ reward.terms|linebreaksbr }}</p>
+                                </details>
+                            {% endif %}
+
+                            <div class="reward-action">
+                                {% if balance >= reward.points_cost %}
+                                    <p class="reward-notice">
+                                        Bạn có đủ điểm để đổi voucher này.
+                                    </p>
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'customers:my_vouchers' %}"
+                                        onsubmit="return confirm('Bạn xác nhận sử dụng {{ reward.points_cost }} điểm để đổi voucher này?');">
+
+                                        {% csrf_token %}
+
+                                        <input
+                                            type="hidden"
+                                            name="action"
+                                            value="redeem_voucher">
+
+                                        <input
+                                            type="hidden"
+                                            name="reward_id"
+                                            value="{{ reward.pk }}">
+
+                                        <input
+                                            type="hidden"
+                                            name="redeem_token"
+                                            value="{{ redeem_token }}">
+
+                                        <button
+                                            type="submit"
+                                            class="redeem-button">
+                                            Đổi ngay
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <p class="reward-notice">
+                                        Bạn cần tích lũy thêm điểm
+                                        để đổi voucher này.
+                                    </p>
+
+                                    <button
+                                        type="button"
+                                        class="redeem-button"
+                                        disabled>
+                                        Chưa đủ điểm
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    Hiện chưa có voucher nào mở đổi điểm.
+                </div>
+            {% endif %}
+        </section>
+
+    {% elif tab == 'tiers' %}
+
+        <h2 class="section-heading">
+            Hạng thành viên và quyền lợi
+        </h2>
+
+        <div class="info-notice">
+            Hạng thành viên được quản lý theo tổng điểm
+            tích lũy. Điểm đã sử dụng để đổi voucher
+            không được tính là điểm có thể sử dụng nữa.
+        </div>
+
+        {% if tiers %}
+            <div class="tier-grid">
+                {% for tier in tiers %}
+                    <article
+                        class="offer-card tier-card {% if current_tier.pk == tier.pk %}current{% endif %}">
+
+                        <div class="card-header">
+                            <span class="source-label">
+                                HULO Loyalty
+                            </span>
+
+                            {% if current_tier.pk == tier.pk %}
+                                <span class="status-badge active">
+                                    Hạng hiện tại
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <h3>{{ tier.get_code_display }}</h3>
+
+                        <p class="tier-points">
+                            Từ {{ tier.min_total_points|intcomma }}
+                            điểm tích lũy
+                        </p>
+
+                        {% if tier.benefits %}
+                            <p class="offer-description">
+                                {{ tier.benefits|linebreaksbr }}
+                            </p>
+                        {% else %}
+                            <p class="offer-description">
+                                Chưa có mô tả quyền lợi.
+                            </p>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                Hệ thống chưa cấu hình các hạng thành viên.
+            </div>
+        {% endif %}
+
+    {% elif tab == 'history' %}
+
+        <h2 class="section-heading">
+            Lịch sử tích lũy và sử dụng điểm
+        </h2>
+
+        {% if transactions %}
+            <div class="history-scroll">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Hoạt động</th>
+                            <th>Nội dung</th>
+                            <th>Số điểm</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for transaction in transactions %}
+                            <tr>
+                                <td>
+                                    {{ transaction.created_at|date:"d/m/Y H:i" }}
+                                </td>
+
+                                <td>
+                                    {{ transaction.get_transaction_type_display }}
+                                </td>
+
+                                <td>
+                                    {{ transaction.description|default:"—" }}
+                                </td>
+
+                                <td>
+                                    {% if transaction.transaction_type == 'EARN' %}
+                                        <span class="points-plus">
+                                            +{{ transaction.points|intcomma }}
+                                        </span>
+                                    {% else %}
+                                        <span class="points-minus">
+                                            -{{ transaction.points|intcomma }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="offer-meta">
+                Hiển thị tối đa 50 giao dịch gần nhất.
+            </p>
+        {% else %}
+            <div class="empty-state">
+                Bạn chưa có lịch sử giao dịch điểm Loyalty.
+            </div>
+        {% endif %}
+
+    {% elif tab == 'programs' %}
+
+        <h2 class="section-heading">
+            Chương trình ưu đãi dành cho bạn
+        </h2>
+
+        {% if program_rows %}
+            <div class="program-grid">
+                {% for row in program_rows %}
+                    <article class="offer-card">
+                        <div class="card-header">
+                            <span class="source-label">
+                                {{ row.program.code }}
+                            </span>
+
+                            <span class="status-badge {% if row.status == 'Đang diễn ra' %}active{% else %}upcoming{% endif %}">
+                                {{ row.status }}
+                            </span>
+                        </div>
+
+                        <h3>{{ row.program.name }}</h3>
+
+                        <div class="offer-meta">
+                            <div>
+                                <strong>Bắt đầu:</strong>
+                                {{ row.program.starts_at|date:"d/m/Y H:i" }}
+                            </div>
+
+                            <div>
+                                <strong>Kết thúc:</strong>
+                                {{ row.program.ends_at|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+
+                        <p class="offer-description">
+                            Các quyền lợi cụ thể được áp dụng
+                            theo điều kiện của chương trình.
+                            Vui lòng liên hệ HULO để được tư vấn.
+                        </p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                Hiện chưa có chương trình ưu đãi phù hợp
+                với hạng thành viên của bạn.
+            </div>
+        {% endif %}
+
+    {% endif %}
 </div>
 {% endblock %}

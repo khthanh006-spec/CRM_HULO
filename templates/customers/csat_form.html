@@ -1,6 +1,10 @@
 
 {% extends "base.html" %}
 
+{% block title %}
+Đánh giá chất lượng hỗ trợ - HULOECOM
+{% endblock %}
+
 {% block content %}
 
 <style>
@@ -12,83 +16,59 @@
         color: #143b73;
     }
 
-    .m5-hero {
-        background: linear-gradient(115deg, #f0f7ff, #d7eaff);
-        border-radius: 16px;
-        padding: 42px 40px;
+    /* NÚT QUAY VỀ TRUNG TÂM HỖ TRỢ */
+    .m5-csat-topbar {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        gap: 20px;
-        overflow: hidden;
-        margin-bottom: 24px;
-    }
-
-    .m5-hero h1 {
-        color: #0d438b;
-        font-size: 30px;
-        font-weight: 800;
-        margin: 0 0 10px;
-    }
-
-    .m5-hero p {
-        color: #6789af;
-        margin-bottom: 20px;
+        margin-bottom: 22px;
     }
 
     .m5-help-link {
-        display: inline-block;
-        background: white;
-        color: #2572d6;
-        padding: 12px 20px;
-        border: 1px solid #d5e5fa;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        background: #ffffff;
+        color: #2276e5;
+        padding: 11px 18px;
+        border: 1px solid #cfe0f8;
         border-radius: 9px;
         text-decoration: none;
-        font-weight: 600;
+        font-size: 14px;
+        font-weight: 700;
+        transition: background 0.2s, border-color 0.2s;
     }
 
-    .m5-hero-art {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        min-width: 260px;
+    .m5-help-link:hover {
+        background: #edf5ff;
+        border-color: #93bdf3;
+        text-decoration: none;
     }
 
-    .m5-art-item {
-        background: white;
-        box-shadow: 0 8px 30px #a7c9f155;
-        border-radius: 15px;
-        padding: 20px;
-        font-size: 34px;
-    }
-
-    .m5-art-item:nth-child(2) {
-        transform: translateY(-16px);
-    }
-
+    /* HAI KHUNG CHÍNH */
     .m5-csat-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 22px;
-        align-items: start;
+        align-items: stretch;
     }
 
     .m5-card {
-        background: #fff;
+        background: #ffffff;
         border: 1px solid #d9e6f8;
         border-radius: 14px;
-        padding: 24px;
+        padding: 26px;
         box-shadow: 0 4px 15px #123e7410;
+        min-width: 0;
     }
 
     .m5-card h2 {
-        font-size: 19px;
+        font-size: 20px;
         color: #17478e;
         font-weight: 750;
-        margin: 0 0 16px;
+        margin: 0 0 18px;
     }
 
+    /* THÔNG TIN TICKET */
     .m5-ticket-info {
         background: #f5f8fc;
         border-radius: 9px;
@@ -97,7 +77,7 @@
 
     .m5-info-row {
         display: grid;
-        grid-template-columns: 125px 1fr;
+        grid-template-columns: 125px minmax(0, 1fr);
         gap: 12px;
         padding: 9px 0;
         border-bottom: 1px solid #e5edf7;
@@ -121,15 +101,33 @@
     .m5-description {
         font-size: 14px;
         color: #7290b1;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
+        line-height: 1.6;
+    }
+
+    /* ĐÁNH GIÁ SAO */
+    .m5-rating-area {
+        text-align: center;
+        margin: 24px 0 30px;
+    }
+
+    .m5-rating-title {
+        display: block;
+        color: #194887;
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 20px;
     }
 
     .m5-stars {
         display: flex;
         flex-direction: row-reverse;
-        justify-content: flex-end;
-        gap: 4px;
-        margin: 18px 0 26px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin: 0 auto;
+        width: fit-content;
+        max-width: 100%;
     }
 
     .m5-stars input {
@@ -140,11 +138,12 @@
     }
 
     .m5-stars label {
-        font-size: 49px;
+        font-size: 68px;
         line-height: 1;
         color: #d1d8e4;
         cursor: pointer;
         transition: color 0.15s, transform 0.15s;
+        user-select: none;
     }
 
     .m5-stars input:checked ~ label,
@@ -154,7 +153,7 @@
     }
 
     .m5-stars label:hover {
-        transform: scale(1.08);
+        transform: scale(1.1);
     }
 
     .m5-stars input:focus-visible + label {
@@ -163,6 +162,7 @@
         border-radius: 4px;
     }
 
+    /* NHẬN XÉT */
     .m5-field-label {
         display: block;
         color: #194887;
@@ -172,8 +172,9 @@
     }
 
     .m5-comment {
+        display: block;
         width: 100%;
-        min-height: 125px;
+        min-height: 135px;
         padding: 14px;
         border: 1px solid #d8e5f5;
         border-radius: 9px;
@@ -181,16 +182,19 @@
         font: inherit;
         font-size: 14px;
         outline-color: #2876df;
+        box-sizing: border-box;
     }
 
     .m5-comment::placeholder {
         color: #a4b3c5;
     }
 
+    /* NÚT THAO TÁC */
     .m5-buttons {
         display: flex;
+        flex-wrap: wrap;
         gap: 12px;
-        margin-top: 18px;
+        margin-top: 22px;
     }
 
     .m5-btn {
@@ -198,16 +202,23 @@
         text-align: center;
         text-decoration: none;
         border-radius: 7px;
-        padding: 12px 15px;
+        padding: 12px 16px;
+        font-family: inherit;
         font-size: 14px;
         font-weight: 650;
         cursor: pointer;
+        transition: background 0.2s;
     }
 
     .m5-btn-primary {
-        color: #fff;
+        color: #ffffff;
         background: #2276e5;
         border: 1px solid #2276e5;
+    }
+
+    .m5-btn-primary:hover {
+        background: #155ec4;
+        color: #ffffff;
     }
 
     .m5-btn-secondary {
@@ -216,11 +227,18 @@
         border: 1px solid #a8cdfb;
     }
 
-    .m5-btn-block {
-        width: 100%;
-        margin-top: 14px;
+    .m5-btn-secondary:hover {
+        background: #e8f2ff;
     }
 
+    .m5-btn-block {
+        display: block;
+        width: 100%;
+        margin-top: 16px;
+        box-sizing: border-box;
+    }
+
+    /* THÔNG BÁO */
     .m5-success {
         color: #157347;
         background: #e9f7ef;
@@ -234,6 +252,8 @@
         background: #fff6df;
         padding: 15px;
         border-radius: 9px;
+        margin-bottom: 16px;
+        line-height: 1.6;
     }
 
     .m5-errors {
@@ -242,60 +262,60 @@
         margin: 8px 0;
     }
 
-    @media (max-width: 760px) {
-        .m5-hero {
-            padding: 28px 22px;
-        }
-
-        .m5-hero-art {
-            display: none;
-        }
-
-        .m5-hero h1 {
-            font-size: 23px;
-        }
-
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
         .m5-csat-grid {
             grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .m5-csat-page {
+            padding: 0 12px;
+            margin-top: 18px;
         }
 
         .m5-card {
             padding: 18px;
         }
 
+        .m5-card h2 {
+            font-size: 18px;
+        }
+
+        .m5-info-row {
+            grid-template-columns: 105px minmax(0, 1fr);
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .m5-stars {
+            gap: 4px;
+        }
+
         .m5-stars label {
-            font-size: 43px;
+            font-size: 48px;
+        }
+
+        .m5-help-link {
+            font-size: 13px;
         }
     }
 </style>
 
 <div class="m5-csat-page">
 
-    <!-- Banner HULO -->
-    <section class="m5-hero">
-        <div>
-            <h1>HULO có thể giúp gì cho bạn?</h1>
+    <!-- NÚT QUAY VỀ TRUNG TÂM HỖ TRỢ -->
+    <div class="m5-csat-topbar">
+        <a href="/support/" class="m5-help-link">
+            ← Quay về Trung tâm hỗ trợ
+        </a>
+    </div>
 
-            <p>
-                Tìm câu trả lời hoặc trò chuyện với
-                HULO Assistant.
-            </p>
-
-            <a href="/support/" class="m5-help-link">
-                🔎 Truy cập trung tâm hỗ trợ
-            </a>
-        </div>
-
-        <div class="m5-hero-art" aria-hidden="true">
-            <div class="m5-art-item">📦</div>
-            <div class="m5-art-item">🛍️</div>
-            <div class="m5-art-item">✈️</div>
-        </div>
-    </section>
-
+    <!-- HAI KHUNG CHÍNH -->
     <div class="m5-csat-grid">
 
-        <!-- CỘT TRÁI: THÔNG TIN TICKET -->
+        <!-- KHUNG TRÁI: THÔNG TIN TICKET -->
         <section class="m5-card">
 
             <h2>
@@ -305,28 +325,36 @@
             <div class="m5-ticket-info">
 
                 <div class="m5-info-row">
-                    <span class="m5-info-label">Mã Ticket</span>
+                    <span class="m5-info-label">
+                        Mã Ticket
+                    </span>
                     <span class="m5-info-value">
                         {{ ticket.ma_ticket }}
                     </span>
                 </div>
 
                 <div class="m5-info-row">
-                    <span class="m5-info-label">Tiêu đề</span>
+                    <span class="m5-info-label">
+                        Tiêu đề
+                    </span>
                     <span class="m5-info-value">
                         {{ ticket.tieu_de }}
                     </span>
                 </div>
 
                 <div class="m5-info-row">
-                    <span class="m5-info-label">Khách hàng</span>
+                    <span class="m5-info-label">
+                        Khách hàng
+                    </span>
                     <span class="m5-info-value">
                         {{ ticket.khach_hang.ho_ten }}
                     </span>
                 </div>
 
                 <div class="m5-info-row">
-                    <span class="m5-info-label">Danh mục</span>
+                    <span class="m5-info-label">
+                        Danh mục
+                    </span>
                     <span class="m5-info-value">
                         {% if ticket.danh_muc %}
                             {{ ticket.danh_muc.ten_danh_muc }}
@@ -337,28 +365,36 @@
                 </div>
 
                 <div class="m5-info-row">
-                    <span class="m5-info-label">Ngày tạo</span>
+                    <span class="m5-info-label">
+                        Ngày tạo
+                    </span>
                     <span class="m5-info-value">
                         {{ ticket.thoi_diem_tao|date:"d/m/Y H:i" }}
                     </span>
                 </div>
 
                 <div class="m5-info-row">
-                    <span class="m5-info-label">Cập nhật cuối</span>
+                    <span class="m5-info-label">
+                        Cập nhật cuối
+                    </span>
                     <span class="m5-info-value">
                         {{ ticket.thoi_diem_cap_nhat|date:"d/m/Y H:i" }}
                     </span>
                 </div>
 
                 <div class="m5-info-row">
-                    <span class="m5-info-label">Trạng thái</span>
+                    <span class="m5-info-label">
+                        Trạng thái
+                    </span>
                     <span class="m5-info-value">
                         {{ ticket.trang_thai }}
                     </span>
                 </div>
 
                 <div class="m5-info-row">
-                    <span class="m5-info-label">Kết quả xử lý</span>
+                    <span class="m5-info-label">
+                        Kết quả xử lý
+                    </span>
                     <span class="m5-info-value">
                         {{ ticket.ket_qua_xu_ly|default:"Chưa cập nhật" }}
                     </span>
@@ -366,16 +402,21 @@
 
             </div>
 
-            <a href="/support/" class="m5-btn m5-btn-primary m5-btn-block">
+            <a
+                href="/support/"
+                class="m5-btn m5-btn-primary m5-btn-block"
+            >
                 Bạn cần hỗ trợ thêm?
             </a>
 
         </section>
 
-        <!-- CỘT PHẢI: ĐÁNH GIÁ CSAT -->
+        <!-- KHUNG PHẢI: ĐÁNH GIÁ CSAT -->
         <section class="m5-card">
 
-            <h2>Bạn hài lòng với kết quả này chứ?</h2>
+            <h2>
+                Bạn hài lòng với kết quả này chứ?
+            </h2>
 
             <p class="m5-description">
                 Đánh giá của bạn sẽ giúp HULO
@@ -384,7 +425,7 @@
 
             {% if existing_csat %}
 
-                <!-- ĐÃ GỬI ĐÁNH GIÁ -->
+                <!-- ĐÃ ĐÁNH GIÁ -->
                 <div class="m5-success">
                     ✅ Cảm ơn bạn đã gửi đánh giá!
                 </div>
@@ -422,37 +463,45 @@
 
             {% else %}
 
-                <!-- FORM GỬI ĐÁNH GIÁ -->
+                <!-- FORM ĐÁNH GIÁ -->
                 <form method="post">
                     {% csrf_token %}
 
-                    <label class="m5-field-label">
-                        Chọn mức độ hài lòng (1–5 sao)
-                    </label>
+                    <div class="m5-rating-area">
 
-                    <div class="m5-stars" role="group"
-                         aria-label="Mức độ hài lòng">
+                        <span class="m5-rating-title">
+                            Chọn mức độ hài lòng (1–5 sao)
+                        </span>
 
-                        {% for point in rating_values %}
+                        <div
+                            class="m5-stars"
+                            role="group"
+                            aria-label="Mức độ hài lòng"
+                        >
 
-                            <input
-                                type="radio"
-                                name="score"
-                                id="m5-star-{{ point }}"
-                                value="{{ point }}"
-                                required
-                                {% if selected_score == point %}
-                                    checked
-                                {% endif %}
-                            >
+                            {% for point in rating_values %}
 
-                            <label
-                                for="m5-star-{{ point }}"
-                                title="{{ point }} sao"
-                                aria-label="{{ point }} sao"
-                            >★</label>
+                                <input
+                                    type="radio"
+                                    name="score"
+                                    id="m5-star-{{ point }}"
+                                    value="{{ point }}"
+                                    required
+                                    {% if selected_score == point %}
+                                        checked
+                                    {% endif %}
+                                >
 
-                        {% endfor %}
+                                <label
+                                    for="m5-star-{{ point }}"
+                                    title="{{ point }} sao"
+                                    aria-label="{{ point }} sao"
+                                >★</label>
+
+                            {% endfor %}
+
+                        </div>
+
                     </div>
 
                     {% if form.score.errors %}
@@ -512,6 +561,7 @@
         </section>
 
     </div>
+
 </div>
 
 {% endblock %}

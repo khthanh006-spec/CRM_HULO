@@ -3,24 +3,175 @@
 {% load static %}
 
 {% block title %}
-Xác nhận kết quả Ticket - HULOECOM
+Chi tiết yêu cầu hỗ trợ - HULOECOM
 {% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet"
-      href="{% static 'tickets/customer_result.css' %}?v=3">
+      href="{% static 'tickets/customer_result.css' %}?v=4">
 {% endblock %}
 
 {% block content %}
+
+<style>
+    .customer-supplement-area {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid #e1eaf5;
+    }
+
+    .customer-supplement-heading {
+        font-size: 17px;
+        font-weight: 700;
+        color: #103b78;
+        margin: 0 0 10px;
+    }
+
+    .customer-supplement-description {
+        color: #607da8;
+        font-size: 13px;
+        line-height: 1.7;
+        margin-bottom: 18px;
+    }
+
+    .customer-supplement-field {
+        margin-bottom: 17px;
+    }
+
+    .customer-supplement-field label {
+        display: block;
+        color: #17365d;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .customer-supplement-textarea {
+        width: 100%;
+        min-height: 125px;
+        padding: 13px 14px;
+        border: 1px solid #cbdcf0;
+        border-radius: 10px;
+        background: #fff;
+        color: #17365d;
+        font: inherit;
+        font-size: 13px;
+        line-height: 1.7;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+
+    .customer-supplement-textarea:focus {
+        border-color: #2276e5;
+        outline: 2px solid #e0efff;
+    }
+
+    .customer-supplement-file-box {
+        border: 1px dashed #9dc4ec;
+        background: #f7fbff;
+        border-radius: 11px;
+        padding: 17px;
+    }
+
+    .customer-supplement-file-input {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        font-size: 13px;
+        color: #17365d;
+    }
+
+    .customer-supplement-hint {
+        color: #7188a5;
+        font-size: 12px;
+        line-height: 1.6;
+        margin: 9px 0 0;
+    }
+
+    .customer-supplement-submit {
+        border: none;
+        border-radius: 9px;
+        background: #2276e5;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 13px 20px;
+        cursor: pointer;
+        transition: background .2s;
+    }
+
+    .customer-supplement-submit:hover {
+        background: #155fbe;
+    }
+
+    .customer-supplement-message {
+        margin-bottom: 13px;
+        border: 1px solid #e1eaf5;
+        border-radius: 11px;
+        padding: 15px 17px;
+        background: #f8fbff;
+    }
+
+    .customer-supplement-message.is-customer {
+        background: #edf6ff;
+        border-color: #c8e1fb;
+    }
+
+    .customer-supplement-message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .customer-supplement-sender {
+        font-size: 13px;
+        color: #103b78;
+        font-weight: 700;
+    }
+
+    .customer-supplement-time {
+        font-size: 11px;
+        color: #7188a5;
+    }
+
+    .customer-supplement-message-body {
+        color: #334f70;
+        font-size: 13px;
+        line-height: 1.75;
+        overflow-wrap: anywhere;
+    }
+
+    .customer-supplement-message-body p {
+        margin: 0;
+    }
+
+    .customer-supplement-notice {
+        color: #607da8;
+        background: #f3f7fc;
+        border-radius: 9px;
+        padding: 12px 15px;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 650px) {
+        .customer-supplement-submit {
+            width: 100%;
+        }
+    }
+</style>
 
 <div class="customer-ticket-page">
 
     <!-- 1. BANNER -->
     <section class="customer-ticket-banner">
-        <h1>Xác nhận kết quả hỗ trợ</h1>
+        <h1>Chi tiết yêu cầu hỗ trợ</h1>
         <p>
-            Xem kết quả xử lý và gửi phản hồi của bạn
-            đến HULOECOM.
+            Theo dõi tiến độ xử lý, trao đổi thông tin
+            và gửi phản hồi đến HULOECOM.
         </p>
     </section>
 
@@ -42,7 +193,7 @@ Xác nhận kết quả Ticket - HULOECOM
         <div class="customer-ticket-heading">
             <div>
                 <p class="customer-ticket-eyebrow">
-                    HULOECOM / Kết quả hỗ trợ
+                    HULOECOM / Yêu cầu hỗ trợ
                 </p>
 
                 <h2 class="customer-ticket-code">
@@ -63,7 +214,9 @@ Xác nhận kết quả Ticket - HULOECOM
 
             <div class="customer-ticket-info-item">
                 <span>Khách hàng</span>
-                <strong>{{ ticket.khach_hang.ho_ten }}</strong>
+                <strong>
+                    {{ ticket.khach_hang.ho_ten }}
+                </strong>
             </div>
 
             <div class="customer-ticket-info-item">
@@ -104,43 +257,189 @@ Xác nhận kết quả Ticket - HULOECOM
 
     </section>
 
-    <!-- 5. LỊCH SỬ TRAO ĐỔI CÔNG KHAI -->
+    <!-- 5. TRAO ĐỔI HAI CHIỀU -->
     <section class="customer-ticket-card">
 
         <h3 class="customer-ticket-section-title">
             💬 Trao đổi với HULOECOM
         </h3>
 
-        {% for item in public_messages %}
+        <p class="customer-ticket-muted">
+            Lịch sử trao đổi công khai giữa bạn
+            và nhân viên hỗ trợ HULOECOM.
+        </p>
 
-            <div class="customer-ticket-content">
+        <!-- LỊCH SỬ TIN NHẮN -->
+        <div class="customer-supplement-history">
 
-                <div class="customer-ticket-message-heading">
-                    <strong>Nhân viên HULOECOM</strong>
+            {% for item in public_messages %}
 
-                    <small>
-                        {{ item.thoi_diem_gui|date:"d/m/Y H:i" }}
-                    </small>
+                <div class="customer-supplement-message
+                    {% if item.nguoi_gui_id == ticket.khach_hang.ma_tai_khoan_id %}
+                        is-customer
+                    {% endif %}">
+
+                    <div class="customer-supplement-message-header">
+
+                        <span class="customer-supplement-sender">
+                            {% if item.nguoi_gui_id == ticket.khach_hang.ma_tai_khoan_id %}
+                                Khách hàng - Bạn
+                            {% else %}
+                                Nhân viên HULOECOM
+                            {% endif %}
+                        </span>
+
+                        <span class="customer-supplement-time">
+                            {{ item.thoi_diem_gui|date:"d/m/Y H:i" }}
+                        </span>
+
+                    </div>
+
+                    <div class="customer-supplement-message-body">
+                        {{ item.noi_dung|linebreaksbr }}
+                    </div>
+
                 </div>
 
-                <p>
-                    {{ item.noi_dung|linebreaksbr }}
+            {% empty %}
+
+                <p class="customer-ticket-muted">
+                    Hiện chưa có nội dung trao đổi công khai.
                 </p>
+
+            {% endfor %}
+
+        </div>
+
+        <!-- FORM BỔ SUNG THÔNG TIN -->
+        {% if ticket.trang_thai == 'IN_PROGRESS' %}
+
+            <div class="customer-supplement-area">
+
+                <h4 class="customer-supplement-heading">
+                    Bổ sung thông tin / Minh chứng
+                </h4>
+
+                <p class="customer-supplement-description">
+                    Bạn có thể gửi thêm thông tin hoặc
+                    đính kèm hình ảnh, tài liệu để nhân viên
+                    HULOECOM kiểm tra và tiếp tục xử lý yêu cầu.
+                </p>
+
+                <form
+                    method="POST"
+                    action="{% url 'tickets:customer_supplement' ticket.pk %}"
+                    enctype="multipart/form-data"
+                >
+                    {% csrf_token %}
+
+                    <div class="customer-supplement-field">
+
+                        <label for="supplement-noi-dung">
+                            Nội dung bổ sung
+                            <span style="color:#d53a4a;">*</span>
+                        </label>
+
+                        <textarea
+                            id="supplement-noi-dung"
+                            name="noi_dung"
+                            class="customer-supplement-textarea"
+                            rows="5"
+                            minlength="10"
+                            maxlength="5000"
+                            required
+                            placeholder="Mô tả sản phẩm thực tế đã nhận, nội dung cần xác minh hoặc thông tin bạn muốn bổ sung..."
+                        ></textarea>
+
+                        <p class="customer-supplement-hint">
+                            Nội dung từ 10 đến 5.000 ký tự.
+                        </p>
+
+                    </div>
+
+                    <div class="customer-supplement-field">
+
+                        <label for="supplement-tep">
+                            Ảnh hoặc tài liệu minh chứng
+                            (không bắt buộc)
+                        </label>
+
+                        <div class="customer-supplement-file-box">
+
+                            <input
+                                type="file"
+                                id="supplement-tep"
+                                name="tep_minh_chung"
+                                class="customer-supplement-file-input"
+                                accept=".jpg,.jpeg,.png,.pdf"
+                            >
+
+                            <p class="customer-supplement-hint">
+                                Hỗ trợ JPG, JPEG, PNG, PDF.
+                                Tối đa 5 MB mỗi tệp.
+                                Mỗi lần gửi một tệp.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="customer-supplement-submit"
+                    >
+                        Gửi thông tin bổ sung
+                    </button>
+
+                </form>
 
             </div>
 
-        {% empty %}
+        {% elif ticket.trang_thai == 'RESOLVED' %}
 
-            <p class="customer-ticket-muted">
-                Hiện chưa có phản hồi công khai từ HULOECOM.
-            </p>
+            <div class="customer-supplement-area">
+                <div class="customer-supplement-notice">
+                    Ticket đã có kết quả xử lý.
+                    Nếu chưa đồng ý với kết quả,
+                    vui lòng sử dụng chức năng
+                    xác nhận ở phần bên dưới.
+                </div>
+            </div>
 
-        {% endfor %}
+        {% elif ticket.trang_thai == 'REOPENED' %}
+
+            <div class="customer-supplement-area">
+                <div class="customer-supplement-notice">
+                    HULOECOM đã tiếp nhận yêu cầu xử lý lại.
+                    Nhân viên phụ trách sẽ tiếp tục xem xét.
+                    Bạn có thể bổ sung thêm thông tin khi
+                    Ticket được chuyển sang đang xử lý.
+                </div>
+            </div>
+
+        {% elif ticket.trang_thai == 'CLOSED' %}
+
+            <div class="customer-supplement-area">
+                <div class="customer-supplement-notice">
+                    Ticket đã đóng nên không thể
+                    gửi thêm nội dung bổ sung.
+                </div>
+            </div>
+
+        {% else %}
+
+            <div class="customer-supplement-area">
+                <div class="customer-supplement-notice">
+                    Chức năng bổ sung thông tin
+                    sẽ khả dụng khi Ticket đang được xử lý.
+                </div>
+            </div>
+
+        {% endif %}
 
     </section>
 
-
-    <!-- 5. PHẢN HỒI KHÁCH HÀNG -->
+    <!-- 6. PHẢN HỒI VỀ KẾT QUẢ XỬ LÝ -->
     <section class="customer-ticket-card">
 
         <h3 class="customer-ticket-section-title">
@@ -155,8 +454,10 @@ Xác nhận kết quả Ticket - HULOECOM
                 phương án xử lý được HULOECOM đề xuất hay không.
             </p>
 
-            <form method="POST"
-                  action="{% url 'tickets:customer_confirm' ticket.pk %}">
+            <form
+                method="POST"
+                action="{% url 'tickets:customer_confirm' ticket.pk %}"
+            >
                 {% csrf_token %}
 
                 <fieldset class="customer-ticket-options">
@@ -167,12 +468,15 @@ Xác nhận kết quả Ticket - HULOECOM
                     {% for choice in confirmation_form.lua_chon %}
                         <label class="customer-ticket-option">
                             {{ choice.tag }}
-                            <span>{{ choice.choice_label }}</span>
+                            <span>
+                                {{ choice.choice_label }}
+                            </span>
                         </label>
                     {% endfor %}
                 </fieldset>
 
                 <div class="customer-ticket-form-group">
+
                     <label for="{{ confirmation_form.ly_do.id_for_label }}">
                         Lý do / Phản hồi bổ sung
                     </label>
@@ -180,21 +484,29 @@ Xác nhận kết quả Ticket - HULOECOM
                     {{ confirmation_form.ly_do }}
 
                     <p class="customer-ticket-hint">
-                        Nếu không đồng ý, bạn bắt buộc phải nhập
-                        lý do để HULOECOM tiếp tục hỗ trợ.
+                        Nếu không đồng ý, bạn bắt buộc phải
+                        nhập lý do để HULOECOM tiếp tục hỗ trợ.
                     </p>
+
                 </div>
 
-                <button type="submit" class="customer-ticket-button">
+                <button
+                    type="submit"
+                    class="customer-ticket-button"
+                >
                     ✓ Gửi xác nhận
                 </button>
+
             </form>
 
         <!-- ĐÃ ĐỒNG Ý -->
         {% elif ticket.trang_thai_xac_nhan == 'AGREED' %}
 
             <div class="customer-ticket-success">
-                <h4>✅ Bạn đã đồng ý với kết quả xử lý</h4>
+
+                <h4>
+                    ✅ Bạn đã đồng ý với kết quả xử lý
+                </h4>
 
                 <p>
                     HULOECOM đã ghi nhận xác nhận của bạn.
@@ -210,32 +522,90 @@ Xác nhận kết quả Ticket - HULOECOM
                         </strong>
                     </p>
                 {% endif %}
+
             </div>
+
+            <!-- LIÊN KẾT ĐẾN CSAT -->
+            {% if ticket.trang_thai == 'RESOLVED' or ticket.trang_thai == 'CLOSED' %}
+
+                <div style="
+                    margin-top:20px;
+                    padding:22px;
+                    background:#f0f7ff;
+                    border:1px solid #cfe2ff;
+                    border-radius:12px;
+                    text-align:center;
+                ">
+
+                    <p style="
+                        color:#607da8;
+                        margin-bottom:18px;
+                    ">
+                        Hãy chia sẻ mức độ hài lòng
+                        để giúp HULOECOM cải thiện
+                        chất lượng dịch vụ.
+                    </p>
+
+                    <a
+                        href="{% url 'customers:submit_csat' ticket.pk %}"
+                        class="customer-ticket-button"
+                        style="
+                            display:inline-block;
+                            text-decoration:none;
+                            background:#2276e5;
+                            color:#ffffff;
+                            padding:22px 24px;
+                            border-radius:8px;
+                            font-weight:700;
+                        "
+                    >
+                        Đánh giá mức độ hài lòng
+                    </a>
+
+                </div>
+
+            {% endif %}
 
         <!-- KHÔNG ĐỒNG Ý -->
         {% elif ticket.trang_thai_xac_nhan == 'DISAGREED' %}
 
             <div class="customer-ticket-warning">
-                <h4>🔄 Bạn đã yêu cầu xử lý lại Ticket</h4>
+
+                <h4>
+                    🔄 Bạn đã yêu cầu xử lý lại Ticket
+                </h4>
 
                 <p>
                     HULOECOM đã ghi nhận phản hồi của bạn.
-                    Nhân viên phụ trách sẽ tiếp tục xem xét yêu cầu.
+                    Nhân viên phụ trách sẽ tiếp tục
+                    xem xét yêu cầu.
                 </p>
 
                 {% if ticket.ly_do_khong_dong_y %}
+
                     <div class="customer-ticket-reason">
-                        <strong>Lý do không đồng ý:</strong>
-                        <p>{{ ticket.ly_do_khong_dong_y|linebreaksbr }}</p>
+
+                        <strong>
+                            Lý do không đồng ý:
+                        </strong>
+
+                        <p>
+                            {{ ticket.ly_do_khong_dong_y|linebreaksbr }}
+                        </p>
+
                     </div>
+
                 {% endif %}
 
                 {% if ticket.thoi_diem_xac_nhan %}
+
                     <p class="customer-ticket-time">
                         Thời điểm phản hồi:
                         {{ ticket.thoi_diem_xac_nhan|date:"d/m/Y H:i" }}
                     </p>
+
                 {% endif %}
+
             </div>
 
         <!-- ĐÃ ĐÓNG -->
@@ -243,14 +613,17 @@ Xác nhận kết quả Ticket - HULOECOM
 
             <div class="customer-ticket-success">
                 <h4>✅ Ticket đã được đóng</h4>
-                <p>Quy trình hỗ trợ đã hoàn tất.</p>
+                <p>
+                    Quy trình hỗ trợ đã hoàn tất.
+                </p>
             </div>
 
         <!-- TRẠNG THÁI KHÁC -->
         {% else %}
 
             <p class="customer-ticket-muted">
-                Ticket chưa đến giai đoạn xác nhận kết quả xử lý.
+                Ticket chưa đến giai đoạn xác nhận
+                kết quả xử lý.
             </p>
 
         {% endif %}

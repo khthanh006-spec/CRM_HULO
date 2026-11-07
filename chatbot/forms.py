@@ -1,6 +1,8 @@
 
 from django import forms
 
+from disputes.models import Order
+
 
 # ==========================================
 # UC-2.4: KHAI BÁO THÔNG TIN YÊU CẦU HỖ TRỢ
@@ -14,17 +16,18 @@ class YeuCauHoTroForm(forms.Form):
         required=True,
         widget=forms.TextInput(attrs={
             'class': 'm2-input',
-            'placeholder': 'Ví dụ: Áo thun bị lỗi in'
+            'placeholder': 'Ví dụ: Đơn hàng giao chậm'
         })
     )
 
-    ma_don_hang = forms.CharField(
-        label="Mã đơn hàng (nếu có)",
-        max_length=50,
+    ma_don_hang = forms.ChoiceField(
+        label="Đơn hàng liên quan (nếu có)",
         required=False,
-        widget=forms.TextInput(attrs={
+        choices=[
+            ('', 'Không liên quan đến đơn hàng'),
+        ],
+        widget=forms.Select(attrs={
             'class': 'm2-input',
-            'placeholder': 'Ví dụ: ORD001'
         })
     )
 
@@ -59,6 +62,75 @@ class YeuCauHoTroForm(forms.Form):
         })
     )
 
+    def __init__(self, *args, customer=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.customer = customer
+
+        choices = [
+            ('', 'Không liên quan đến đơn hàng'),
+        ]
+
+        if customer is not None:
+
+            orders = (
+                Order.objects
+                .filter(ma_khach_hang=customer)
+                .order_by(
+                    '-thoi_diem_dat',
+                    '-ma_don_hang',
+                )
+            )
+
+            status_labels = dict(
+                Order._meta.get_field(
+                    'trang_thai'
+                ).choices
+            )
+
+            for order in orders:
+
+                status = status_labels.get(
+                    order.trang_thai,
+                    order.trang_thai,
+                )
+
+                label = (
+                    f'{order.so_don_hang} — {status}'
+                )
+
+                choices.append(
+                    (order.so_don_hang, label)
+                )
+
+        self.fields['ma_don_hang'].choices = choices
+
+    def clean_ma_don_hang(self):
+        ma_don_hang = (
+            self.cleaned_data.get('ma_don_hang') or ''
+        ).strip()
+
+        if not ma_don_hang:
+            return ''
+
+        if self.customer is None:
+            raise forms.ValidationError(
+                'Không xác định được khách hàng.'
+            )
+
+        exists = Order.objects.filter(
+            so_don_hang=ma_don_hang,
+            ma_khach_hang=self.customer,
+        ).exists()
+
+        if not exists:
+            raise forms.ValidationError(
+                'Đơn hàng không tồn tại hoặc không thuộc '
+                'tài khoản của bạn.'
+            )
+
+        return ma_don_hang
+
 
 # ==================================================
 # UC-2.5: FORM CUNG CẤP BẰNG CHỨNG
@@ -81,7 +153,6 @@ class BangChungForm(forms.Form):
 
         tep = self.cleaned_data['tep_bang_chung']
 
-        # Bước 1: Kiểm tra phần mở rộng
         ten_tep = tep.name.lower()
 
         if not ten_tep.endswith(('.jpg', '.jpeg')):
@@ -89,7 +160,6 @@ class BangChungForm(forms.Form):
                 'Chỉ chấp nhận ảnh JPG hoặc JPEG.'
             )
 
-        # Bước 2: Kiểm tra dung lượng
         gioi_han = 10 * 1024 * 1024
 
         if tep.size > gioi_han:
@@ -97,8 +167,8 @@ class BangChungForm(forms.Form):
                 'Ảnh không được vượt quá 10 MB.'
             )
 
-        # Bước 3: Trả tệp hợp lệ về View
         return tep
+
 
 # ==========================================
 # UC-2.7: FORM BỔ SUNG THÔNG TIN YÊU CẦU

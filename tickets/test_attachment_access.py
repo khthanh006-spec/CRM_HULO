@@ -1,14 +1,23 @@
 ﻿
-from unittest.mock import patch, Mock
+from tempfile import TemporaryDirectory
+from unittest.mock import Mock, patch
 
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpResponseForbidden
-from django.test import SimpleTestCase, RequestFactory
+from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
+from django.test import (
+    RequestFactory,
+    SimpleTestCase,
+    TestCase,
+    override_settings,
+)
 from django.urls import reverse
 
+from accounts.models import Staff
+from customers.models import Customer
 from tickets.attachment_views import (
     ticket_attachment_download,
 )
+from tickets.models import Ticket, TicketAttachment
 
 
 class AttachmentAccessTest(SimpleTestCase):
@@ -26,8 +35,12 @@ class AttachmentAccessTest(SimpleTestCase):
 
     def test_logged_in_user_without_permission_is_forbidden(self):
         """
-        Nguoi da dang nhap nhung khong so huu Ticket
-        va khong co quyen nhan vien phai bi chan.
+        Người dùng đã đăng nhập nhưng không sở hữu
+        Ticket phải bị từ chối quyền tải minh chứng.
+
+        Đây là unit test sử dụng Mock.
+        Vai trò CUSTOMER được giả lập trực tiếp
+        để không truy vấn database trong SimpleTestCase.
         """
 
         request = RequestFactory().get(
@@ -36,6 +49,7 @@ class AttachmentAccessTest(SimpleTestCase):
 
         user = Mock()
         user.is_authenticated = True
+        user.is_active = True
         user.is_superuser = False
         user.staff_profile = None
 
@@ -54,31 +68,29 @@ class AttachmentAccessTest(SimpleTestCase):
             return_value=bang_chung,
         ):
             with patch(
-                "tickets.attachment_views.Customer.objects.filter"
-            ) as mock_filter:
-                mock_filter.return_value.exists.return_value = False
+                "tickets.attachment_views.get_user_role",
+                return_value="CUSTOMER",
+            ):
+                with patch(
+                    "tickets.attachment_views.Customer.objects.filter"
+                ) as mock_filter:
 
-                response = ticket_attachment_download(
-                    request,
-                    pk=1,
-                )
+                    mock_filter.return_value.exists.return_value = False
+
+                    response = ticket_attachment_download(
+                        request,
+                        pk=1,
+                    )
 
         self.assertEqual(
             response.status_code,
             403,
         )
 
-
-from tempfile import TemporaryDirectory
-from pathlib import Path
-
-from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
-from django.test import TestCase, override_settings
-
-from accounts.models import Staff
-from customers.models import Customer
-from tickets.models import Ticket, TicketAttachment
+        mock_filter.assert_called_once_with(
+            ma_tai_khoan=user,
+            pk=100,
+        )
 
 
 class AttachmentDatabaseAccessTest(TestCase):
@@ -99,6 +111,7 @@ class AttachmentDatabaseAccessTest(TestCase):
             username="test_customer_a",
             password="TestPass123!",
         )
+
         self.user_b = User.objects.create_user(
             username="test_customer_b",
             password="TestPass123!",
@@ -109,6 +122,7 @@ class AttachmentDatabaseAccessTest(TestCase):
             ho_ten="Khach hang A",
             email="customer_a@example.com",
         )
+
         self.customer_b = Customer.objects.create(
             ma_tai_khoan=self.user_b,
             ho_ten="Khach hang B",
@@ -119,6 +133,7 @@ class AttachmentDatabaseAccessTest(TestCase):
             username="test_cskh_1",
             password="TestPass123!",
         )
+
         self.staff_user_2 = User.objects.create_user(
             username="test_cskh_2",
             password="TestPass123!",
@@ -129,6 +144,7 @@ class AttachmentDatabaseAccessTest(TestCase):
             ho_ten="Nhan vien 1",
             vai_tro="CSKH",
         )
+
         self.staff_2 = Staff.objects.create(
             ma_tai_khoan=self.staff_user_2,
             ho_ten="Nhan vien 2",
@@ -219,7 +235,7 @@ class AttachmentDatabaseAccessTest(TestCase):
 
         Staff.objects.create(
             ma_tai_khoan=assessor_user,
-            ho_ten="Nhan vien tham dinh",
+            ho_ten="Nhan vien thẩm định",
             vai_tro="ASSESSOR",
         )
 

@@ -1,93 +1,167 @@
+
 from uuid import uuid4
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core import signing
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Sum
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.http import require_POST, require_http_methods
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods, require_POST
 
 from accounts.permissions import role_required
 from tickets.models import Ticket
 
-from .forms import CareInteractionForm, CSATForm, LoyaltyPointForm
-from .models import Customer, LoyaltyAccount, CareRecord, CSAT
-from django.conf import settings
-from django.core.exceptions import PermissionDenied
-from .services import change_loyalty_points
-from .models import LoyaltyTier
-from .forms import LoyaltyVoucherTransactionForm
-from .models import LoyaltyReward, LoyaltyRedemption
-from .services import redeem_loyalty_voucher
+from .forms import (
+    CareInteractionForm,
+    CSATForm,
+    LoyaltyVoucherTransactionForm,
+)
+from .models import (
+    CareRecord,
+    CSAT,
+    Customer,
+    LoyaltyAccount,
+    LoyaltyRedemption,
+    LoyaltyReward,
+    LoyaltyTier,
+)
+from .order_360 import get_customer_order_360
+from .services import change_loyalty_points, redeem_loyalty_voucher
+
+
 # =========================================================
-# MODULE 5 - TRANG CHU KHACH HANG
+# MODULE 5 - TRANG CHỦ KHÁCH HÀNG
 # =========================================================
 
 @role_required('CSKH', 'ASSESSOR', 'MANAGER')
 def customer_home(request):
-    return render(
-        request,
-        'customers/home.html'
-    )
+    return render(request, 'customers/home.html')
 
 
 # =========================================================
-# MODULE 5 - DANH SACH VA TIM KIEM KHACH HANG
+# MODULE 5 - DANH SÁCH VÀ TÌM KIẾM KHÁCH HÀNG
 # =========================================================
 
 @role_required('CSKH', 'MANAGER')
 def customer_list(request):
-
-    # 1. Lay tu khoa tim kiem
     keyword = request.GET.get('q', '').strip()
 
-    # 2. Lay danh sach khach hang
     customers = (
         Customer.objects
         .all()
         .order_by('ma_khach_hang')
     )
 
-    # 3. Tim theo ten, email hoac ma khach hang
     if keyword:
-
         conditions = (
-            Q(ho_ten__icontains=keyword) |
-            Q(email__icontains=keyword)
+            Q(ho_ten__icontains=keyword)
+            | Q(email__icontains=keyword)
         )
 
         if keyword.isdecimal():
-            conditions |= Q(
-                ma_khach_hang=int(keyword)
-            )
+            conditions |= Q(ma_khach_hang=int(keyword))
 
         customers = customers.filter(conditions)
-
-    # 4. Truyen du lieu sang giao dien
-    context = {
-        'customers': customers,
-        'keyword': keyword,
-    }
 
     return render(
         request,
         'customers/customer_list.html',
-        context
+        {
+            'customers': customers,
+            'keyword': keyword,
+        },
     )
 
 
 # =========================================================
-# MODULE 5 - HO SO CUSTOMER 360
+# HÀM DÙNG CHUNG - TIẾN ĐỘ NÂNG HẠNG LOYALTY
+# =========================================================
+
+def get_loyalty_progress(loyalty_account):
+    if not loyalty_account:
+        return None
+
+    total_points = loyalty_account.total_points_earned
+
+    tiers = LoyaltyTier.objects.order_by(
+        'min_total_points',
+        'pk',
+    )
+
+    reached_tier = None
+    next_tier = None
+
+    for tier in tiers:
+        if tier.min_total_points <= total_points:
+            reached_tier = tier
+        else:
+            next_tier = tier
+            break
+
+    if next_tier:
+        current_threshold = (
+            reached_tier.min_total_points
+            if reached_tier
+            else 0
+        )
+
+        level_range = (
+            next_tier.min_total_points
+            - current_threshold
+        )
+
+        points_in_level = total_points - current_threshold
+
+        percent = (
+            min(
+                100,
+                max(
+                    0,
+                    points_in_level * 100 // level_range,
+                ),
+            )
+            if level_range > 0
+            else 0
+        )
+
+        return {
+            'percent': percent,
+            'total_points': total_points,
+            'next_tier': next_tier.get_code_display(),
+            'target_points': next_tier.min_total_points,
+            'remaining_points': (
+                next_tier.min_total_points - total_points
+            ),
+            'is_max': False,
+        }
+
+    if reached_tier:
+        return {
+            'percent': 100,
+            'total_points': total_points,
+            'is_max': True,
+        }
+
+    return None
+
+
+# =========================================================
+# MODULE 5 - HỒ SƠ CUSTOMER 360°
+# TÍCH HỢP ORDER TỪ MODULE 4
 # =========================================================
 
 @role_required('CSKH', 'MANAGER')
 def customer_detail(request, customer_id):
 
-    # 1. Lấy thông tin khách hàng
+    # 1. Thông tin khách hàng
     customer = get_object_or_404(
         Customer,
-        pk=customer_id
+        pk=customer_id,
     )
 
-    # 2. Lấy tài khoản Loyalty
+    # 2. Tài khoản Loyalty
     loyalty_account = (
         LoyaltyAccount.objects
         .select_related('tier')
@@ -95,7 +169,7 @@ def customer_detail(request, customer_id):
         .first()
     )
 
-    # 3. Lấy lịch sử giao dịch điểm
+    # 3. Lịch sử giao dịch điểm
     if loyalty_account:
         transactions = (
             loyalty_account.transactions
@@ -105,65 +179,12 @@ def customer_detail(request, customer_id):
     else:
         transactions = []
 
-    # 4. Tính tiến độ nâng hạng
-    loyalty_progress = None
+    # 4. Tiến độ nâng hạng
+    loyalty_progress = get_loyalty_progress(
+        loyalty_account
+    )
 
-    if loyalty_account:
-        total_points = loyalty_account.total_points_earned
-
-        tiers = (
-            LoyaltyTier.objects
-            .order_by('min_total_points', 'pk')
-        )
-
-        reached_tier = None
-        next_tier = None
-
-        for tier in tiers:
-            if tier.min_total_points <= total_points:
-                reached_tier = tier
-            else:
-                next_tier = tier
-                break
-
-        if next_tier:
-            current_threshold = (
-                reached_tier.min_total_points
-                if reached_tier
-                else 0
-            )
-
-            level_range = (
-                next_tier.min_total_points - current_threshold
-            )
-
-            points_in_level = total_points - current_threshold
-
-            percent = (
-                min(100, max(0, points_in_level * 100 // level_range))
-                if level_range > 0
-                else 0
-            )
-
-            loyalty_progress = {
-                'percent': percent,
-                'total_points': total_points,
-                'next_tier': next_tier.get_code_display(),
-                'target_points': next_tier.min_total_points,
-                'remaining_points': (
-                    next_tier.min_total_points - total_points
-                ),
-                'is_max': False,
-            }
-
-        elif reached_tier:
-            loyalty_progress = {
-                'percent': 100,
-                'total_points': total_points,
-                'is_max': True,
-            }
-
-    # 5. Lấy lịch sử chăm sóc khách hàng
+    # 5. Lịch sử chăm sóc
     care_records = (
         CareRecord.objects
         .filter(customer=customer)
@@ -171,7 +192,7 @@ def customer_detail(request, customer_id):
         .order_by('-created_at', '-pk')
     )
 
-    # 6. Lấy Ticket từ Module 3
+    # 6. Ticket từ Module 3
     ticket_queryset = (
         Ticket.objects
         .filter(khach_hang=customer)
@@ -181,7 +202,7 @@ def customer_detail(request, customer_id):
     ticket_count = ticket_queryset.count()
     tickets = ticket_queryset[:10]
 
-    # 7. Lấy đánh giá CSAT gần nhất
+    # 7. CSAT gần nhất
     latest_csat = (
         CSAT.objects
         .filter(ticket__khach_hang=customer)
@@ -190,7 +211,7 @@ def customer_detail(request, customer_id):
         .first()
     )
 
-    # 8. Lấy lịch sử đánh giá CSAT
+    # 8. Lịch sử CSAT
     csat_history = (
         CSAT.objects
         .filter(ticket__khach_hang=customer)
@@ -198,7 +219,11 @@ def customer_detail(request, customer_id):
         .order_by('-created_at', '-pk')
     )
 
-    # 9. Truyền dữ liệu sang Customer 360°
+    # 9. DỮ LIỆU ĐƠN HÀNG TỪ MODULE 4
+    # Chỉ đọc dữ liệu của khách hàng hiện tại.
+    order_data = get_customer_order_360(customer)
+
+    # 10. Context Customer 360°
     context = {
         'customer': customer,
         'loyalty_account': loyalty_account,
@@ -211,134 +236,114 @@ def customer_detail(request, customer_id):
         'loyalty_progress': loyalty_progress,
     }
 
+    # Bổ sung toàn bộ thống kê và lịch sử Order.
+    context.update(order_data)
+
     return render(
         request,
         'customers/customer_detail.html',
-        context
+        context,
     )
 
 
 # =========================================================
-# MODULE 5 - LUU HOAT DONG CHAM SOC / GHI CHU
+# MODULE 5 - LƯU GHI CHÚ / HOẠT ĐỘNG CHĂM SÓC
 # =========================================================
 
 @role_required('CSKH', 'MANAGER')
 @require_POST
 def add_care_record(request, customer_id):
 
-    # 1. Lay khach hang
     customer = get_object_or_404(
         Customer,
-        pk=customer_id
+        pk=customer_id,
     )
 
-    # 2. Lay thong tin tu bieu mau
     care_type = request.POST.get(
         'care_type',
-        CareRecord.CareType.NOTE
+        CareRecord.CareType.NOTE,
     )
 
     content = (
         request.POST.get('content') or ''
     ).strip()
 
-    # 3. Kiem tra du lieu
     if care_type not in CareRecord.CareType.values:
-
         messages.error(
             request,
-            'Hình thức chăm sóc không hợp lệ.'
+            'Hình thức chăm sóc không hợp lệ.',
         )
 
     elif not content:
-
         messages.error(
             request,
-            'Vui lòng nhập nội dung chăm sóc.'
+            'Vui lòng nhập nội dung chăm sóc.',
         )
 
     elif len(content) > 500:
-
         messages.error(
             request,
-            'Nội dung không được quá 500 ký tự.'
+            'Nội dung không được quá 500 ký tự.',
         )
 
     else:
-
-        # 4. Luu vao database
         CareRecord.objects.create(
             customer=customer,
             created_by=request.user,
             care_type=care_type,
-            content=content
+            content=content,
         )
 
         messages.success(
             request,
-            'Đã lưu nội dung chăm sóc thành công.'
+            'Đã lưu nội dung chăm sóc thành công.',
         )
 
-    # 5. Quay ve Customer 360
     return redirect(
         'customers:detail',
-        customer_id=customer.pk
+        customer_id=customer.pk,
     )
 
 
 # =========================================================
-# MODULE 5 - CHAM SOC KHACH HANG CO CSAT THAP
+# MODULE 5 - CHĂM SÓC KHÁCH HÀNG CÓ CSAT THẤP
 # =========================================================
 
 @role_required('CSKH', 'MANAGER')
 @require_http_methods(['GET', 'POST'])
 def csat_care(request, customer_id):
 
-    # 1. Lay khach hang can cham soc
     customer = get_object_or_404(
         Customer,
-        pk=customer_id
+        pk=customer_id,
     )
 
-    # 2. Xu ly khi nhan vien gui hoat dong cham soc
     if request.method == 'POST':
-
         form = CareInteractionForm(request.POST)
 
         if form.is_valid():
-
-            # Tao ban ghi nhung chua luu
             care_record = form.save(commit=False)
-
-            # Gan khach hang
             care_record.customer = customer
-
-            # Gan nhan vien thuc hien
             care_record.created_by = request.user
-
-            # Luu hoat dong cham soc
             care_record.save()
 
             messages.success(
                 request,
-                'Đã lưu hoạt động chăm sóc thành công.'
+                'Đã lưu hoạt động chăm sóc thành công.',
             )
 
             return redirect(
                 'customers:csat_care',
-                customer_id=customer.pk
+                customer_id=customer.pk,
             )
 
     else:
-
-        # Mac dinh hinh thuc cham soc la Goi dien
         form = CareInteractionForm(
             initial={
-                'care_type': CareRecord.CareType.CALL
+                'care_type': CareRecord.CareType.CALL,
             }
         )
 
-    # 3. Lay lich su cham soc
     care_records = (
         CareRecord.objects
         .filter(customer=customer)
@@ -346,8 +351,6 @@ def csat_care(request, customer_id):
         .order_by('-created_at', '-pk')
     )
 
-    # 4. Lay CSAT moi nhat cua khach hang
-    # Ket noi M5 CSAT voi Ticket cua M3
     latest_csat = (
         CSAT.objects
         .filter(ticket__khach_hang=customer)
@@ -356,21 +359,17 @@ def csat_care(request, customer_id):
         .first()
     )
 
-    # 5. Lay Ticket lien quan den CSAT
-    # Khong thay doi du lieu Ticket cua M3
     latest_ticket = (
         latest_csat.ticket
         if latest_csat is not None
         else None
     )
 
-    # 6. Xac dinh CSAT thap
     is_low_csat = (
         latest_csat is not None
         and latest_csat.score <= 3
     )
 
-    # 7. Truyen du lieu sang giao dien
     context = {
         'customer': customer,
         'form': form,
@@ -383,19 +382,18 @@ def csat_care(request, customer_id):
     return render(
         request,
         'customers/csat_care.html',
-        context
+        context,
     )
 
 
 # =========================================================
-# MODULE 5 - KHACH HANG GUI DANH GIA CSAT
+# MODULE 5 - KHÁCH HÀNG GỬI ĐÁNH GIÁ CSAT
 # =========================================================
 
 @login_required
 @require_http_methods(['GET', 'POST'])
 def submit_csat(request, ticket_id):
 
-    # 1. Chi cho phep khach hang danh gia Ticket cua minh
     ticket = get_object_or_404(
         Ticket.objects.select_related(
             'khach_hang',
@@ -406,88 +404,75 @@ def submit_csat(request, ticket_id):
         khach_hang__ma_tai_khoan=request.user,
     )
 
-    # 2. Kiem tra Ticket da duoc danh gia chua
     existing_csat = (
         CSAT.objects
         .filter(ticket=ticket)
         .first()
     )
 
-    # 3. Dieu kien duoc phep danh gia
-    # Ticket da xu ly va khach hang da dong y ket qua
     can_rate = (
         ticket.trang_thai in ['RESOLVED', 'CLOSED']
         and ticket.trang_thai_xac_nhan == 'AGREED'
     )
 
-    # 4. Khoi tao form danh gia
     form = CSATForm(request.POST or None)
 
-    # 5. Xu ly khi khach hang gui danh gia
     if (
         request.method == 'POST'
         and existing_csat is None
         and can_rate
+        and form.is_valid()
     ):
+        csat, created = CSAT.objects.get_or_create(
+            ticket=ticket,
+            defaults={
+                'score': form.cleaned_data['score'],
+                'comment': form.cleaned_data.get(
+                    'comment',
+                    '',
+                ),
+            },
+        )
 
-        if form.is_valid():
-
-            # Moi Ticket chi co mot CSAT
-            csat, created = CSAT.objects.get_or_create(
-                ticket=ticket,
-                defaults={
-                    'score': form.cleaned_data['score'],
-                    'comment': form.cleaned_data.get(
-                        'comment',
-                        ''
-                    ),
-                },
+        if created:
+            messages.success(
+                request,
+                'Cảm ơn bạn đã gửi đánh giá cho HULO!',
             )
 
-            if created:
-                messages.success(
-                    request,
-                    'Cảm ơn bạn đã gửi đánh giá cho HULO!'
-                )
+        return redirect(
+            'customers:submit_csat',
+            ticket_id=ticket.pk,
+        )
 
-            return redirect(
-                'customers:submit_csat',
-                ticket_id=ticket.pk
-            )
-
-    # 6. Truyen thong tin Ticket va CSAT sang giao dien
     context = {
         'ticket': ticket,
         'form': form,
         'existing_csat': existing_csat,
         'can_rate': can_rate,
         'rating_values': ['5', '4', '3', '2', '1'],
-        'selected_score': request.POST.get(
-            'score',
-            ''
-        ),
+        'selected_score': request.POST.get('score', ''),
     }
 
     return render(
         request,
         'customers/csat_form.html',
-        context
+        context,
     )
 
+
 # =========================================================
-# MODULE 5 - TRANG QUAN LY LOYALTY
+# MODULE 5 - CHI TIẾT LOYALTY
 # =========================================================
 
 @role_required('CSKH', 'MANAGER')
 def loyalty_detail(request, customer_id):
 
-    # 1. Lay khach hang
     customer = get_object_or_404(
         Customer,
-        pk=customer_id
+        pk=customer_id,
     )
 
-    # 2. Lay tai khoan Loyalty
     loyalty_account = (
         LoyaltyAccount.objects
         .select_related('tier')
@@ -495,194 +480,51 @@ def loyalty_detail(request, customer_id):
         .first()
     )
 
-    # 3. Lay lich su giao dich diem
     if loyalty_account:
-
         transactions = (
             loyalty_account.transactions
             .all()
             .order_by('-created_at', '-pk')
         )
-
     else:
         transactions = []
-    # Tiến độ nâng hạng dựa trên tổng điểm tích lũy
-    loyalty_progress = None
 
-    if loyalty_account:
-        total_points = loyalty_account.total_points_earned
-
-        tiers = list(
-            LoyaltyTier.objects.order_by("min_total_points", "pk")
-        )
-
-        reached_tier = None
-        next_tier = None
-
-        for tier in tiers:
-            if tier.min_total_points <= total_points:
-                reached_tier = tier
-            else:
-                next_tier = tier
-                break
-
-        if next_tier:
-            current_threshold = (
-                reached_tier.min_total_points
-                if reached_tier
-                else 0
-            )
-
-            points_in_level = total_points - current_threshold
-            level_range = (
-                    next_tier.min_total_points - current_threshold
-            )
-
-            percent = (
-                min(100, max(0, points_in_level * 100 // level_range))
-                if level_range > 0
-                else 0
-            )
-
-            loyalty_progress = {
-                "percent": percent,
-                "total_points": total_points,
-                "next_tier": next_tier.get_code_display(),
-                "target_points": next_tier.min_total_points,
-                "remaining_points": (
-                        next_tier.min_total_points - total_points
-                ),
-                "is_max": False,
-            }
-
-        elif reached_tier:
-            loyalty_progress = {
-                "percent": 100,
-                "total_points": total_points,
-                "is_max": True,
-            }
-
-    # 4. Truyen du lieu sang giao dien
-    context = {
-        'customer': customer,
-        'loyalty_account': loyalty_account,
-        'transactions': transactions,
-        "loyalty_progress": loyalty_progress,
-    }
+    loyalty_progress = get_loyalty_progress(
+        loyalty_account
+    )
 
     return render(
         request,
         'customers/loyalty_detail.html',
-        context
+        {
+            'customer': customer,
+            'loyalty_account': loyalty_account,
+            'transactions': transactions,
+            'loyalty_progress': loyalty_progress,
+        },
     )
 
-# =====================================================
-# MODULE 5 - GIAO DICH DIEM LOYALTY DEMO
-# =====================================================
 
+# =========================================================
+# MODULE 5 - TỔNG QUAN LOYALTY
+# =========================================================
 
-@role_required('CSKH', 'MANAGER')
-@require_http_methods(['GET', 'POST'])
-def loyalty_adjust_demo(request, customer_id):
-
-    # Chỉ sử dụng trong môi trường DEMO
-    if not settings.DEBUG:
-        raise PermissionDenied(
-            "Chức năng giao dịch Loyalty DEMO không được bật."
-        )
-
-    # 1. Lấy khách hàng
-    customer = get_object_or_404(
-        Customer,
-        pk=customer_id
-    )
-
-    # 2. Lấy tài khoản Loyalty
-    loyalty_account = get_object_or_404(
-        LoyaltyAccount.objects.select_related('tier'),
-        customer=customer
-    )
-
-    # 3. Tạo form
-    if request.method == 'POST':
-
-        # Dùng lại mã đã gửi từ biểu mẫu
-        form = LoyaltyPointForm(request.POST)
-
-    else:
-
-        # Mỗi lần mở trang mới sẽ có một mã UUID mới
-        form = LoyaltyPointForm(
-            initial={
-                'idempotency_key': uuid4()
-            }
-        )
-
-    # 4. Xử lý giao dịch
-    if request.method == 'POST' and form.is_valid():
-
-        try:
-
-            change_loyalty_points(
-                customer=customer,
-                transaction_type=form.cleaned_data[
-                    'transaction_type'
-                ],
-                points=form.cleaned_data['points'],
-                description=(
-                    "DEMO - " +
-                    form.cleaned_data['description']
-                ),
-                performed_by=request.user,
-                idempotency_key=form.cleaned_data[
-                    'idempotency_key'
-                ]
-            )
-
-        except ValueError as error:
-
-            form.add_error(None, str(error))
-
-        else:
-
-            messages.success(
-                request,
-                "Yêu cầu giao dịch Loyalty đã được xử lý. "
-                "Nếu gửi lại cùng mã yêu cầu, "
-                "điểm sẽ không thay đổi lần thứ hai."
-            )
-
-            return redirect(
-                'customers:loyalty_detail',
-                customer_id=customer.pk
-            )
-
-    # 5. Hiển thị biểu mẫu
-    context = {
-        'customer': customer,
-        'loyalty_account': loyalty_account,
-        'form': form,
-    }
-
-    return render(
-        request,
-        'customers/loyalty_adjust_demo.html',
-        context
-    )
 @role_required('CSKH', 'MANAGER')
 def loyalty_overview(request):
+
     keyword = request.GET.get('q', '').strip()
 
-    # Thống kê trên toàn bộ tài khoản Loyalty.
     all_accounts = LoyaltyAccount.objects.all()
 
     total_accounts = all_accounts.count()
+
     total_points_balance = (
-        all_accounts.aggregate(total=Sum('points_balance'))['total']
+        all_accounts.aggregate(
+            total=Sum('points_balance')
+        )['total']
         or 0
     )
 
-    # Danh sách hiển thị và tìm kiếm.
     loyalty_accounts = (
         all_accounts
         .select_related('customer', 'tier')
@@ -700,23 +542,30 @@ def loyalty_overview(request):
                 customer__ma_khach_hang=int(keyword)
             )
 
-        loyalty_accounts = loyalty_accounts.filter(conditions)
-
-    context = {
-        'keyword': keyword,
-        'loyalty_accounts': loyalty_accounts,
-        'total_accounts': total_accounts,
-        'total_points_balance': total_points_balance,
-    }
+        loyalty_accounts = loyalty_accounts.filter(
+            conditions
+        )
 
     return render(
         request,
         'customers/loyalty_overview.html',
-        context,
+        {
+            'keyword': keyword,
+            'loyalty_accounts': loyalty_accounts,
+            'total_accounts': total_accounts,
+            'total_points_balance': total_points_balance,
+        },
     )
+
+
+# =========================================================
+# MODULE 5 - GIAO DỊCH LOYALTY / ĐỔI VOUCHER DEMO
+# =========================================================
+
 @role_required('CSKH', 'MANAGER')
 @require_http_methods(['GET', 'POST'])
 def loyalty_adjust_demo(request, customer_id):
+
     if not settings.DEBUG:
         raise PermissionDenied(
             'Chức năng giao dịch Loyalty DEMO không được bật.'
@@ -735,28 +584,41 @@ def loyalty_adjust_demo(request, customer_id):
     preview = None
 
     if request.method == 'POST':
-        form = LoyaltyVoucherTransactionForm(request.POST)
+        form = LoyaltyVoucherTransactionForm(
+            request.POST
+        )
     else:
-        form = LoyaltyVoucherTransactionForm(initial={
-            'idempotency_key': uuid4(),
-            'transaction_type': 'EARN',
-        })
+        form = LoyaltyVoucherTransactionForm(
+            initial={
+                'idempotency_key': uuid4(),
+                'transaction_type': 'EARN',
+            }
+        )
 
     if request.method == 'POST' and form.is_valid():
+
         data = form.cleaned_data
         action = request.POST.get('action', '')
         transaction_type = data['transaction_type']
 
         try:
+            # -----------------------------------------
+            # CỘNG ĐIỂM LOYALTY
+            # -----------------------------------------
             if transaction_type == 'EARN':
+
                 if action != 'earn':
-                    raise ValueError('Thao tác cộng điểm không hợp lệ.')
+                    raise ValueError(
+                        'Thao tác cộng điểm không hợp lệ.'
+                    )
 
                 change_loyalty_points(
                     customer=customer,
                     transaction_type='EARN',
                     points=data['points'],
-                    description='DEMO - ' + data['description'],
+                    description=(
+                        'DEMO - ' + data['description']
+                    ),
                     performed_by=request.user,
                     idempotency_key=data['idempotency_key'],
                 )
@@ -771,12 +633,19 @@ def loyalty_adjust_demo(request, customer_id):
                     customer_id=customer.pk,
                 )
 
+            # -----------------------------------------
+            # ĐỔI VOUCHER
+            # -----------------------------------------
             reward = data['reward']
 
             if action == 'preview':
+
                 loyalty_account.refresh_from_db()
 
-                if loyalty_account.points_balance < reward.points_cost:
+                if (
+                    loyalty_account.points_balance
+                    < reward.points_cost
+                ):
                     raise ValueError(
                         'Khách hàng không đủ điểm đổi Voucher này.'
                     )
@@ -790,19 +659,21 @@ def loyalty_adjust_demo(request, customer_id):
                 }
 
             elif action == 'confirm':
-                # So sánh với nội dung đã xem trước.
-                # Nội dung xác nhận được ký bởi máy chủ.
-                from django.core import signing
 
                 try:
                     confirmed = signing.loads(
-                        request.POST.get('preview_token', ''),
+                        request.POST.get(
+                            'preview_token',
+                            '',
+                        ),
                         salt='m5-loyalty-voucher-preview',
                         max_age=900,
                     )
+
                 except signing.BadSignature:
                     raise ValueError(
-                        'Thông tin xác nhận đã hết hạn hoặc không hợp lệ. '
+                        'Thông tin xác nhận đã hết hạn '
+                        'hoặc không hợp lệ. '
                         'Vui lòng xem trước lại.'
                     )
 
@@ -842,44 +713,56 @@ def loyalty_adjust_demo(request, customer_id):
                     ),
                 )
 
-                # Hiển thị lại trang với kết quả Voucher vừa đổi.
                 return redirect(
-                    request.path + '?voucher=' + str(voucher.reference_code)
+                    request.path
+                    + '?voucher='
+                    + str(voucher.reference_code)
                 )
 
             else:
-                raise ValueError('Thao tác đổi Voucher không hợp lệ.')
+                raise ValueError(
+                    'Thao tác đổi Voucher không hợp lệ.'
+                )
 
         except ValueError as error:
             form.add_error(None, str(error))
 
+    # -----------------------------------------
+    # TẠO TOKEN XÁC NHẬN VOUCHER
+    # -----------------------------------------
     preview_token = ''
 
     if preview:
-        from django.core import signing
-
         reward = preview['reward']
 
         preview_token = signing.dumps(
             {
                 'customer_id': customer.pk,
                 'user_id': request.user.pk,
-                'key': str(form.cleaned_data['idempotency_key']),
+                'key': str(
+                    form.cleaned_data['idempotency_key']
+                ),
                 'reward_id': reward.pk,
                 'name': reward.name,
                 'cost': reward.points_cost,
                 'amount': reward.discount_amount,
                 'terms': reward.terms,
                 'days': reward.validity_days,
-                'description': form.cleaned_data['description'],
+                'description': form.cleaned_data[
+                    'description'
+                ],
             },
             salt='m5-loyalty-voucher-preview',
         )
 
-    # Lịch sử Voucher thuộc đúng khách hàng đang xem.
+    # -----------------------------------------
+    # LỊCH SỬ VOUCHER
+    # -----------------------------------------
     vouchers = (
         LoyaltyRedemption.objects
-        .filter(transaction__account__customer=customer)
+        .filter(
+            transaction__account__customer=customer
+        )
         .order_by('-issued_at', '-pk')[:20]
     )
 
@@ -894,9 +777,11 @@ def loyalty_adjust_demo(request, customer_id):
             'form': form,
             'preview': preview,
             'preview_token': preview_token,
-            'rewards': LoyaltyReward.objects.filter(
-                is_enabled=True
-            ).order_by('points_cost', 'pk'),
+            'rewards': (
+                LoyaltyReward.objects
+                .filter(is_enabled=True)
+                .order_by('points_cost', 'pk')
+            ),
             'vouchers': vouchers,
         },
     )

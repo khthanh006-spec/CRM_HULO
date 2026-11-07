@@ -6,151 +6,373 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'tickets/tickets.css' %}?v=5">
-<link rel="stylesheet" href="{% static 'tickets/ticket_detail.css' %}?v=4">
+<link rel="stylesheet" href="{% static 'tickets/ticket_detail.css' %}?v=7">
 
 <style>
-    /* Giao diện bằng chứng đính kèm M2 -> M3 */
-    .ticket-detail-page .ticket-evidence-section {
-        padding: 24px;
-    }
+.ticket-detail-page .ticket-evidence-section {
+    padding: 24px;
+}
+.ticket-evidence-group {
+    margin-top: 20px;
+}
+.ticket-evidence-group + .ticket-evidence-group {
+    margin-top: 26px;
+}
+.ticket-evidence-group-header {
+    padding: 15px 18px;
+    background: #edf5ff;
+    border: 1px solid #d6e7fc;
+    border-radius: 11px;
+    margin-bottom: 13px;
+}
+.ticket-evidence-group-header h4 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #164b88;
+}
+.ticket-evidence-group-header p {
+    margin: 0;
+    color: #607d9e;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.ticket-evidence-group-supplement .ticket-evidence-group-header {
+    background: #eef8f4;
+    border-color: #d1eadc;
+}
+.ticket-evidence-group-supplement .ticket-evidence-group-header h4 {
+    color: #21734d;
+}
+.ticket-evidence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.ticket-evidence-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    padding: 18px;
+    background: #f8fafc;
+    border: 1px solid #dce6f2;
+    border-radius: 11px;
+}
+.ticket-evidence-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+.ticket-evidence-name {
+    font-weight: 700;
+    color: #183e70;
+    overflow-wrap: anywhere;
+}
+.ticket-evidence-meta {
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.6;
+}
+.ticket-evidence-source {
+    display: inline-block;
+    align-self: flex-start;
+    border-radius: 20px;
+    background: #e5f1ff;
+    color: #1763ac;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+}
+.ticket-evidence-source-supplement {
+    background: #e5f5eb;
+    color: #24754c;
+}
+.ticket-evidence-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+.ticket-evidence-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 9px 14px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.ticket-evidence-view {
+    background: #176fc1;
+    border: 1px solid #176fc1;
+    color: #fff;
+}
+.ticket-evidence-view:hover {
+    background: #0c559d;
+    color: #fff;
+}
+.ticket-evidence-download {
+    background: #fff;
+    border: 1px solid #cbd9e8;
+    color: #145b9f;
+}
+.ticket-evidence-download:hover {
+    background: #edf5ff;
+    color: #145b9f;
+}
+.ticket-evidence-empty {
+    padding: 20px;
+    text-align: center;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    font-size: 13px;
+}
+.ticket-context-intro {
+    padding: 18px 20px;
+    margin-bottom: 22px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-left: 4px solid #2563eb;
+    border-radius: 11px;
+    line-height: 1.7;
+    color: #1e40af;
+}
+.ticket-context-intro strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+.ticket-context-intro p {
+    margin: 0;
+}
+.ticket-context-group {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.ticket-context-group .ticket-action-block {
+    margin: 0;
+}
+.ticket-advanced-details {
+    margin-top: 16px;
+    border: 1px solid #dce5ef;
+    border-radius: 12px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+.ticket-advanced-details > summary {
+    padding: 17px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #475569;
+    line-height: 1.5;
+}
+.ticket-advanced-details > summary:hover {
+    background: #f1f5f9;
+}
+.ticket-advanced-details[open] > summary {
+    border-bottom: 1px solid #e2e8f0;
+}
+.ticket-advanced-content {
+    padding: 20px;
+}
+.ticket-assessment-active {
+    padding: 16px 18px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    color: #9a3412;
+    margin: 16px 0;
+    line-height: 1.7;
+}
+.ticket-action-heading {
+    margin-bottom: 15px;
+}
+.ticket-action-heading h4 {
+    margin: 0 0 7px;
+}
+.ticket-action-heading p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+}
+.ticket-resolved-info {
+    padding: 18px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 11px;
+    color: #065f46;
+    line-height: 1.7;
+}
+.ticket-resolved-info p {
+    margin: 6px 0 0;
+}
+.ticket-action-block textarea,
+.ticket-action-block select {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+.ticket-conversation-customer {
+    border-left: 4px solid #2563eb;
+}
+.ticket-conversation-customer-label {
+    color: #1763ac;
+    font-weight: 700;
+}
+.ticket-conversation-staff-label {
+    color: #24754c;
+    font-weight: 700;
+}
 
-    .ticket-detail-page .ticket-evidence-section > h3 {
-        margin-top: 0;
-        margin-bottom: 14px;
-    }
+/* ==========================================
+   MỚI: YÊU CẦU BỔ SUNG MINH CHỨNG
+   ========================================== */
 
-    .ticket-detail-page .ticket-evidence-section > .ticket-detail-muted {
-        margin-bottom: 22px;
-        line-height: 1.6;
-    }
+.ticket-evidence-request-option {
+    margin: 16px 0;
+    border: 1px solid #c8dcfa;
+    border-radius: 12px;
+    background: #f5f9ff;
+    overflow: hidden;
+}
+.ticket-evidence-request-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 17px 18px;
+    cursor: pointer;
+}
+.ticket-evidence-request-label input[type="checkbox"] {
+    flex: none;
+    width: 19px;
+    height: 19px;
+    margin-top: 2px;
+    accent-color: #176fc1;
+    cursor: pointer;
+}
+.ticket-evidence-request-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+.ticket-evidence-request-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #174b84;
+}
+.ticket-evidence-request-description {
+    font-size: 13px;
+    color: #526b87;
+    line-height: 1.7;
+}
+.ticket-evidence-request-option:has(input:checked) {
+    background: #eaf3ff;
+    border-color: #6ea8e6;
+}
+.ticket-evidence-request-option:has(input:checked)
+.ticket-evidence-request-title {
+    color: #0b559a;
+}
+.ticket-evidence-request-note {
+    padding: 10px 18px 15px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #64748b;
+    border-top: 1px solid #dce9fb;
+}
+.ticket-evidence-request-note strong {
+    color: #334155;
+}
+.ticket-evidence-request-pending {
+    padding: 14px 17px;
+    background: #fff8e9;
+    border: 1px solid #f5d89e;
+    border-radius: 11px;
+    color: #92400e;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+.ticket-evidence-request-pending strong {
+    display: block;
+    margin-bottom: 4px;
+}
+.ticket-evidence-request-status {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #fff1cc;
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 700;
+}
+.ticket-evidence-request-status-done {
+    background: #dcfce7;
+    color: #166534;
+}
+.ticket-evidence-request-history {
+    margin-top: 12px;
+}
+.ticket-evidence-request-history h5 {
+    margin: 0 0 10px;
+    color: #334155;
+    font-size: 13px;
+}
+.ticket-evidence-request-history-item {
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    margin-bottom: 9px;
+    background: #fff;
+    font-size: 12px;
+    line-height: 1.6;
+}
+.ticket-evidence-request-history-item p {
+    margin: 5px 0 0;
+    color: #64748b;
+}
+.ticket-message-form .ticket-form-hint {
+    line-height: 1.7;
+}
 
-    .ticket-detail-page .ticket-evidence-list {
-        display: flex;
+@media (max-width: 800px) {
+    .ticket-evidence-item {
         flex-direction: column;
-        gap: 14px;
+        align-items: stretch;
+    }
+    .ticket-evidence-actions {
+        justify-content: flex-start;
+    }
+}
+@media (max-width: 420px) {
+    .ticket-evidence-actions {
+        flex-direction: column;
+    }
+    .ticket-evidence-btn {
         width: 100%;
     }
-
-    .ticket-detail-page .ticket-evidence-item {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        width: 100%;
-        min-width: 0;
-        padding: 22px;
-        background: #f7f9fc;
-        border: 1px solid #dce6f2;
-        border-radius: 14px;
+    .ticket-advanced-content {
+        padding: 14px;
     }
-
-    .ticket-detail-page .ticket-evidence-info {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        flex: 1 1 auto;
-        min-width: 0;
-        gap: 9px;
+    .ticket-evidence-request-label {
+        padding: 14px;
     }
-
-    .ticket-detail-page .ticket-evidence-name {
-        display: block;
-        max-width: 100%;
-        color: #183e70;
-        font-size: 15px;
-        font-weight: 700;
-        overflow-wrap: anywhere;
-        line-height: 1.5;
-    }
-
-    .ticket-detail-page .ticket-evidence-info small {
-        display: block;
-        color: #7a90aa;
-        font-size: 13px;
-        line-height: 1.5;
-    }
-
-    .ticket-detail-page .ticket-evidence-actions {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-end;
-        flex: 0 0 auto;
-        gap: 10px;
-        margin: 0;
-    }
-
-    .ticket-detail-page .ticket-evidence-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        min-height: 44px;
-        padding: 11px 16px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        text-decoration: none;
-        white-space: nowrap;
-        line-height: 1.4;
-        transition: background-color .2s, border-color .2s;
-    }
-
-    .ticket-detail-page .ticket-evidence-view {
-        color: #ffffff;
-        background: #176fc1;
-        border: 1px solid #176fc1;
-    }
-
-    .ticket-detail-page .ticket-evidence-view:hover {
-        color: #ffffff;
-        background: #0c559d;
-        border-color: #0c559d;
-        text-decoration: none;
-    }
-
-    .ticket-detail-page .ticket-evidence-download {
-        color: #145b9f;
-        background: #ffffff;
-        border: 1px solid #cbd9e8;
-    }
-
-    .ticket-detail-page .ticket-evidence-download:hover {
-        color: #0d4b88;
-        background: #edf5ff;
-        border-color: #8db9e5;
-        text-decoration: none;
-    }
-
-    @media (max-width: 800px) {
-        .ticket-detail-page .ticket-evidence-item {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 16px;
-            padding: 18px;
-        }
-
-        .ticket-detail-page .ticket-evidence-actions {
-            justify-content: flex-start;
-            flex-wrap: wrap;
-        }
-    }
-
-    @media (max-width: 420px) {
-        .ticket-detail-page .ticket-evidence-actions {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .ticket-detail-page .ticket-evidence-btn {
-            width: 100%;
-        }
-    }
+}
 </style>
 {% endblock %}
 
+
 {% block content %}
+{% with category=ticket.danh_muc.ten_danh_muc %}
 
 <div class="ticket-page ticket-detail-page">
 
@@ -161,7 +383,7 @@
         </a>
     </div>
 
-    <!-- THÔNG BÁO DJANGO -->
+    <!-- THÔNG BÁO -->
     {% if messages %}
         {% for message in messages %}
             <div class="ticket-notice {% if 'success' in message.tags %}ticket-notice-success{% else %}ticket-notice-error{% endif %}">
@@ -170,19 +392,15 @@
         {% endfor %}
     {% endif %}
 
-    <!-- 1. BANNER THÔNG TIN TICKET -->
+
+    <!-- 1. THÔNG TIN TICKET -->
     <section class="ticket-detail-header">
-
         <div class="ticket-detail-header-main">
-
             <p class="ticket-detail-eyebrow">
-                Ticket Management / Chi tiết Ticket
+                HULOECOM / Chi tiết Ticket
             </p>
 
-            <h1>
-                #{{ ticket.ma_ticket|default:"Chưa có mã" }}
-            </h1>
-
+            <h1>#{{ ticket.ma_ticket|default:"Chưa có mã" }}</h1>
             <h2>{{ ticket.tieu_de }}</h2>
 
             <div class="ticket-detail-tags">
@@ -210,37 +428,23 @@
                 {% endif %}
 
                 {% if ticket.trang_thai == 'NEW' %}
-                    <span class="ticket-badge ticket-badge-new">
-                        NEW
-                    </span>
+                    <span class="ticket-badge ticket-badge-new">NEW</span>
                 {% elif ticket.trang_thai == 'ASSIGNED' %}
-                    <span class="ticket-badge ticket-badge-assigned">
-                        ASSIGNED
-                    </span>
+                    <span class="ticket-badge ticket-badge-assigned">ASSIGNED</span>
                 {% elif ticket.trang_thai == 'IN_PROGRESS' %}
-                    <span class="ticket-badge ticket-badge-progress">
-                        IN_PROGRESS
-                    </span>
+                    <span class="ticket-badge ticket-badge-progress">IN_PROGRESS</span>
                 {% elif ticket.trang_thai == 'RESOLVED' %}
-                    <span class="ticket-badge ticket-badge-resolved">
-                        RESOLVED
-                    </span>
+                    <span class="ticket-badge ticket-badge-resolved">RESOLVED</span>
                 {% elif ticket.trang_thai == 'CLOSED' %}
-                    <span class="ticket-badge ticket-badge-closed">
-                        CLOSED
-                    </span>
+                    <span class="ticket-badge ticket-badge-closed">CLOSED</span>
                 {% elif ticket.trang_thai == 'REOPENED' %}
-                    <span class="ticket-badge ticket-badge-reopened">
-                        REOPENED
-                    </span>
+                    <span class="ticket-badge ticket-badge-reopened">REOPENED</span>
                 {% endif %}
 
             </div>
         </div>
 
-        <!-- THÔNG TIN SLA -->
         <div class="ticket-detail-sla">
-
             <p>⏳ SLA Deadline</p>
 
             {% if ticket.sla_deadline %}
@@ -252,23 +456,23 @@
             {% endif %}
 
             {% if ticket.sla_status == 'OVERDUE' %}
-                <p style="color: #dc2626; margin-top: 8px;">
+                <p style="color:#dc2626;margin-top:8px;">
                     🚨 {{ ticket.sla_remaining }}
                 </p>
             {% elif ticket.sla_status == 'WARNING' %}
-                <p style="color: #d97706; margin-top: 8px;">
+                <p style="color:#d97706;margin-top:8px;">
                     ⏳ {{ ticket.sla_remaining }} - Sắp quá hạn
                 </p>
             {% elif ticket.sla_status == 'ON_TIME' %}
-                <p style="color: #15803d; margin-top: 8px;">
+                <p style="color:#15803d;margin-top:8px;">
                     ✓ {{ ticket.sla_remaining }}
                 </p>
             {% elif ticket.sla_status == 'DONE' %}
-                <p style="color: #15803d; margin-top: 8px;">
+                <p style="color:#15803d;margin-top:8px;">
                     ✓ Đã giải quyết
                 </p>
             {% else %}
-                <p style="margin-top: 8px;">
+                <p style="margin-top:8px;">
                     Chưa thiết lập SLA
                 </p>
             {% endif %}
@@ -279,35 +483,29 @@
                     {{ ticket.sla_config.thoi_han_gio }} giờ
                 </small>
             {% endif %}
-
         </div>
-
     </section>
 
-    <!-- 2. THÔNG BÁO KHÁCH KHÔNG ĐỒNG Ý -->
-    {% if ticket.trang_thai_xac_nhan == 'DISAGREED' %}
 
+    <!-- 2. THÔNG BÁO XỬ LÝ LẠI -->
+    {% if ticket.trang_thai_xac_nhan == 'DISAGREED' %}
         {% if ticket.trang_thai == 'REOPENED' or ticket.trang_thai == 'IN_PROGRESS' %}
 
             <section class="ticket-detail-card ticket-reopen-notice">
-
                 <h3>🔄 Khách hàng yêu cầu xử lý lại</h3>
 
                 <p>
-                    Khách hàng không đồng ý với kết quả xử lý
-                    trước đó. Nhân viên cần xem xét lý do và
-                    tiếp tục hỗ trợ.
+                    Khách hàng không đồng ý với kết quả xử lý trước đó.
+                    Nhân viên phụ trách cần xem xét phản hồi để đưa ra
+                    phương án phù hợp hơn.
                 </p>
 
                 {% if ticket.ly_do_khong_dong_y %}
                     <div class="ticket-reopen-reason">
-
                         <strong>Lý do khách hàng:</strong>
-
                         <p>
                             {{ ticket.ly_do_khong_dong_y|linebreaksbr }}
                         </p>
-
                     </div>
                 {% endif %}
 
@@ -317,17 +515,15 @@
                         {{ ticket.thoi_diem_xac_nhan|date:"d/m/Y H:i" }}
                     </small>
                 {% endif %}
-
             </section>
 
         {% endif %}
-
     {% endif %}
 
-    <!-- 3. BỐ CỤC THÔNG TIN HAI CỘT -->
+
+    <!-- 3. NỘI DUNG CHI TIẾT -->
     <div class="ticket-detail-grid">
 
-        <!-- CỘT TRÁI -->
         <div class="ticket-detail-main">
 
             <!-- THÔNG TIN YÊU CẦU -->
@@ -337,15 +533,13 @@
 
                 <div class="ticket-detail-info-row">
                     <span>Danh mục</span>
-
                     <strong>
-                        {{ ticket.danh_muc.ten_danh_muc|default:"Chưa phân loại" }}
+                        {{ category|default:"Chưa phân loại" }}
                     </strong>
                 </div>
 
                 <div class="ticket-detail-info-row">
                     <span>Hàng đợi xử lý</span>
-
                     <strong>
                         {{ ticket.queue.ten_queue|default:"Chưa phân luồng" }}
                     </strong>
@@ -353,7 +547,6 @@
 
                 <div class="ticket-detail-info-row">
                     <span>Thời điểm tạo</span>
-
                     <strong>
                         {{ ticket.thoi_diem_tao|date:"d/m/Y H:i" }}
                     </strong>
@@ -364,118 +557,244 @@
                 <div class="ticket-detail-description">
                     {{ ticket.noi_dung|linebreaksbr }}
                 </div>
-
             </section>
 
-            <!-- BẰNG CHỨNG ĐÍNH KÈM TỪ KHÁCH HÀNG -->
+
+            <!-- 4. MINH CHỨNG PHÂN THÀNH HAI NHÓM -->
             <section class="ticket-detail-card ticket-evidence-section">
 
-                <h3>📎 Bằng chứng khách hàng cung cấp</h3>
+                <h3>📎 Minh chứng và tệp đính kèm</h3>
 
                 <p class="ticket-detail-muted">
-                    Hình ảnh được khách hàng đính kèm
-                    để hỗ trợ xác minh và xử lý yêu cầu.
+                    Các tệp được khách hàng cung cấp khi tạo
+                    yêu cầu hoặc bổ sung trong quá trình xử lý.
                 </p>
 
-                <div class="ticket-evidence-list">
+                <!-- NHÓM A: MINH CHỨNG BAN ĐẦU -->
+                <div class="ticket-evidence-group">
 
-                    {% for attachment in danh_sach_bang_chung %}
+                    <div class="ticket-evidence-group-header">
+                        <h4>📁 Minh chứng ban đầu</h4>
+                        <p>
+                            Tệp được ghi nhận cùng yêu cầu hỗ trợ
+                            ban đầu của khách hàng.
+                        </p>
+                    </div>
 
-                        <div class="ticket-evidence-item">
+                    <div class="ticket-evidence-list">
 
-                            <!-- THÔNG TIN FILE BÊN TRÁI -->
-                            <div class="ticket-evidence-info">
+                        {% for attachment in bang_chung_ban_dau %}
 
-                                <strong class="ticket-evidence-name">
-                                    📷 {{ attachment.ten_tep_goc|default:"Hình ảnh bằng chứng" }}
-                                </strong>
+                            <div class="ticket-evidence-item">
 
-                                <small class="ticket-detail-muted">
-                                    Thời điểm tải lên:
-                                    {{ attachment.thoi_diem_tai_len|date:"d/m/Y H:i" }}
-                                </small>
+                                <div class="ticket-evidence-info">
+
+                                    <strong class="ticket-evidence-name">
+                                        📎 {{ attachment.ten_tep_goc|default:"Tệp minh chứng" }}
+                                    </strong>
+
+                                    <span class="ticket-evidence-source">
+                                        Minh chứng ban đầu
+                                    </span>
+
+                                    <div class="ticket-evidence-meta">
+                                        Người tải lên:
+
+                                        {% if attachment.nguoi_tai_len %}
+                                            <strong>
+                                                {{ attachment.nguoi_tai_len.username }}
+                                            </strong>
+                                        {% else %}
+                                            <strong>Hệ thống</strong>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="ticket-evidence-meta">
+                                        Thời điểm tải lên:
+                                        {{ attachment.thoi_diem_tai_len|date:"d/m/Y H:i" }}
+                                    </div>
+                                </div>
+
+                                <div class="ticket-evidence-actions">
+
+                                    <a
+                                        href="{% url 'tickets:attachment_view' attachment.pk %}"
+                                        class="ticket-evidence-btn ticket-evidence-view"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        👁 Xem tệp
+                                    </a>
+
+                                    <a
+                                        href="{% url 'tickets:attachment_download' attachment.pk %}"
+                                        class="ticket-evidence-btn ticket-evidence-download"
+                                    >
+                                        ↓ Tải xuống
+                                    </a>
+                                </div>
 
                             </div>
 
-                            <!-- HAI NÚT BÊN PHẢI -->
-                            <div class="ticket-evidence-actions">
+                        {% empty %}
 
-                                <a
-                                    href="{% url 'tickets:attachment_view' attachment.pk %}"
-                                    class="ticket-evidence-btn ticket-evidence-view"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    👁 Xem ảnh
-                                </a>
-
-                                <a
-                                    href="{% url 'tickets:attachment_download' attachment.pk %}"
-                                    class="ticket-evidence-btn ticket-evidence-download"
-                                >
-                                    ↓ Tải xuống
-                                </a>
-
+                            <div class="ticket-evidence-empty">
+                                Không có minh chứng ban đầu.
                             </div>
 
-                        </div>
+                        {% endfor %}
 
-                    {% empty %}
-
-                        <div class="ticket-detail-empty">
-                            Chưa có hình ảnh hoặc bằng chứng
-                            nào được đính kèm vào Ticket này.
-                        </div>
-
-                    {% endfor %}
-
+                    </div>
                 </div>
 
+
+                <!-- NHÓM B: MINH CHỨNG BỔ SUNG -->
+                <div class="ticket-evidence-group ticket-evidence-group-supplement">
+
+                    <div class="ticket-evidence-group-header">
+                        <h4>📂 Minh chứng bổ sung</h4>
+                        <p>
+                            Tệp khách hàng gửi thêm trong quá trình
+                            nhân viên CSKH xử lý Ticket.
+                        </p>
+                    </div>
+
+                    <div class="ticket-evidence-list">
+
+                        {% for attachment in bang_chung_bo_sung %}
+
+                            <div class="ticket-evidence-item">
+
+                                <div class="ticket-evidence-info">
+
+                                    <strong class="ticket-evidence-name">
+                                        📎 {{ attachment.ten_tep_goc|default:"Tệp minh chứng" }}
+                                    </strong>
+
+                                    <span class="ticket-evidence-source ticket-evidence-source-supplement">
+                                        Minh chứng bổ sung
+                                    </span>
+
+                                    <div class="ticket-evidence-meta">
+                                        Người tải lên:
+
+                                        {% if attachment.nguoi_tai_len %}
+                                            <strong>
+                                                {{ attachment.nguoi_tai_len.username }}
+                                            </strong>
+                                        {% else %}
+                                            <strong>Hệ thống</strong>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="ticket-evidence-meta">
+                                        Thời điểm tải lên:
+                                        {{ attachment.thoi_diem_tai_len|date:"d/m/Y H:i" }}
+                                    </div>
+                                </div>
+
+                                <div class="ticket-evidence-actions">
+
+                                    <a
+                                        href="{% url 'tickets:attachment_view' attachment.pk %}"
+                                        class="ticket-evidence-btn ticket-evidence-view"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        👁 Xem tệp
+                                    </a>
+
+                                    <a
+                                        href="{% url 'tickets:attachment_download' attachment.pk %}"
+                                        class="ticket-evidence-btn ticket-evidence-download"
+                                    >
+                                        ↓ Tải xuống
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        {% empty %}
+
+                            <div class="ticket-evidence-empty">
+                                Khách hàng chưa gửi minh chứng bổ sung.
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+                </div>
             </section>
 
-            <!-- TRAO ĐỔI VÀ GHI CHÚ -->
-            <section
-                class="ticket-detail-card"
-                id="ticket-conversation"
-            >
+
+            <!-- 5. TRAO ĐỔI VÀ GHI CHÚ -->
+            <section class="ticket-detail-card" id="ticket-conversation">
 
                 <h3>💬 Trao đổi và ghi chú xử lý</h3>
 
                 <p class="ticket-detail-muted">
-                    Phản hồi công khai và ghi chú nội bộ
-                    trong quá trình xử lý Ticket.
+                    Lịch sử trao đổi giữa khách hàng và nhân viên,
+                    bao gồm các ghi chú nội bộ.
                 </p>
 
                 <div class="ticket-conversation-list">
 
                     {% for item in ticket_messages %}
 
-                        <div class="ticket-conversation-item {% if item.loai_tin_nhan == 'PUBLIC' %}ticket-conversation-public{% else %}ticket-conversation-internal{% endif %}">
+                        <div class="ticket-conversation-item {% if item.loai_tin_nhan == 'INTERNAL' %}ticket-conversation-internal{% else %}ticket-conversation-public{% endif %} {% if item.nguoi_gui_id == ticket.khach_hang.ma_tai_khoan_id %}ticket-conversation-customer{% endif %}">
 
                             <div class="ticket-conversation-heading">
 
                                 <strong>
-                                    {% if item.loai_tin_nhan == 'PUBLIC' %}
-                                        💬 Phản hồi khách hàng
-                                    {% else %}
+
+                                    {% if item.loai_tin_nhan == 'INTERNAL' %}
                                         🔒 Ghi chú nội bộ
+
+                                    {% elif item.nguoi_gui_id == ticket.khach_hang.ma_tai_khoan_id %}
+                                        <span class="ticket-conversation-customer-label">
+                                            👤 Khách hàng bổ sung thông tin
+                                        </span>
+
+                                    {% elif item.evidence_request %}
+                                        <span class="ticket-conversation-staff-label">
+                                            📎 CSKH yêu cầu bổ sung minh chứng
+                                        </span>
+
+                                    {% else %}
+                                        <span class="ticket-conversation-staff-label">
+                                            💬 Nhân viên phản hồi khách hàng
+                                        </span>
                                     {% endif %}
+
                                 </strong>
 
                                 <span class="ticket-conversation-time">
                                     {{ item.thoi_diem_gui|date:"d/m/Y H:i" }}
                                 </span>
-
                             </div>
 
                             <p class="ticket-conversation-sender">
                                 Người gửi:
-                                {{ item.nguoi_gui.username }}
+                                <strong>{{ item.nguoi_gui.username }}</strong>
                             </p>
 
                             <div class="ticket-conversation-content">
                                 {{ item.noi_dung|linebreaksbr }}
                             </div>
+
+                            {% if item.evidence_request %}
+
+                                {% if item.evidence_request.trang_thai == 'PENDING' %}
+                                    <span class="ticket-evidence-request-status">
+                                        ⏳ Đang chờ khách hàng bổ sung
+                                    </span>
+                                {% elif item.evidence_request.trang_thai == 'FULFILLED' %}
+                                    <span class="ticket-evidence-request-status ticket-evidence-request-status-done">
+                                        ✓ Khách hàng đã bổ sung
+                                    </span>
+                                {% endif %}
+
+                            {% endif %}
 
                         </div>
 
@@ -486,12 +805,11 @@
                         </div>
 
                     {% endfor %}
-
                 </div>
-
             </section>
 
-            <!-- LỊCH SỬ XỬ LÝ -->
+
+            <!-- 6. LỊCH SỬ XỬ LÝ -->
             <section class="ticket-detail-card">
 
                 <h3>🕘 Lịch sử xử lý Ticket</h3>
@@ -506,14 +824,10 @@
 
                             <div class="ticket-timeline-content">
 
-                                <strong>
-                                    {{ log.hanh_dong }}
-                                </strong>
+                                <strong>{{ log.hanh_dong }}</strong>
 
                                 {% if log.noi_dung %}
-                                    <p>
-                                        {{ log.noi_dung }}
-                                    </p>
+                                    <p>{{ log.noi_dung }}</p>
                                 {% endif %}
 
                                 <small>
@@ -527,50 +841,42 @@
                                 </small>
 
                             </div>
-
                         </div>
 
                     {% empty %}
 
                         <div class="ticket-detail-empty">
-                            Chưa có lịch sử xử lý được ghi nhận.
+                            Chưa có lịch sử xử lý.
                         </div>
 
                     {% endfor %}
 
                 </div>
-
             </section>
 
         </div>
 
-        <!-- CỘT PHẢI -->
+
+        <!-- 7. CỘT PHẢI -->
         <aside class="ticket-detail-sidebar">
 
-            <!-- KHÁCH HÀNG -->
+            <!-- THÔNG TIN KHÁCH HÀNG -->
             <section class="ticket-detail-card">
 
                 <h3>👤 Thông tin khách hàng</h3>
 
                 <div class="ticket-detail-info-row">
                     <span>Họ tên</span>
-
-                    <strong>
-                        {{ ticket.khach_hang.ho_ten }}
-                    </strong>
+                    <strong>{{ ticket.khach_hang.ho_ten }}</strong>
                 </div>
 
                 <div class="ticket-detail-info-row">
                     <span>Email</span>
-
-                    <strong>
-                        {{ ticket.khach_hang.email }}
-                    </strong>
+                    <strong>{{ ticket.khach_hang.email }}</strong>
                 </div>
 
                 <div class="ticket-detail-info-row">
                     <span>Số điện thoại</span>
-
                     <strong>
                         {{ ticket.khach_hang.so_dien_thoai|default:"Chưa cập nhật" }}
                     </strong>
@@ -578,13 +884,13 @@
 
             </section>
 
+
             <!-- NHÂN VIÊN PHỤ TRÁCH -->
             <section class="ticket-detail-card">
 
                 <h3>🎧 Nhân viên phụ trách</h3>
 
                 {% if ticket.nguoi_phu_trach %}
-
                     <p class="ticket-assignee-name">
                         {{ ticket.nguoi_phu_trach.ho_ten }}
                     </p>
@@ -592,21 +898,19 @@
                     <p class="ticket-detail-muted">
                         {{ ticket.nguoi_phu_trach.get_vai_tro_display }}
                     </p>
-
                 {% else %}
-
                     <p class="ticket-detail-muted">
                         Chưa phân công nhân viên.
                     </p>
-
                 {% endif %}
 
-                <!-- FORM PHÂN CÔNG TICKET MỚI -->
+
+                <!-- PHÂN CÔNG TICKET MỚI -->
                 {% if ticket.trang_thai == 'NEW' %}
-                    {% if user_role == 'MANAGER' or user_role == 'ADMIN' %}
+
+                    {% if user_role == 'MANAGER' %}
 
                         <div class="ticket-action-block">
-
                             <h4>Phân công nhân viên CSKH</h4>
 
                             <form
@@ -635,30 +939,20 @@
                                                 {{ staff.ho_ten }}
                                             </option>
                                         {% endfor %}
-
                                     </select>
-
                                 </div>
 
                                 {% if staff_options %}
-
-                                    <button
-                                        type="submit"
-                                        class="ticket-btn"
-                                    >
+                                    <button type="submit" class="ticket-btn">
                                         Phân công Ticket
                                     </button>
-
                                 {% else %}
-
                                     <p class="ticket-detail-muted">
                                         Chưa có nhân viên CSKH để phân công.
                                     </p>
-
                                 {% endif %}
 
                             </form>
-
                         </div>
 
                     {% endif %}
@@ -666,62 +960,59 @@
 
             </section>
 
+
             <!-- THEO DÕI THẨM ĐỊNH -->
-            <section class="ticket-detail-card">
+            {% if ticket.trang_thai_tham_dinh == 'WAITING' or ticket.trang_thai_tham_dinh == 'COMPLETED' or category == 'Hàng bị lỗi' or category == 'Đổi trả / Hoàn tiền' or category == 'Sai sản phẩm / đơn hàng' or category == 'Thanh toán / Hóa đơn' %}
 
-                <h3>📋 Theo dõi thẩm định</h3>
+                <section class="ticket-detail-card">
 
-                <div class="ticket-detail-info-row">
-                    <span>Trạng thái thẩm định</span>
-
-                    <strong>
-                        {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
-                            ⏳ Đang chờ kết quả
-                        {% elif ticket.trang_thai_tham_dinh == 'COMPLETED' %}
-                            ✅ Đã có kết quả
-                        {% else %}
-                            Chưa yêu cầu
-                        {% endif %}
-                    </strong>
-                </div>
-
-                {% if ticket.thoi_diem_yeu_cau_tham_dinh %}
+                    <h3>📋 Theo dõi thẩm định</h3>
 
                     <div class="ticket-detail-info-row">
-                        <span>Thời điểm yêu cầu</span>
+                        <span>Trạng thái thẩm định</span>
 
                         <strong>
-                            {{ ticket.thoi_diem_yeu_cau_tham_dinh|date:"d/m/Y H:i" }}
+                            {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
+                                ⏳ Đang chờ kết quả
+                            {% elif ticket.trang_thai_tham_dinh == 'COMPLETED' %}
+                                ✅ Đã có kết quả
+                            {% else %}
+                                Chưa yêu cầu
+                            {% endif %}
                         </strong>
                     </div>
 
-                {% endif %}
+                    {% if ticket.thoi_diem_yeu_cau_tham_dinh %}
+                        <div class="ticket-detail-info-row">
+                            <span>Thời điểm yêu cầu</span>
+                            <strong>
+                                {{ ticket.thoi_diem_yeu_cau_tham_dinh|date:"d/m/Y H:i" }}
+                            </strong>
+                        </div>
+                    {% endif %}
 
-                {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
+                    {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
+                        <p class="ticket-detail-muted">
+                            Hồ sơ đang chờ kết quả xác minh từ
+                            bộ phận chuyên môn. Không cần gửi yêu cầu mới.
+                        </p>
+                    {% elif ticket.trang_thai_tham_dinh == 'COMPLETED' %}
+                        <p class="ticket-detail-muted">
+                            Đã có kết quả thẩm định.
+                            Nếu cần điều chỉnh phương án,
+                            tiếp tục sử dụng hồ sơ hiện có.
+                        </p>
+                    {% else %}
+                        <p class="ticket-detail-muted">
+                            Chưa phát sinh yêu cầu thẩm định.
+                            Chức năng sử dụng khi cần xác minh chuyên sâu.
+                        </p>
+                    {% endif %}
 
-                    <p class="ticket-detail-muted">
-                        Hồ sơ đang chờ phối hợp chuyên môn.
-                        Nhân viên không cần gửi lại yêu cầu.
-                    </p>
+                </section>
 
-                {% elif ticket.trang_thai_tham_dinh == 'COMPLETED' %}
+            {% endif %}
 
-                    <p class="ticket-detail-muted">
-                        Đã ghi nhận kết quả thẩm định.
-                        Nếu khách hàng yêu cầu xử lý lại,
-                        hồ sơ M4 cũ sẽ được sử dụng để tiếp tục
-                        theo dõi các lần điều chỉnh phương án.
-                    </p>
-
-                {% else %}
-
-                    <p class="ticket-detail-muted">
-                        Ticket hiện chưa ghi nhận yêu cầu thẩm định.
-                    </p>
-
-                {% endif %}
-
-            </section>
 
             <!-- KẾT QUẢ XỬ LÝ -->
             <section class="ticket-detail-card">
@@ -729,37 +1020,36 @@
                 <h3>✅ Kết quả xử lý</h3>
 
                 {% if ticket.ket_qua_xu_ly %}
-
                     <div class="ticket-detail-description">
                         {{ ticket.ket_qua_xu_ly|linebreaksbr }}
                     </div>
-
                 {% else %}
-
                     <p class="ticket-detail-muted">
                         Chưa có kết quả xử lý cuối cùng.
                     </p>
-
                 {% endif %}
 
             </section>
 
         </aside>
-
     </div>
 
-    <!-- 4. HÀNH ĐỘNG XỬ LÝ TICKET -->
+
+    <!-- 8. HÀNH ĐỘNG XỬ LÝ -->
     <section class="ticket-detail-card ticket-detail-actions">
 
         <h3>⚙️ Hành động xử lý</h3>
 
-        <!-- ASSIGNED: TIẾP NHẬN -->
+        <!-- ASSIGNED -->
         {% if ticket.trang_thai == 'ASSIGNED' %}
 
-            <p>
-                Ticket đang chờ nhân viên được phân công
-                tiếp nhận và bắt đầu xử lý.
-            </p>
+            <div class="ticket-context-intro">
+                <strong>Ticket đang chờ tiếp nhận</strong>
+                <p>
+                    Nhân viên được phân công cần tiếp nhận
+                    Ticket trước khi bắt đầu xử lý yêu cầu.
+                </p>
+            </div>
 
             {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
 
@@ -769,25 +1059,24 @@
                 >
                     {% csrf_token %}
 
-                    <button
-                        type="submit"
-                        class="ticket-btn"
-                    >
+                    <button type="submit" class="ticket-btn">
                         ✓ Tiếp nhận Ticket
                     </button>
-
                 </form>
 
             {% endif %}
 
-        <!-- REOPENED: TIẾP TỤC XỬ LÝ -->
+
+        <!-- REOPENED -->
         {% elif ticket.trang_thai == 'REOPENED' %}
 
-            <p>
-                Khách hàng đã yêu cầu xử lý lại.
-                Nhân viên phụ trách cần xem xét phản hồi
-                và tiếp tục xử lý Ticket.
-            </p>
+            <div class="ticket-context-intro">
+                <strong>Khách hàng yêu cầu xử lý lại</strong>
+                <p>
+                    Khách hàng chưa đồng ý với phương án trước đó.
+                    Nhân viên phụ trách cần tiếp tục xử lý.
+                </p>
+            </div>
 
             {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
 
@@ -797,251 +1086,490 @@
                 >
                     {% csrf_token %}
 
-                    <button
-                        type="submit"
-                        class="ticket-btn"
-                    >
+                    <button type="submit" class="ticket-btn">
                         ↻ Tiếp tục xử lý Ticket
                     </button>
-
                 </form>
 
             {% else %}
 
                 <p class="ticket-detail-muted">
-                    Chỉ nhân viên được phân công mới
-                    có quyền tiếp tục xử lý.
+                    Chỉ nhân viên được phân công
+                    mới có quyền tiếp tục xử lý.
                 </p>
 
             {% endif %}
 
-        <!-- IN_PROGRESS: PHẢN HỒI VÀ XỬ LÝ -->
+
+        <!-- IN_PROGRESS -->
         {% elif ticket.trang_thai == 'IN_PROGRESS' %}
 
-            <p>
-                Nhân viên có thể phản hồi khách hàng,
-                ghi chú nội bộ, yêu cầu thẩm định
-                hoặc hoàn tất Ticket khi có phương án giải quyết.
-            </p>
+            <div class="ticket-context-intro">
+
+                {% if category == 'Chậm giao hàng' %}
+                    <strong>🚚 Xử lý vấn đề giao hàng</strong>
+                    <p>
+                        Kiểm tra thông tin giao hàng, trao đổi
+                        với khách hàng và ghi nhận phương án hỗ trợ.
+                    </p>
+
+                {% elif category == 'Hàng bị lỗi' %}
+                    <strong>🛠 Xử lý sản phẩm bị lỗi</strong>
+                    <p>
+                        Kiểm tra mô tả và hình ảnh.
+                        Có thể chuyển thẩm định khi cần xác minh lỗi.
+                    </p>
+
+                {% elif category == 'Đổi trả / Hoàn tiền' %}
+                    <strong>↩ Xử lý đổi trả / hoàn tiền</strong>
+                    <p>
+                        Kiểm tra đơn hàng, bằng chứng và điều kiện đổi trả.
+                        Yêu cầu thẩm định khi cần xác minh chuyên sâu.
+                    </p>
+
+                {% elif category == 'Sai sản phẩm / đơn hàng' %}
+                    <strong>📦 Xử lý vấn đề đơn hàng</strong>
+                    <p>
+                        Xác minh thông tin đơn hàng và sản phẩm.
+                        Chuyển thẩm định khi cần kiểm tra sai lệch.
+                    </p>
+
+                {% elif category == 'Thanh toán / Hóa đơn' %}
+                    <strong>💳 Xử lý thanh toán</strong>
+                    <p>
+                        Xác minh giao dịch và chuyển thẩm định
+                        nếu cần kiểm tra chuyên sâu.
+                    </p>
+
+                {% else %}
+                    <strong>🎧 Xử lý yêu cầu hỗ trợ</strong>
+                    <p>
+                        Trao đổi với khách hàng, làm rõ vấn đề
+                        và ghi nhận phương án giải quyết phù hợp.
+                    </p>
+                {% endif %}
+
+            </div>
 
             {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
 
-                <!-- FORM PHẢN HỒI -->
-                <div class="ticket-action-block">
+                <div class="ticket-context-group">
 
-                    <h4>
-                        💬 Phản hồi khách hàng / Ghi chú nội bộ
-                    </h4>
+                    <!-- ======================================
+                         PHẢN HỒI / GHI CHÚ
+                         ====================================== -->
+                    <div class="ticket-action-block">
 
-                    <form
-                        method="POST"
-                        action="{% url 'tickets:add_message' ticket.pk %}"
-                        class="ticket-message-form"
-                    >
-                        {% csrf_token %}
+                        <div class="ticket-action-heading">
 
-                        <div class="ticket-form-group">
+                            <h4>
+                                💬 Phản hồi khách hàng / Ghi chú nội bộ
+                            </h4>
 
-                            <label for="{{ message_form.loai_tin_nhan.id_for_label }}">
-                                Loại nội dung
-                            </label>
-
-                            {{ message_form.loai_tin_nhan }}
-
-                        </div>
-
-                        <div class="ticket-form-group">
-
-                            <label for="{{ message_form.noi_dung.id_for_label }}">
-                                Nội dung phản hồi / ghi chú
-                            </label>
-
-                            {{ message_form.noi_dung }}
-
-                        </div>
-
-                        <p class="ticket-form-hint">
-                            PUBLIC: Phản hồi dành cho khách hàng.
-                            INTERNAL: Ghi chú nội bộ.
-                        </p>
-
-                        <button
-                            type="submit"
-                            class="ticket-btn"
-                        >
-                            ✓ Lưu nội dung
-                        </button>
-
-                    </form>
-
-                </div>
-
-                <!-- YÊU CẦU THẨM ĐỊNH -->
-                <div class="ticket-action-block">
-
-                    <h4>📋 Yêu cầu chuyển thẩm định</h4>
-
-                    {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
-
-                        <p class="ticket-detail-muted">
-                            ⏳ Ticket đã được ghi nhận yêu cầu
-                            thẩm định và đang chờ kết quả.
-                            Không cần gửi lại yêu cầu.
-                        </p>
-
-                        {% if ticket.thoi_diem_yeu_cau_tham_dinh %}
-
-                            <p class="ticket-form-hint">
-                                Thời điểm gửi:
-                                {{ ticket.thoi_diem_yeu_cau_tham_dinh|date:"d/m/Y H:i" }}
+                            <p>
+                                Cập nhật thông tin xử lý, trao đổi
+                                với khách hàng hoặc yêu cầu bổ sung minh chứng.
                             </p>
+                        </div>
 
-                        {% endif %}
 
-                    {% elif ticket.trang_thai_tham_dinh == 'COMPLETED' %}
+                        <!-- HIỂN THỊ YÊU CẦU ĐANG CHỜ -->
+                        {% for evidence_request in ticket.evidence_requests.all %}
 
-                        <p class="ticket-detail-muted">
-                            ✅ Ticket đã có kết quả thẩm định.
-                            Nếu cần điều chỉnh phương án,
-                            phải sử dụng hồ sơ thẩm định M4
-                            hiện có và giữ lịch sử thay đổi.
-                        </p>
+                            {% if evidence_request.trang_thai == 'PENDING' %}
 
-                    {% else %}
+                                <div class="ticket-evidence-request-pending">
 
-                        <p class="ticket-detail-muted">
-                            Sử dụng khi cần bộ phận chuyên môn
-                            xác minh lỗi sản phẩm, yêu cầu đổi trả
-                            hoặc bồi hoàn.
-                        </p>
+                                    <strong>
+                                        ⏳ Đang chờ khách hàng bổ sung minh chứng
+                                    </strong>
 
+                                    Ticket đã có yêu cầu bổ sung minh chứng
+                                    chưa được khách hàng đáp ứng.
+
+                                    <div>
+                                        Thời điểm gửi:
+                                        {{ evidence_request.thoi_diem_tao|date:"d/m/Y H:i" }}
+                                    </div>
+
+                                    <p>
+                                        Bạn vẫn có thể gửi phản hồi công khai
+                                        thông thường, nhưng hệ thống sẽ không
+                                        tạo thêm yêu cầu bổ sung mới khi
+                                        yêu cầu hiện tại còn đang chờ.
+                                    </p>
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+
+                        <!-- FORM PHẢN HỒI CSKH -->
                         <form
                             method="POST"
-                            action="{% url 'tickets:request_assessment' ticket.pk %}"
+                            action="{% url 'tickets:add_message' ticket.pk %}"
+                            class="ticket-message-form"
+                            id="ticket-message-form"
                         >
                             {% csrf_token %}
 
                             <div class="ticket-form-group">
 
-                                <label for="ly_do_tham_dinh">
-                                    Lý do yêu cầu thẩm định
+                                <label for="{{ message_form.loai_tin_nhan.id_for_label }}">
+                                    Loại nội dung
                                 </label>
 
-                                <textarea
-                                    name="ly_do_tham_dinh"
-                                    id="ly_do_tham_dinh"
-                                    rows="4"
-                                    minlength="10"
-                                    required
-                                    placeholder="Nhập nội dung cần bộ phận chuyên môn xác minh..."
-                                ></textarea>
+                                {{ message_form.loai_tin_nhan }}
 
                             </div>
 
+
+                            <div class="ticket-form-group">
+
+                                <label for="{{ message_form.noi_dung.id_for_label }}">
+                                    Nội dung phản hồi / ghi chú
+                                </label>
+
+                                {{ message_form.noi_dung }}
+
+                            </div>
+
+
+                            <!-- MỚI: YÊU CẦU BỔ SUNG MINH CHỨNG -->
+                            <div class="ticket-evidence-request-option">
+
+                                <label
+                                    class="ticket-evidence-request-label"
+                                    for="yeu_cau_bo_sung"
+                                >
+
+                                    <input
+                                        type="checkbox"
+                                        name="yeu_cau_bo_sung"
+                                        id="yeu_cau_bo_sung"
+                                        value="on"
+                                    >
+
+                                    <span class="ticket-evidence-request-content">
+
+                                        <span class="ticket-evidence-request-title">
+                                            📎 Yêu cầu khách hàng bổ sung minh chứng
+                                        </span>
+
+                                        <span class="ticket-evidence-request-description">
+                                            Đánh dấu nếu hình ảnh hoặc thông tin
+                                            khách hàng cung cấp chưa đủ để
+                                            xác minh và xử lý yêu cầu.
+
+                                            Hệ thống sẽ tạo yêu cầu bổ sung
+                                            và ghi nhận trạng thái chờ khách hàng.
+                                        </span>
+
+                                    </span>
+
+                                </label>
+
+                                <div class="ticket-evidence-request-note">
+                                    <strong>Lưu ý:</strong>
+                                    Chỉ sử dụng với loại nội dung
+                                    <strong>PUBLIC – Phản hồi công khai</strong>.
+
+                                    Khách hàng cần gửi thêm thông tin
+                                    và tệp minh chứng để đáp ứng yêu cầu.
+                                </div>
+
+                            </div>
+
+
                             <p class="ticket-form-hint">
-                                Yêu cầu được ghi nhận vào lịch sử Ticket.
-                                Ticket vẫn ở trạng thái IN_PROGRESS.
-                                Việc chuyển hồ sơ thực tế sang Module 4
-                                sẽ được kết nối khi tích hợp các module.
+                                <strong>PUBLIC:</strong>
+                                Phản hồi hiển thị cho khách hàng.
+
+                                <strong>INTERNAL:</strong>
+                                Ghi chú chỉ dành cho nội bộ.
+
+                                Nếu tích yêu cầu bổ sung minh chứng,
+                                hệ thống sẽ tạo một yêu cầu
+                                <strong>PENDING</strong>
+                                liên kết với tin nhắn công khai.
                             </p>
+
 
                             <button
                                 type="submit"
                                 class="ticket-btn"
                             >
-                                ✓ Ghi nhận yêu cầu thẩm định
+                                ✓ Lưu nội dung
                             </button>
 
                         </form>
 
-                    {% endif %}
+                    </div>
 
-                </div>
 
-                <!-- FORM HOÀN TẤT -->
-                <div class="ticket-action-block ticket-resolve-block">
-
-                    <h4>✅ Hoàn tất xử lý Ticket</h4>
-
+                    <!-- TRẠNG THÁI THẨM ĐỊNH -->
                     {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
 
-                        <p class="ticket-detail-muted">
-                            ⏳ Ticket đang chờ kết quả thẩm định
-                            từ bộ phận chuyên môn.
-                        </p>
+                        <div class="ticket-assessment-active">
 
-                        <p class="ticket-form-hint">
-                            Chưa thể hoàn tất Ticket cho đến khi
-                            có kết quả thẩm định hợp lệ.
-                        </p>
+                            <strong>
+                                ⏳ Đang chờ kết quả thẩm định
+                            </strong>
 
-                    {% else %}
+                            <p>
+                                Hồ sơ đã được chuyển đến bộ phận
+                                chuyên môn. Không cần gửi lại yêu cầu.
+                            </p>
 
-                        <p>
-                            Nhập phương án giải quyết rõ ràng
-                            trước khi chuyển Ticket sang RESOLVED.
-                        </p>
+                            {% if ticket.thoi_diem_yeu_cau_tham_dinh %}
+                                <small>
+                                    Thời điểm yêu cầu:
+                                    {{ ticket.thoi_diem_yeu_cau_tham_dinh|date:"d/m/Y H:i" }}
+                                </small>
+                            {% endif %}
 
-                        <form
-                            method="POST"
-                            action="{% url 'tickets:resolve' ticket.pk %}"
-                            class="ticket-resolve-form"
-                        >
-                            {% csrf_token %}
+                        </div>
 
-                            <div class="ticket-form-group">
+                    {% elif ticket.trang_thai_tham_dinh == 'COMPLETED' %}
 
-                                <label for="{{ resolve_form.ket_qua_xu_ly.id_for_label }}">
-                                    Kết quả xử lý
-                                </label>
+                        <div class="ticket-assessment-active">
 
-                                {{ resolve_form.ket_qua_xu_ly }}
+                            <strong>
+                                ✅ Đã có kết quả thẩm định
+                            </strong>
+
+                            <p>
+                                Tiếp tục xử lý dựa trên kết quả đã ghi nhận.
+                                Không tạo hồ sơ trùng.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- YÊU CẦU THẨM ĐỊNH -->
+                    {% if ticket.trang_thai_tham_dinh != 'WAITING' and ticket.trang_thai_tham_dinh != 'COMPLETED' %}
+
+                        {% if category == 'Hàng bị lỗi' or category == 'Đổi trả / Hoàn tiền' or category == 'Sai sản phẩm / đơn hàng' or category == 'Thanh toán / Hóa đơn' %}
+
+                            <div class="ticket-action-block">
+
+                                <div class="ticket-action-heading">
+
+                                    <h4>
+                                        📋 Yêu cầu thẩm định chuyên môn
+                                    </h4>
+
+                                    <p>
+                                        Sử dụng khi cần xác minh thông tin,
+                                        bằng chứng hoặc phương án xử lý
+                                        tranh chấp.
+                                    </p>
+
+                                </div>
+
+                                <form
+                                    method="POST"
+                                    action="{% url 'tickets:request_assessment' ticket.pk %}"
+                                >
+                                    {% csrf_token %}
+
+                                    <div class="ticket-form-group">
+
+                                        <label for="ly_do_tham_dinh">
+                                            Lý do yêu cầu thẩm định
+                                        </label>
+
+                                        <textarea
+                                            name="ly_do_tham_dinh"
+                                            id="ly_do_tham_dinh"
+                                            rows="4"
+                                            minlength="10"
+                                            required
+                                            placeholder="Mô tả nội dung cần xác minh chuyên sâu..."
+                                        ></textarea>
+
+                                    </div>
+
+                                    <p class="ticket-form-hint">
+                                        Hệ thống sẽ tạo hoặc sử dụng hồ sơ
+                                        thẩm định liên quan. Ticket giữ nguyên
+                                        trạng thái đang xử lý trong thời gian chờ.
+                                    </p>
+
+                                    <button
+                                        type="submit"
+                                        class="ticket-btn"
+                                    >
+                                        ✓ Gửi yêu cầu thẩm định
+                                    </button>
+
+                                </form>
 
                             </div>
 
-                            <p class="ticket-form-hint">
-                                Ticket sẽ chuyển IN_PROGRESS → RESOLVED
-                                và chờ khách hàng xác nhận.
-                            </p>
+                        {% else %}
 
-                            <button
-                                type="submit"
-                                class="ticket-btn ticket-btn-resolve"
-                            >
-                                ✓ Xác nhận hoàn tất xử lý
-                            </button>
+                            <details class="ticket-advanced-details">
 
-                        </form>
+                                <summary>
+                                    Cần hỗ trợ chuyên sâu hoặc phát sinh tranh chấp?
+                                </summary>
+
+                                <div class="ticket-advanced-content">
+
+                                    <div class="ticket-action-block">
+
+                                        <h4>
+                                            📋 Yêu cầu thẩm định bổ sung
+                                        </h4>
+
+                                        <p class="ticket-detail-muted">
+                                            Chỉ sử dụng khi yêu cầu hiện tại
+                                            phát sinh vấn đề không thể giải quyết
+                                            bằng quy trình hỗ trợ thông thường.
+                                        </p>
+
+                                        <form
+                                            method="POST"
+                                            action="{% url 'tickets:request_assessment' ticket.pk %}"
+                                        >
+                                            {% csrf_token %}
+
+                                            <div class="ticket-form-group">
+
+                                                <label for="ly_do_tham_dinh">
+                                                    Lý do yêu cầu thẩm định
+                                                </label>
+
+                                                <textarea
+                                                    name="ly_do_tham_dinh"
+                                                    id="ly_do_tham_dinh"
+                                                    rows="4"
+                                                    minlength="10"
+                                                    required
+                                                    placeholder="Nêu rõ lý do cần hỗ trợ chuyên sâu..."
+                                                ></textarea>
+
+                                            </div>
+
+                                            <button
+                                                type="submit"
+                                                class="ticket-btn"
+                                            >
+                                                ✓ Gửi yêu cầu thẩm định
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </details>
+
+                        {% endif %}
 
                     {% endif %}
 
+
+                    <!-- HOÀN TẤT XỬ LÝ -->
+                    <div class="ticket-action-block ticket-resolve-block">
+
+                        <div class="ticket-action-heading">
+
+                            <h4>
+                                ✅ Hoàn tất xử lý Ticket
+                            </h4>
+
+                            <p>
+                                Ghi nhận phương án giải quyết cuối cùng
+                                để khách hàng xác nhận.
+                            </p>
+
+                        </div>
+
+                        {% if ticket.trang_thai_tham_dinh == 'WAITING' %}
+
+                            <p class="ticket-detail-muted">
+                                ⏳ Chưa thể hoàn tất vì hồ sơ đang chờ
+                                kết quả thẩm định chuyên môn.
+                            </p>
+
+                        {% else %}
+
+                            <form
+                                method="POST"
+                                action="{% url 'tickets:resolve' ticket.pk %}"
+                                class="ticket-resolve-form"
+                            >
+                                {% csrf_token %}
+
+                                <div class="ticket-form-group">
+
+                                    <label for="{{ resolve_form.ket_qua_xu_ly.id_for_label }}">
+                                        Kết quả xử lý
+                                    </label>
+
+                                    {{ resolve_form.ket_qua_xu_ly }}
+
+                                </div>
+
+                                <p class="ticket-form-hint">
+                                    Sau khi hoàn tất, Ticket chuyển sang
+                                    RESOLVED và chờ khách hàng xác nhận.
+                                </p>
+
+                                <button
+                                    type="submit"
+                                    class="ticket-btn ticket-btn-resolve"
+                                >
+                                    ✓ Xác nhận hoàn tất xử lý
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+                    </div>
+
                 </div>
+
+            {% else %}
+
+                <p class="ticket-detail-muted">
+                    Chỉ nhân viên được phân công mới có quyền
+                    xử lý Ticket này.
+                </p>
 
             {% endif %}
 
-        <!-- RESOLVED: CHỜ XÁC NHẬN HOẶC ĐÓNG -->
-        {% elif ticket.trang_thai == 'RESOLVED' %}
 
-            <p>
-                Ticket đã được nhân viên giải quyết.
-                Vui lòng kiểm tra xác nhận của khách hàng
-                trước khi đóng Ticket.
-            </p>
+        <!-- RESOLVED -->
+        {% elif ticket.trang_thai == 'RESOLVED' %}
 
             {% if ticket.trang_thai_xac_nhan == 'AGREED' %}
 
-                <div class="ticket-close-section">
+                <div class="ticket-resolved-info">
 
-                    <span class="ticket-badge ticket-badge-resolved">
+                    <strong>
                         ✓ Khách hàng đã đồng ý với kết quả xử lý
-                    </span>
+                    </strong>
 
-                    {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
+                    <p>
+                        Phương án đã được chấp thuận.
+                        Ticket có thể được đóng để hoàn tất hỗ trợ.
+                    </p>
+
+                </div>
+
+                {% if user_role == 'CSKH' and ticket.nguoi_phu_trach.ma_tai_khoan_id == request.user.pk %}
+
+                    <div class="ticket-close-section">
 
                         <p class="ticket-close-description">
-                            Khách hàng đã chấp thuận phương án
-                            giải quyết. Bạn có thể đóng Ticket
-                            để hoàn tất quy trình hỗ trợ.
+                            Nhấn Đóng Ticket để hoàn tất quy trình xử lý.
                         </p>
 
                         <form
@@ -1058,42 +1586,64 @@
                             </button>
 
                         </form>
+                    </div>
 
-                    {% else %}
+                {% else %}
 
-                        <p class="ticket-detail-muted ticket-close-description">
-                            Chỉ nhân viên được phân công mới
-                            có quyền đóng Ticket.
-                        </p>
+                    <p class="ticket-detail-muted">
+                        Chỉ nhân viên phụ trách mới có quyền đóng Ticket.
+                    </p>
 
-                    {% endif %}
-
-                </div>
+                {% endif %}
 
             {% else %}
 
+                <div class="ticket-context-intro">
+
+                    <strong>
+                        ⏳ Đang chờ khách hàng xác nhận
+                    </strong>
+
+                    <p>
+                        Nhân viên đã ghi nhận kết quả xử lý.
+                        Hệ thống đang chờ khách hàng phản hồi.
+                    </p>
+
+                </div>
+
                 <span class="ticket-badge ticket-badge-assigned">
-                    Đang chờ khách hàng xác nhận
+                    Chờ xác nhận
                 </span>
 
             {% endif %}
 
-        <!-- CLOSED: ĐÃ ĐÓNG -->
+
+        <!-- CLOSED -->
         {% elif ticket.trang_thai == 'CLOSED' %}
 
-            <p>
-                Ticket đã được đóng và hoàn tất
-                quy trình xử lý.
-            </p>
+            <div class="ticket-resolved-info">
+
+                <strong>
+                    ✓ Ticket đã hoàn tất
+                </strong>
+
+                <p>
+                    Yêu cầu hỗ trợ đã được đóng.
+                    Toàn bộ lịch sử trao đổi và kết quả xử lý
+                    vẫn được lưu để phục vụ tra cứu.
+                </p>
+
+            </div>
 
             <span class="ticket-badge ticket-badge-closed">
-                ✓ CLOSED
+                CLOSED
             </span>
+
 
         <!-- TRẠNG THÁI KHÁC -->
         {% else %}
 
-            <p>
+            <p class="ticket-detail-muted">
                 Trạng thái hiện tại:
                 {{ ticket.get_trang_thai_display }}.
             </p>
@@ -1104,4 +1654,5 @@
 
 </div>
 
+{% endwith %}
 {% endblock %}

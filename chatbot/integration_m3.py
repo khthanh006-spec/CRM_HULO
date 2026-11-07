@@ -16,8 +16,10 @@ from .services import (
 from .attachment_integration import tao_ticket_kem_bang_chung
 
 
-# Anh xa 6 nhom van de M2 sang danh muc M3 dang hoat dong.
-# Day la anh xa mac dinh theo nhom, chua phan loai chi tiet.
+# ==================================================
+# ÁNH XẠ LOẠI VẤN ĐỀ M2 SANG DANH MỤC M3
+# ==================================================
+
 BANG_ANH_XA_M2_M3 = {
     "DON_HANG": "Sai sản phẩm / đơn hàng",
     "GIAO_HANG": "Chậm giao hàng",
@@ -28,31 +30,43 @@ BANG_ANH_XA_M2_M3 = {
 }
 
 
+# ==================================================
+# M2 -> M3: GỬI YÊU CẦU HỖ TRỢ CHÍNH THỨC
+# ==================================================
+
 @login_required(login_url="login")
 @require_POST
 def gui_yeu_cau_sang_m3(request):
     """
-    Gui yeu cau ho tro tu M2 sang M3.
+    Gửi yêu cầu hỗ trợ từ Module 2 sang Module 3.
 
-    - Kiem tra khach hang so huu ban nhap.
-    - Anh xa loai van de M2 sang danh muc M3.
-    - Su dung service tao Ticket chinh thuc cua M3.
-    - Ho tro yeu cau co hoac khong co anh.
-    - Giu ban nhap neu luu Ticket/anh that bai.
-    - Chi thong bao thanh cong khi service hoan tat.
+    Chức năng:
+    - Xác định khách hàng đang đăng nhập.
+    - Kiểm tra quyền sở hữu bản nháp M2.
+    - Kiểm tra đơn hàng có thuộc khách hàng hay không.
+    - Ánh xạ loại vấn đề M2 sang danh mục Ticket M3.
+    - Tạo Ticket có hoặc không có ảnh bằng chứng.
+    - Giữ bản nháp nếu gửi thất bại.
+    - Chống tạo Ticket trùng thông qua source_request_id.
     """
 
-    # 1. Xac dinh khach hang
+    # --------------------------------------------------
+    # 1. XÁC ĐỊNH KHÁCH HÀNG
+    # --------------------------------------------------
+
     khach_hang = Customer.objects.filter(
         ma_tai_khoan=request.user
     ).first()
 
     if khach_hang is None:
         return HttpResponseForbidden(
-            "Tai khoan chua co ho so khach hang."
+            "Tài khoản chưa có hồ sơ khách hàng."
         )
 
-    # 2. Lay ban nhap M2
+    # --------------------------------------------------
+    # 2. LẤY BẢN NHÁP M2
+    # --------------------------------------------------
+
     yeu_cau = request.session.get(
         "m2_yeu_cau_ho_tro"
     )
@@ -60,69 +74,128 @@ def gui_yeu_cau_sang_m3(request):
     if not isinstance(yeu_cau, dict):
         messages.error(
             request,
-            "Khong tim thay yeu cau ho tro can gui."
+            "Không tìm thấy yêu cầu hỗ trợ cần gửi."
         )
-        return redirect("chatbot:chuyen_ho_tro")
 
+        return redirect(
+            "chatbot:chuyen_ho_tro"
+        )
+
+    # Kiểm tra bản nháp thuộc khách hàng đang đăng nhập
     if yeu_cau.get("ma_khach_hang") != khach_hang.pk:
         return HttpResponseForbidden(
-            "Ban khong co quyen gui yeu cau nay."
+            "Bạn không có quyền gửi yêu cầu này."
         )
 
-    # 3. Kiem tra thong tin yeu cau
+    # --------------------------------------------------
+    # 3. KIỂM TRA THÔNG TIN YÊU CẦU
+    # --------------------------------------------------
+
     thong_tin = yeu_cau.get("thong_tin")
 
     if not isinstance(thong_tin, dict):
         messages.error(
             request,
-            "Vui long khai bao day du thong tin yeu cau."
+            "Vui lòng khai báo đầy đủ thông tin yêu cầu."
         )
-        return redirect("chatbot:khai_bao_yeu_cau")
 
-    form = YeuCauHoTroForm(thong_tin)
+        return redirect(
+            "chatbot:khai_bao_yeu_cau"
+        )
+
+    # CẬP NHẬT QUAN TRỌNG:
+    # Truyền đúng khách hàng vào Form.
+    #
+    # Form sẽ kiểm tra:
+    # - Mã đơn hàng có tồn tại hay không.
+    # - Đơn hàng có thuộc khách hàng không.
+    # - Dữ liệu khai báo có hợp lệ không.
+    #
+    # Nếu không truyền customer, dropdown sẽ
+    # không nhận diện được đơn hàng đã chọn.
+
+    form = YeuCauHoTroForm(
+        thong_tin,
+        customer=khach_hang,
+    )
 
     if not form.is_valid():
+
         messages.error(
             request,
-            "Thong tin yeu cau chua hop le."
+            "Thông tin yêu cầu chưa hợp lệ. "
+            "Vui lòng kiểm tra đơn hàng và nội dung đã nhập."
         )
-        return redirect("chatbot:khai_bao_yeu_cau")
 
-    # 4. Anh xa loai van de M2 sang danh muc M3
+        return redirect(
+            "chatbot:khai_bao_yeu_cau"
+        )
+
+    # --------------------------------------------------
+    # 4. ÁNH XẠ LOẠI VẤN ĐỀ M2 SANG DANH MỤC M3
+    # --------------------------------------------------
+
     try:
         danh_muc = tim_danh_muc_m3(
-            loai_van_de=yeu_cau.get("loai_van_de"),
+            loai_van_de=yeu_cau.get(
+                "loai_van_de"
+            ),
             bang_anh_xa=BANG_ANH_XA_M2_M3,
         )
 
     except ValueError as error:
+
         messages.error(
             request,
-            f"Khong the xac dinh danh muc M3: {error}"
+            f"Không thể xác định danh mục M3: {error}"
         )
-        return redirect("chatbot:xac_nhan_yeu_cau")
 
-    # 5. Kiem tra kieu du lieu bang chung
-    bang_chung = yeu_cau.get("bang_chung", [])
+        return redirect(
+            "chatbot:xac_nhan_yeu_cau"
+        )
+
+    # --------------------------------------------------
+    # 5. KIỂM TRA DANH SÁCH BẰNG CHỨNG
+    # --------------------------------------------------
+
+    bang_chung = yeu_cau.get(
+        "bang_chung",
+        []
+    )
 
     if not isinstance(bang_chung, list):
+
         messages.error(
             request,
-            "Danh sach bang chung khong hop le."
+            "Danh sách bằng chứng không hợp lệ."
         )
-        return redirect("chatbot:xac_nhan_yeu_cau")
 
-    # 6. Goi service phu hop
+        return redirect(
+            "chatbot:xac_nhan_yeu_cau"
+        )
+
+    # --------------------------------------------------
+    # 6. GỌI SERVICE TẠO TICKET M3
+    # --------------------------------------------------
+
     try:
+
         if bang_chung:
-            # Co anh: M2 dieu phoi Ticket + TicketAttachment
+
+            # Có ảnh bằng chứng:
+            # Tạo Ticket và chuyển ảnh sang M3.
+
             ticket = tao_ticket_kem_bang_chung(
                 yeu_cau=yeu_cau,
                 khach_hang=khach_hang,
                 danh_muc=danh_muc,
             )
+
         else:
-            # Khong co anh: tao Ticket qua service M3
+
+            # Không có ảnh:
+            # Tạo Ticket qua service M3.
+
             ticket = tao_ticket_theo_chuan_m3(
                 yeu_cau=yeu_cau,
                 khach_hang=khach_hang,
@@ -130,20 +203,27 @@ def gui_yeu_cau_sang_m3(request):
             )
 
     except (ValueError, ValidationError) as error:
-        # Giu nguyen ban nhap de khach hang thu lai
+
+        # Không xóa bản nháp nếu tạo Ticket thất bại.
         messages.error(
             request,
-            f"Khong the gui yeu cau: {error}"
+            f"Không thể gửi yêu cầu: {error}"
         )
-        return redirect("chatbot:xac_nhan_yeu_cau")
 
-    # 7. Ghi nhan Ticket da tao
+        return redirect(
+            "chatbot:xac_nhan_yeu_cau"
+        )
+
+    # --------------------------------------------------
+    # 7. GHI NHẬN TICKET ĐÃ TẠO
+    # --------------------------------------------------
+
     request.session["m2_ticket_vua_tao"] = {
         "ticket_id": ticket.pk,
         "ma_ticket": ticket.ma_ticket,
     }
 
-    # Chi xoa ban nhap khi service tra ve thanh cong
+    # Chỉ xóa bản nháp sau khi service thành công.
     request.session.pop(
         "m2_yeu_cau_ho_tro",
         None,
@@ -151,8 +231,12 @@ def gui_yeu_cau_sang_m3(request):
 
     messages.success(
         request,
-        f"Gui yeu cau thanh cong! "
-        f"Ma Ticket cua ban la {ticket.ma_ticket}."
+        (
+            "Gửi yêu cầu thành công! "
+            f"Mã Ticket của bạn là {ticket.ma_ticket}."
+        )
     )
 
-    return redirect("chatbot:home")
+    return redirect(
+        "chatbot:home"
+    )

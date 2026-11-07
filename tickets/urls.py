@@ -1,129 +1,145 @@
 
 from django.urls import path
+
 from . import views
 from . import attachment_views
+from . import customer_supplement_views
 
-# Namespace của Module 3 - Ticket Management & SLA
-app_name = 'tickets'
+
+# Namespace của hệ thống quản lý Ticket
+app_name = "tickets"
+
 
 urlpatterns = [
 
     # ==================================================
-    # UC-3.2 - DANH SÁCH TICKET / TICKET QUEUE
+    # DANH SÁCH TICKET / TICKET QUEUE
     # ==================================================
     path(
-        '',
+        "",
         views.ticket_home,
-        name='home'
+        name="home",
     ),
 
     # ==================================================
-    # UC-3.2 - XEM CHI TIẾT TICKET
+    # XEM CHI TIẾT TICKET
     # ==================================================
     path(
-        '<int:pk>/',
+        "<int:pk>/",
         views.ticket_detail,
-        name='detail'
+        name="detail",
     ),
 
     # ==================================================
-    # UC-3.2 - TIẾP NHẬN TICKET
+    # TIẾP NHẬN TICKET
     # ASSIGNED -> IN_PROGRESS
     # ==================================================
     path(
-        '<int:pk>/accept/',
+        "<int:pk>/accept/",
         views.ticket_accept,
-        name='accept'
+        name="accept",
     ),
 
     # ==================================================
-    # UC-3.3 - PHẢN HỒI / GHI CHÚ NỘI BỘ
+    # PHẢN HỒI / GHI CHÚ NỘI BỘ
     # ==================================================
     path(
-        '<int:pk>/messages/add/',
+        "<int:pk>/messages/add/",
         views.ticket_add_message,
-        name='add_message'
-    ),
-
-    # UC3.4 - Ghi nhận yêu cầu thẩm định
-    path(
-        '<int:pk>/request-assessment/',
-        views.ticket_request_assessment,
-        name='request_assessment'
+        name="add_message",
     ),
 
     # ==================================================
-    # UC-3.5 - HOÀN TẤT XỬ LÝ
+    # GỬI YÊU CẦU THẨM ĐỊNH
+    # ==================================================
+    path(
+        "<int:pk>/request-assessment/",
+        views.ticket_request_assessment,
+        name="request_assessment",
+    ),
+
+    # ==================================================
+    # HOÀN TẤT XỬ LÝ
     # IN_PROGRESS -> RESOLVED
     # ==================================================
     path(
-        '<int:pk>/resolve/',
+        "<int:pk>/resolve/",
         views.ticket_resolve,
-        name='resolve'
+        name="resolve",
     ),
 
     # ==================================================
-    # UC-3.5 - ĐÓNG TICKET
+    # ĐÓNG TICKET
     # RESOLVED + AGREED -> CLOSED
     # ==================================================
     path(
-        '<int:pk>/close/',
+        "<int:pk>/close/",
         views.ticket_close,
-        name='close'
+        name="close",
     ),
 
     # ==================================================
-    # UC-3.5 - TIẾP TỤC XỬ LÝ TICKET MỞ LẠI
+    # TIẾP TỤC XỬ LÝ TICKET MỞ LẠI
     # REOPENED -> IN_PROGRESS
     # ==================================================
     path(
-        '<int:pk>/resume/',
+        "<int:pk>/resume/",
         views.ticket_resume,
-        name='resume'
+        name="resume",
     ),
 
     # ==================================================
-    # UC-3.5 - KHÁCH HÀNG XEM KẾT QUẢ XỬ LÝ
+    # KHÁCH HÀNG XEM KẾT QUẢ / CHI TIẾT HỖ TRỢ
     # ==================================================
     path(
-        'customer/<int:pk>/result/',
+        "customer/<int:pk>/result/",
         views.ticket_customer_result,
-        name='customer_result'
+        name="customer_result",
     ),
 
     # ==================================================
-    # UC-3.5 - KHÁCH HÀNG XÁC NHẬN KẾT QUẢ
+    # KHÁCH HÀNG XÁC NHẬN KẾT QUẢ
     # ==================================================
     path(
-        'customer/<int:pk>/confirm/',
+        "customer/<int:pk>/confirm/",
         views.ticket_customer_confirm,
-        name='customer_confirm'
-    ),
-
-
-    path(
-        '<int:pk>/assign/',
-        views.ticket_assign,
-        name='assign'
+        name="customer_confirm",
     ),
 
     # ==================================================
-    # UC-3.x - XEM ANH BANG CHUNG
+    # KHÁCH HÀNG BỔ SUNG THÔNG TIN VÀ MINH CHỨNG
+    # ==================================================
+    path(
+        "customer/<int:pk>/supplement/",
+        customer_supplement_views.ticket_customer_supplement,
+        name="customer_supplement",
+    ),
+
+    # ==================================================
+    # PHÂN CÔNG TICKET
+    # ==================================================
+    path(
+        "<int:pk>/assign/",
+        views.ticket_assign,
+        name="assign",
+    ),
+
+    # ==================================================
+    # XEM TỆP MINH CHỨNG
     # ==================================================
     path(
         "attachments/<int:pk>/view/",
         attachment_views.ticket_attachment_view,
-        name="attachment_view"
+        name="attachment_view",
     ),
 
     # ==================================================
-    # UC-3.x - TAI ANH BANG CHUNG
+    # TẢI TỆP MINH CHỨNG
     # ==================================================
     path(
         "attachments/<int:pk>/download/",
         attachment_views.ticket_attachment_download,
-        name="attachment_download"
+        name="attachment_download",
     ),
-
 
 ]

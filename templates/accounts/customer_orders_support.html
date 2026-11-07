@@ -1,0 +1,320 @@
+
+{% extends "base.html" %}
+
+{% block title %}Đơn hàng & Hỗ trợ - HULOECOM{% endblock %}
+
+{% block extra_css %}
+<style>
+    .portal-container {
+        max-width: 1150px;
+        margin: 35px auto;
+        padding: 0 20px;
+    }
+
+    .portal-heading {
+        margin-bottom: 25px;
+    }
+
+    .portal-heading h1 {
+        margin-bottom: 8px;
+        color: #222;
+    }
+
+    .portal-heading p {
+        color: #6b7280;
+    }
+
+    .portal-tabs {
+        display: flex;
+        gap: 10px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 25px;
+    }
+
+    .portal-tabs a {
+        padding: 13px 20px;
+        text-decoration: none;
+        color: #555;
+        border-bottom: 3px solid transparent;
+        font-weight: 600;
+    }
+
+    .portal-tabs a.active {
+        color: #17457c;
+        border-bottom-color: #17457c;
+    }
+
+    .portal-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 22px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .portal-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .portal-card h3 {
+        margin: 0;
+        color: #222;
+    }
+
+    .portal-meta {
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .portal-status {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: #eef2f7;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .status-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .portal-link {
+        display: inline-block;
+        margin-top: 12px;
+        color: #17457c;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .portal-link:hover {
+        text-decoration: underline;
+    }
+
+    .portal-empty {
+        text-align: center;
+        padding: 45px 20px;
+        background: #f9fafb;
+        border-radius: 12px;
+        color: #6b7280;
+    }
+
+    .portal-empty h3 {
+        color: #374151;
+        margin-bottom: 10px;
+    }
+
+    .portal-items {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #eee;
+    }
+
+    .portal-items ul {
+        padding-left: 20px;
+        color: #555;
+        line-height: 1.9;
+    }
+
+    @media (max-width: 600px) {
+        .portal-tabs a {
+            padding: 12px 8px;
+            font-size: 13px;
+        }
+
+        .portal-card {
+            padding: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portal-container">
+
+    <div class="portal-heading">
+        <h1>Đơn hàng & Hỗ trợ</h1>
+        <p>
+            Theo dõi đơn hàng và quản lý các yêu cầu hỗ trợ
+            của bạn tại HULOECOM.
+        </p>
+    </div>
+
+    <div class="portal-tabs">
+        <a href="?tab=orders"
+           class="{% if active_tab == 'orders' %}active{% endif %}">
+            📦 Đơn hàng của tôi
+        </a>
+
+        <a href="?tab=tickets"
+           class="{% if active_tab == 'tickets' %}active{% endif %}">
+            🎧 Yêu cầu hỗ trợ
+        </a>
+    </div>
+
+    {% if active_tab == 'orders' %}
+
+        <h2>Danh sách đơn hàng</h2>
+
+        {% for order in orders %}
+            <div class="portal-card">
+
+                <div class="portal-card-header">
+                    <h3>{{ order.so_don_hang }}</h3>
+
+                    <span class="portal-status
+                        {% if order.trang_thai == 'DA_GIAO' %}
+                            status-success
+                        {% elif order.trang_thai == 'DA_HUY' %}
+                            status-warning
+                        {% else %}
+                            status-info
+                        {% endif %}">
+                        {{ order.get_trang_thai_display }}
+                    </span>
+                </div>
+
+                <div class="portal-meta">
+                    <div>
+                        <strong>Ngày đặt:</strong>
+                        {{ order.thoi_diem_dat|date:"d/m/Y H:i" }}
+                    </div>
+
+                    <div>
+                        <strong>Đơn vị tiền tệ:</strong>
+                        {{ order.don_vi_tien_te }}
+                    </div>
+                </div>
+
+                <div class="portal-items">
+                    <strong>Sản phẩm trong đơn hàng:</strong>
+
+                    <ul>
+                        {% for item in order.items.all %}
+                            <li>
+                                {{ item.ten_san_pham_luc_mua }}
+                                – Số lượng: {{ item.so_luong }}
+                                – {{ item.gia_tri_da_thanh_toan|floatformat:0 }}
+                                {{ order.don_vi_tien_te }}
+                            </li>
+                        {% empty %}
+                            <li>Đơn hàng chưa có sản phẩm.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- CHUYỂN THẲNG ĐẾN TRANG CẦN NHÂN VIÊN HỖ TRỢ -->
+                <a class="portal-link"
+                   href="/chatbot/chuyen-ho-tro/">
+                    Cần hỗ trợ về đơn hàng này →
+                </a>
+
+            </div>
+
+        {% empty %}
+
+            <div class="portal-empty">
+                <h3>Bạn chưa có đơn hàng nào</h3>
+                <p>
+                    Khi có đơn hàng, thông tin sẽ được hiển thị tại đây.
+                </p>
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <h2>Yêu cầu hỗ trợ của tôi</h2>
+
+        {% for ticket in tickets %}
+            <div class="portal-card">
+
+                <div class="portal-card-header">
+                    <h3>
+                        {{ ticket.ma_ticket|default:ticket.pk }}
+                    </h3>
+
+                    <span class="portal-status
+                        {% if ticket.trang_thai == 'CLOSED' %}
+                            status-success
+                        {% elif ticket.trang_thai == 'RESOLVED' %}
+                            status-info
+                        {% elif ticket.trang_thai == 'REOPENED' %}
+                            status-warning
+                        {% else %}
+                            status-info
+                        {% endif %}">
+                        {{ ticket.get_trang_thai_display }}
+                    </span>
+                </div>
+
+                <h4>{{ ticket.tieu_de }}</h4>
+
+                <div class="portal-meta">
+                    <div>
+                        <strong>Danh mục:</strong>
+                        {% if ticket.danh_muc %}
+                            {{ ticket.danh_muc.ten_danh_muc }}
+                        {% else %}
+                            Chưa phân loại
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <strong>Ngày tạo:</strong>
+                        {{ ticket.thoi_diem_tao|date:"d/m/Y H:i" }}
+                    </div>
+
+                    <div>
+                        <strong>Xác nhận kết quả:</strong>
+                        {{ ticket.get_trang_thai_xac_nhan_display }}
+                    </div>
+                </div>
+
+                <a class="portal-link"
+                   href="{% url 'tickets:customer_result' ticket.pk %}">
+                    Xem kết quả xử lý →
+                </a>
+
+            </div>
+
+        {% empty %}
+
+            <div class="portal-empty">
+                <h3>Bạn chưa có yêu cầu hỗ trợ nào</h3>
+                <p>
+                    Khi gửi yêu cầu hỗ trợ, bạn có thể theo dõi
+                    tiến độ xử lý tại đây.
+                </p>
+
+                <a class="portal-link"
+                   href="{% url 'support:home' %}">
+                    Đến Trung tâm trợ giúp →
+                </a>
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+</div>
+{% endblock %}

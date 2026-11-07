@@ -1,0 +1,1701 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Tổng quan vận hành - CRM HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ==========================================
+       1. GIAO DIỆN DASHBOARD MANAGER
+       ========================================== */
+
+    .manager-dashboard {
+        max-width: 1280px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px 18px 45px;
+        box-sizing: border-box;
+        color: #17365d;
+    }
+
+    .manager-dashboard * {
+        box-sizing: border-box;
+    }
+
+    .manager-dashboard .dashboard-hero {
+        background: #dcecff;
+        border-radius: 17px;
+        padding: 29px 32px;
+        margin-bottom: 23px;
+    }
+
+    .manager-dashboard .dashboard-hero h1 {
+        margin: 0 0 9px;
+        font-size: 25px;
+        font-weight: 700;
+        color: #103b78;
+    }
+
+    .manager-dashboard .dashboard-hero p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #607da8;
+    }
+
+    .manager-dashboard .section-box {
+        background: #ffffff;
+        border: 1px solid #dbe7f6;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 22px;
+    }
+
+    .manager-dashboard .section-title {
+        margin: 0 0 7px;
+        color: #103b78;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .manager-dashboard .section-desc {
+        color: #607da8;
+        font-size: 13px;
+        margin: 0 0 18px;
+        line-height: 1.6;
+    }
+
+    .manager-dashboard .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 13px;
+    }
+
+    .manager-dashboard .stats-grid-six {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .manager-dashboard .stat-card {
+        background: #ffffff;
+        border: 1px solid #dbe7f6;
+        border-radius: 13px;
+        padding: 17px;
+        min-height: 92px;
+    }
+
+    .manager-dashboard .stat-label {
+        font-size: 12px;
+        color: #607da8;
+        margin-bottom: 10px;
+    }
+
+    .manager-dashboard .stat-value {
+        font-size: 23px;
+        font-weight: 700;
+        color: #103b78;
+    }
+
+    .manager-dashboard .stat-value.danger {
+        color: #d53a4a;
+    }
+
+    .manager-dashboard .stat-note {
+        font-size: 11px;
+        color: #7489a8;
+        margin-top: 5px;
+    }
+
+    /* ==========================================
+       2. BỘ LỌC
+       ========================================== */
+
+    .manager-dashboard .filter-form {
+        display: grid;
+        grid-template-columns:
+            minmax(150px, 1.2fr)
+            minmax(150px, 1.2fr)
+            minmax(140px, 1fr)
+            minmax(140px, 1fr)
+            auto;
+        gap: 10px;
+        align-items: end;
+        margin-bottom: 18px;
+    }
+
+    .manager-dashboard .filter-group label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #103b78;
+    }
+
+    .manager-dashboard .filter-group select {
+        width: 100%;
+        height: 39px;
+        padding: 7px 9px;
+        border: 1px solid #cfdcf0;
+        border-radius: 7px;
+        background: #ffffff;
+        color: #17365d;
+        font-size: 12px;
+    }
+
+    .manager-dashboard .filter-buttons {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+    }
+
+    .manager-dashboard .filter-button,
+    .manager-dashboard .reset-button {
+        height: 39px;
+        padding: 0 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        border: 1px solid #176cc1;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .manager-dashboard .filter-button {
+        background: #176cc1;
+        color: #ffffff;
+    }
+
+    .manager-dashboard .reset-button {
+        background: #ffffff;
+        color: #176cc1;
+    }
+
+    /* ==========================================
+       3. BẢNG DỮ LIỆU
+       ========================================== */
+
+    .manager-dashboard .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #dbe7f6;
+        border-radius: 11px;
+    }
+
+    .manager-dashboard table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+
+    .manager-dashboard th,
+    .manager-dashboard td {
+        text-align: left;
+        vertical-align: middle;
+        padding: 12px 10px;
+        border-bottom: 1px solid #e7eef8;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .manager-dashboard th {
+        background: #edf5ff;
+        color: #103b78;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .manager-dashboard tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .manager-dashboard .ticket-table {
+        min-width: 1080px;
+    }
+
+    .manager-dashboard .table-link {
+        color: #176cc1;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .manager-dashboard .table-link:hover {
+        text-decoration: underline;
+    }
+
+    .manager-dashboard .muted {
+        color: #7489a8;
+        font-size: 11px;
+        margin-top: 4px;
+    }
+
+    .manager-dashboard .status-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .manager-dashboard .badge-blue {
+        color: #176cc1;
+        background: #e6f0ff;
+    }
+
+    .manager-dashboard .badge-green {
+        color: #24754c;
+        background: #e5f5eb;
+    }
+
+    .manager-dashboard .badge-yellow {
+        color: #ae7616;
+        background: #fff3db;
+    }
+
+    .manager-dashboard .badge-red {
+        color: #bd3648;
+        background: #fde8eb;
+    }
+
+    .manager-dashboard .badge-gray {
+        color: #62748a;
+        background: #eef2f6;
+    }
+
+    /* ==========================================
+       4. THỐNG KÊ NHÂN VIÊN VÀ PHÂN TRANG
+       ========================================== */
+
+    .manager-dashboard .staff-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 17px;
+    }
+
+    .manager-dashboard .staff-panel {
+        border: 1px solid #dbe7f6;
+        border-radius: 11px;
+        overflow: hidden;
+        min-width: 0;
+    }
+
+    .manager-dashboard .staff-title {
+        background: #edf5ff;
+        padding: 14px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #103b78;
+    }
+
+    .manager-dashboard .staff-panel th,
+    .manager-dashboard .staff-panel td {
+        padding: 11px 10px;
+    }
+
+    .manager-dashboard .pagination-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+        font-size: 12px;
+        color: #607da8;
+    }
+
+    .manager-dashboard .pagination-links {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .manager-dashboard .pagination-links a {
+        color: #176cc1;
+        text-decoration: none;
+        padding: 7px 10px;
+        border: 1px solid #dbe7f6;
+        border-radius: 7px;
+    }
+
+    /* ==========================================
+       5. MỚI: THÔNG BÁO CHỜ PHÊ DUYỆT
+       ========================================== */
+
+    .manager-approval-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 20px 22px;
+        margin-bottom: 22px;
+        background: #fff8e9;
+        border: 1px solid #f0d59b;
+        border-left: 5px solid #e3a02c;
+        border-radius: 13px;
+    }
+
+    .manager-approval-banner h2 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        color: #92570d;
+    }
+
+    .manager-approval-banner p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #865f2b;
+    }
+
+    .manager-approval-banner-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .manager-approval-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 11px 17px;
+        border-radius: 9px;
+        border: 1px solid transparent;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background .2s;
+        white-space: nowrap;
+    }
+
+    .manager-approval-button-primary {
+        background: #176cc1;
+        border-color: #176cc1;
+        color: #ffffff;
+    }
+
+    .manager-approval-button-primary:hover {
+        background: #10559a;
+        color: #ffffff;
+    }
+
+    .manager-approval-button-secondary {
+        background: #ffffff;
+        border-color: #ccd7e5;
+        color: #475569;
+    }
+
+    .manager-approval-button-secondary:hover {
+        background: #f1f5f9;
+    }
+
+    .manager-approval-count {
+        display: inline-flex;
+        padding: 6px 11px;
+        border-radius: 20px;
+        background: #fff0cf;
+        color: #945a12;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .manager-approval-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .manager-approval-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 17px;
+        border: 1px solid #e0eaf7;
+        border-radius: 11px;
+        background: #f8fbff;
+    }
+
+    .manager-approval-item-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .manager-approval-item-title {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: #164b88;
+        margin-bottom: 7px;
+    }
+
+    .manager-approval-item p {
+        margin: 4px 0;
+        font-size: 12px;
+        line-height: 1.7;
+        color: #56708c;
+        overflow-wrap: anywhere;
+    }
+
+    .manager-approval-amount {
+        font-size: 16px;
+        font-weight: 700;
+        color: #166534;
+    }
+
+    /* ==========================================
+       6. MỚI: POPUP THÔNG BÁO MANAGER
+       ========================================== */
+
+    .manager-approval-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background: rgba(15, 23, 42, .58);
+    }
+
+    .manager-approval-overlay[hidden] {
+        display: none !important;
+    }
+
+    .manager-approval-modal {
+        width: 100%;
+        max-width: 570px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 28px;
+        border-radius: 18px;
+        background: #ffffff;
+        color: #17365d;
+        box-shadow: 0 24px 70px rgba(15, 23, 42, .28);
+    }
+
+    .manager-approval-modal-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 55px;
+        height: 55px;
+        margin-bottom: 17px;
+        border-radius: 15px;
+        background: #fff0d2;
+        font-size: 27px;
+    }
+
+    .manager-approval-modal h2 {
+        margin: 0 0 10px;
+        font-size: 23px;
+        color: #123d70;
+        line-height: 1.4;
+    }
+
+    .manager-approval-modal-desc {
+        margin: 0 0 18px;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #64748b;
+    }
+
+    .manager-approval-modal-detail {
+        background: #f5f9ff;
+        border: 1px solid #dce8f7;
+        border-radius: 12px;
+        padding: 17px;
+        margin-bottom: 18px;
+    }
+
+    .manager-approval-modal-detail p {
+        margin: 0 0 10px;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #4d6581;
+    }
+
+    .manager-approval-modal-detail p:last-child {
+        margin-bottom: 0;
+    }
+
+    .manager-approval-modal-detail strong {
+        color: #164b88;
+    }
+
+    .manager-approval-modal-amount {
+        padding: 12px 15px;
+        margin: 12px 0;
+        background: #e9f7ef;
+        border: 1px solid #c0e5cf;
+        border-radius: 9px;
+        font-size: 24px;
+        font-weight: 700;
+        color: #176442;
+    }
+
+    .manager-approval-modal-note {
+        margin: 0 0 18px;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #64748b;
+    }
+
+    .manager-approval-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    /* ==========================================
+       7. RESPONSIVE
+       ========================================== */
+
+    @media (max-width: 1100px) {
+        .manager-dashboard .filter-form {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .manager-dashboard .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 750px) {
+        .manager-dashboard .staff-grid,
+        .manager-dashboard .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .manager-dashboard .dashboard-hero {
+            padding: 22px;
+        }
+
+        .manager-dashboard .dashboard-hero h1 {
+            font-size: 21px;
+        }
+
+        .manager-approval-banner,
+        .manager-approval-item {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .manager-approval-banner-actions {
+            justify-content: flex-start;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .manager-dashboard .stats-grid,
+        .manager-dashboard .stats-grid-six {
+            grid-template-columns: 1fr;
+        }
+
+        .manager-approval-modal {
+            padding: 20px;
+        }
+
+        .manager-approval-modal h2 {
+            font-size: 20px;
+        }
+
+        .manager-approval-modal-actions {
+            flex-direction: column-reverse;
+        }
+
+        .manager-approval-modal-actions .manager-approval-button {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="manager-dashboard">
+
+    <!-- ======================================
+         BANNER DASHBOARD
+         ====================================== -->
+
+    <section class="dashboard-hero">
+        <h1>Dashboard quản lý vận hành</h1>
+
+        <p>
+            Theo dõi tổng quan Ticket, hồ sơ thẩm định,
+            phân công nhân sự và chất lượng chăm sóc
+            khách hàng của CRM HULO.
+        </p>
+    </section>
+
+
+    <!-- ======================================
+         MỚI: THANH NHẮC PHÊ DUYỆT
+         ====================================== -->
+
+    {% if approval_notification_latest %}
+
+        <section
+            class="manager-approval-banner"
+            id="manager-approval-banner"
+            aria-label="Thông báo phương án chờ phê duyệt"
+        >
+            <div>
+                <h2>
+                    🔔 Có đề xuất hoàn tiền cần phê duyệt
+                </h2>
+
+                <p>
+                    Hiện có
+                    <strong>{{ approval_notifications_count }}</strong>
+                    phương án hoàn tiền đang chờ MANAGER quyết định.
+
+                    Đề xuất mới nhất thuộc hồ sơ
+                    <strong>
+                        #{{ approval_notification_latest.ma_ho_so.pk }}
+                    </strong>.
+                </p>
+            </div>
+
+            <div class="manager-approval-banner-actions">
+
+                <button
+                    type="button"
+                    class="manager-approval-button manager-approval-button-secondary"
+                    id="manager-open-approval-modal"
+                >
+                    Xem thông báo
+                </button>
+
+                <a
+                    href="{% url 'disputes:detail' approval_notification_latest.ma_ho_so.pk %}"
+                    class="manager-approval-button manager-approval-button-primary"
+                >
+                    Xem đề xuất
+                </a>
+
+            </div>
+        </section>
+
+    {% endif %}
+
+
+    <!-- ======================================
+         MỚI: DANH SÁCH ĐỀ XUẤT CHỜ PHÊ DUYỆT
+         ====================================== -->
+
+    {% if approval_notifications %}
+
+        <section
+            class="section-box"
+            id="manager-pending-approvals"
+        >
+            <div
+                style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:15px;"
+            >
+                <div>
+                    <h2 class="section-title">
+                        📋 Phương án hoàn tiền chờ phê duyệt
+                    </h2>
+
+                    <p class="section-desc" style="margin-bottom:0;">
+                        Chỉ hiển thị những đề xuất đã được
+                        ASSESSOR gửi và chưa có quyết định.
+                    </p>
+                </div>
+
+                <span class="manager-approval-count">
+                    {{ approval_notifications_count }} chờ duyệt
+                </span>
+            </div>
+
+            <div class="manager-approval-list">
+
+                {% for proposal in approval_notifications %}
+
+                    <div class="manager-approval-item">
+
+                        <div class="manager-approval-item-info">
+
+                            <strong class="manager-approval-item-title">
+                                Hồ sơ #{{ proposal.ma_ho_so.pk }}
+                                · Phương án V{{ proposal.phien_ban }}
+                            </strong>
+
+                            <p>
+                                <strong>Ticket:</strong>
+                                {{ proposal.ma_ho_so.ma_ticket.ma_ticket }}
+                            </p>
+
+                            <p>
+                                <strong>Khách hàng:</strong>
+                                {{ proposal.ma_ho_so.ma_ticket.khach_hang.ho_ten }}
+                            </p>
+
+                            <p>
+                                <strong>Đơn hàng:</strong>
+                                {% if proposal.ma_ho_so.ma_don_hang %}
+                                    {{ proposal.ma_ho_so.ma_don_hang }}
+                                {% else %}
+                                    Chưa có thông tin
+                                {% endif %}
+                            </p>
+
+                            <p>
+                                <strong>Nhân viên đề xuất:</strong>
+                                {{ proposal.nguoi_de_xuat.ho_ten }}
+                            </p>
+
+                            <p>
+                                <strong>Số tiền:</strong>
+
+                                <span class="manager-approval-amount">
+                                    {{ proposal.so_tien_hoan|floatformat:0 }}
+                                    {{ proposal.don_vi_tien_te }}
+                                </span>
+                            </p>
+
+                            <p>
+                                <strong>Thời điểm cập nhật:</strong>
+                                {{ proposal.thoi_diem_cap_nhat|date:"d/m/Y H:i" }}
+                            </p>
+
+                            <span class="status-badge badge-yellow">
+                                Chờ phê duyệt
+                            </span>
+
+                        </div>
+
+                        <a
+                            href="{% url 'disputes:detail' proposal.ma_ho_so.pk %}"
+                            class="manager-approval-button manager-approval-button-primary"
+                        >
+                            Xem đề xuất
+                        </a>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% if approval_notifications_count > 10 %}
+                <p class="section-desc" style="margin:14px 0 0;">
+                    Đang hiển thị 10 phương án mới nhất.
+                    Những phương án còn lại sẽ xuất hiện khi
+                    các phương án hiện tại được giải quyết.
+                </p>
+            {% endif %}
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- ======================================
+         TỔNG QUAN TICKET
+         ====================================== -->
+
+    <section class="section-box">
+
+        <h2 class="section-title">
+            Tổng quan yêu cầu hỗ trợ
+        </h2>
+
+        <p class="section-desc">
+            Tình hình tiếp nhận, phân công và xử lý
+            yêu cầu hỗ trợ khách hàng.
+        </p>
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-label">Tổng Ticket</div>
+                <div class="stat-value">
+                    {{ ticket_stats.total|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Đang xử lý</div>
+                <div class="stat-value">
+                    {{ ticket_stats.in_progress|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Chờ nhân viên tiếp nhận</div>
+                <div class="stat-value">
+                    {{ ticket_stats.assigned|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Ticket mở lại</div>
+                <div class="stat-value">
+                    {{ ticket_stats.reopened|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Chưa phân công</div>
+                <div class="stat-value">
+                    {{ ticket_stats.new|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Đã giải quyết</div>
+                <div class="stat-value">
+                    {{ ticket_stats.resolved|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Đã đóng</div>
+                <div class="stat-value">
+                    {{ ticket_stats.closed|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Đang mở, quá hạn SLA</div>
+                <div class="stat-value danger">
+                    {{ ticket_stats.overdue|default:0 }}
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ======================================
+         TỔNG QUAN THẨM ĐỊNH VÀ CSAT
+         ====================================== -->
+
+    <section class="section-box">
+
+        <h2 class="section-title">
+            Thẩm định và mức độ hài lòng
+        </h2>
+
+        <p class="section-desc">
+            Tiến độ giải quyết khiếu nại
+            và kết quả đánh giá sau hỗ trợ.
+        </p>
+
+        <div class="stats-grid stats-grid-six">
+
+            <div class="stat-card">
+                <div class="stat-label">Tổng hồ sơ thẩm định</div>
+                <div class="stat-value">
+                    {{ dispute_stats.total|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Chờ tiếp nhận</div>
+                <div class="stat-value">
+                    {{ dispute_stats.waiting|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Đang thẩm định</div>
+                <div class="stat-value">
+                    {{ dispute_stats.processing|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Chờ bổ sung</div>
+                <div class="stat-value">
+                    {{ dispute_stats.supplement|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Đã kết luận</div>
+                <div class="stat-value">
+                    {{ dispute_stats.concluded|default:0 }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">CSAT trung bình</div>
+                <div class="stat-value">
+                    {% if csat_average is not None %}
+                        {{ csat_average }}/5
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+
+                <div class="stat-note">
+                    {{ csat_total|default:0 }} đánh giá
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ======================================
+         GIÁM SÁT TICKET VÀ THẨM ĐỊNH
+         ====================================== -->
+
+    <section class="section-box">
+
+        <h2 class="section-title">
+            Giám sát Ticket và hồ sơ thẩm định
+        </h2>
+
+        <p class="section-desc">
+            Xem nhân viên chăm sóc khách hàng phụ trách
+            từng Ticket, nhân viên được giao thẩm định
+            và tiến độ giải quyết.
+        </p>
+
+
+        <!-- BỘ LỌC -->
+
+        <form method="get" class="filter-form">
+
+            <div class="filter-group">
+                <label for="id_cskh">
+                    Nhân viên CSKH
+                </label>
+
+                <select name="cskh" id="id_cskh">
+                    <option value="">Tất cả CSKH</option>
+
+                    {% for staff in cskh_staff %}
+                        <option
+                            value="{{ staff.ma_nhan_vien }}"
+                            {% if selected_cskh == staff.ma_nhan_vien|stringformat:"s" %}selected{% endif %}
+                        >
+                            {{ staff.ho_ten }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="filter-group">
+                <label for="id_assessor">
+                    Nhân viên thẩm định
+                </label>
+
+                <select name="assessor" id="id_assessor">
+                    <option value="">Tất cả nhân viên</option>
+
+                    {% for staff in assessor_staff %}
+                        <option
+                            value="{{ staff.ma_nhan_vien }}"
+                            {% if selected_assessor == staff.ma_nhan_vien|stringformat:"s" %}selected{% endif %}
+                        >
+                            {{ staff.ho_ten }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="filter-group">
+                <label for="id_status">
+                    Trạng thái Ticket
+                </label>
+
+                <select name="status" id="id_status">
+                    <option value="">Tất cả trạng thái</option>
+
+                    {% for value, label in ticket_status_choices %}
+                        <option
+                            value="{{ value }}"
+                            {% if selected_status == value %}selected{% endif %}
+                        >
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="filter-group">
+                <label for="id_assessment">
+                    Hồ sơ thẩm định
+                </label>
+
+                <select name="assessment" id="id_assessment">
+                    <option value="">Tất cả</option>
+
+                    <option
+                        value="YES"
+                        {% if selected_assessment == 'YES' %}selected{% endif %}
+                    >
+                        Có hồ sơ
+                    </option>
+
+                    <option
+                        value="NO"
+                        {% if selected_assessment == 'NO' %}selected{% endif %}
+                    >
+                        Chưa có hồ sơ
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="filter-buttons">
+
+                <button type="submit" class="filter-button">
+                    Áp dụng lọc
+                </button>
+
+                <a
+                    href="{% url 'manager_dashboard' %}"
+                    class="reset-button"
+                >
+                    Xóa lọc
+                </a>
+
+            </div>
+
+        </form>
+
+
+        <!-- BẢNG GIÁM SÁT -->
+
+        <div class="table-wrapper">
+
+            <table class="ticket-table">
+
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Khách hàng</th>
+                        <th>Nội dung</th>
+                        <th>CSKH phụ trách</th>
+                        <th>Trạng thái Ticket</th>
+                        <th>Hồ sơ thẩm định</th>
+                        <th>Nhân viên thẩm định</th>
+                        <th>Tiến độ thẩm định</th>
+                        <th>Kết quả</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for row in ticket_rows %}
+
+                        <tr>
+
+                            <td>
+                                <a
+                                    class="table-link"
+                                    href="{% url 'tickets:detail' row.ticket.pk %}"
+                                >
+                                    {{ row.ticket.ma_ticket }}
+                                </a>
+
+                                <div class="muted">
+                                    ID {{ row.ticket.pk }}
+                                </div>
+                            </td>
+
+                            <td>
+                                {% if row.ticket.khach_hang %}
+                                    {{ row.ticket.khach_hang.ho_ten }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ row.ticket.tieu_de|truncatechars:75 }}
+                            </td>
+
+                            <td>
+                                {% if row.ticket.nguoi_phu_trach %}
+                                    {{ row.ticket.nguoi_phu_trach.ho_ten }}
+                                {% else %}
+                                    <span class="muted">
+                                        Chưa phân công
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+
+                                {% if row.ticket.trang_thai == 'NEW' %}
+                                    <span class="status-badge badge-gray">
+                                        Chưa phân công
+                                    </span>
+
+                                {% elif row.ticket.trang_thai == 'ASSIGNED' %}
+                                    <span class="status-badge badge-blue">
+                                        Đã phân công
+                                    </span>
+
+                                {% elif row.ticket.trang_thai == 'IN_PROGRESS' %}
+                                    <span class="status-badge badge-yellow">
+                                        Đang xử lý
+                                    </span>
+
+                                {% elif row.ticket.trang_thai == 'REOPENED' %}
+                                    <span class="status-badge badge-red">
+                                        Mở lại
+                                    </span>
+
+                                {% elif row.ticket.trang_thai == 'RESOLVED' %}
+                                    <span class="status-badge badge-green">
+                                        Đã giải quyết
+                                    </span>
+
+                                {% elif row.ticket.trang_thai == 'CLOSED' %}
+                                    <span class="status-badge badge-gray">
+                                        Đã đóng
+                                    </span>
+
+                                {% else %}
+                                    {{ row.ticket.get_trang_thai_display }}
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if row.dispute %}
+                                    <a
+                                        class="table-link"
+                                        href="{% url 'disputes:detail' row.dispute.pk %}"
+                                    >
+                                        Hồ sơ #{{ row.dispute.pk }}
+                                    </a>
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if row.dispute %}
+
+                                    {% if row.dispute.ma_nhan_vien_tham_dinh %}
+                                        {{ row.dispute.ma_nhan_vien_tham_dinh.ho_ten }}
+                                    {% else %}
+                                        Chưa phân công
+                                    {% endif %}
+
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if row.dispute %}
+
+                                    {% if row.dispute.trang_thai == 'CHO_TIEP_NHAN' %}
+                                        <span class="status-badge badge-blue">
+                                            Chờ tiếp nhận
+                                        </span>
+
+                                    {% elif row.dispute.trang_thai == 'DANG_THAM_DINH' %}
+                                        <span class="status-badge badge-yellow">
+                                            Đang thẩm định
+                                        </span>
+
+                                    {% elif row.dispute.trang_thai == 'CHO_BO_SUNG' %}
+                                        <span class="status-badge badge-red">
+                                            Chờ bổ sung
+                                        </span>
+
+                                    {% elif row.dispute.trang_thai == 'DA_KET_LUAN' %}
+                                        <span class="status-badge badge-green">
+                                            Đã kết luận
+                                        </span>
+
+                                    {% else %}
+                                        {{ row.dispute.get_trang_thai_display }}
+                                    {% endif %}
+
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if row.dispute %}
+
+                                    {% if row.dispute.ket_qua_tham_dinh %}
+                                        {{ row.dispute.get_ket_qua_tham_dinh_display }}
+                                    {% else %}
+                                        Chưa có
+                                    {% endif %}
+
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="9" style="text-align:center;">
+                                Không có Ticket phù hợp bộ lọc.
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- PHÂN TRANG -->
+
+        <div class="pagination-row">
+
+            <span>
+                Tổng kết quả lọc:
+                {{ page_obj.paginator.count }}
+            </span>
+
+            <div class="pagination-links">
+
+                {% if page_obj.has_previous %}
+                    <a href="?{% if query_without_page %}{{ query_without_page }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">
+                        Trước
+                    </a>
+                {% endif %}
+
+                <span>
+                    Trang {{ page_obj.number }}
+                    / {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?{% if query_without_page %}{{ query_without_page }}&amp;{% endif %}page={{ page_obj.next_page_number }}">
+                        Tiếp
+                    </a>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- ======================================
+         KHỐI LƯỢNG CÔNG VIỆC
+         ====================================== -->
+
+    <section class="section-box">
+
+        <h2 class="section-title">
+            Khối lượng công việc theo nhân viên
+        </h2>
+
+        <p class="section-desc">
+            Theo dõi phân bổ yêu cầu hỗ trợ
+            và hồ sơ thẩm định giữa các nhân viên.
+        </p>
+
+        <div class="staff-grid">
+
+            <!-- BỘ PHẬN CSKH -->
+
+            <div class="staff-panel">
+
+                <div class="staff-title">
+                    Bộ phận chăm sóc khách hàng
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Nhân viên</th>
+                                <th>Đang mở</th>
+                                <th>Đã đóng</th>
+                                <th>Tổng được giao</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for staff in cskh_staff %}
+
+                                <tr>
+                                    <td>
+                                        <strong>{{ staff.ho_ten }}</strong>
+
+                                        <div class="muted">
+                                            {{ staff.ma_tai_khoan.username }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {{ staff.open_count|default:0 }}
+                                    </td>
+
+                                    <td>
+                                        {{ staff.closed_count|default:0 }}
+                                    </td>
+
+                                    <td>
+                                        {{ staff.total_count|default:0 }}
+                                    </td>
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+                                    <td colspan="4">
+                                        Chưa có nhân viên.
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+
+            <!-- BỘ PHẬN THẨM ĐỊNH -->
+
+            <div class="staff-panel">
+
+                <div class="staff-title">
+                    Bộ phận thẩm định
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Nhân viên</th>
+                                <th>Đang mở</th>
+                                <th>Đã kết luận</th>
+                                <th>Tổng hồ sơ</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for staff in assessor_staff %}
+
+                                <tr>
+
+                                    <td>
+                                        <strong>{{ staff.ho_ten }}</strong>
+
+                                        <div class="muted">
+                                            {{ staff.ma_tai_khoan.username }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {{ staff.dashboard_open|default:0 }}
+                                    </td>
+
+                                    <td>
+                                        {{ staff.dashboard_concluded|default:0 }}
+                                    </td>
+
+                                    <td>
+                                        {{ staff.dashboard_total|default:0 }}
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+                                    <td colspan="4">
+                                        Chưa có nhân viên.
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+
+<!-- ==========================================
+     MỚI: POPUP PHƯƠNG ÁN CHỜ PHÊ DUYỆT
+     ========================================== -->
+
+{% if approval_notification_latest %}
+
+    <div
+        class="manager-approval-overlay"
+        id="manager-approval-overlay"
+        hidden
+    >
+
+        <section
+            class="manager-approval-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="manager-approval-modal-title"
+            aria-describedby="manager-approval-modal-desc"
+            tabindex="-1"
+        >
+
+            <div
+                class="manager-approval-modal-icon"
+                aria-hidden="true"
+            >
+                🔔
+            </div>
+
+            <h2 id="manager-approval-modal-title">
+                Có đề xuất hoàn tiền cần phê duyệt
+            </h2>
+
+            <p
+                class="manager-approval-modal-desc"
+                id="manager-approval-modal-desc"
+            >
+                Bộ phận thẩm định đã gửi một phương án
+                hoàn tiền đến MANAGER. Vui lòng kiểm tra
+                hồ sơ trước khi đưa ra quyết định.
+            </p>
+
+
+            <div class="manager-approval-modal-detail">
+
+                <p>
+                    <strong>Hồ sơ thẩm định:</strong>
+                    #{{ approval_notification_latest.ma_ho_so.pk }}
+                </p>
+
+                <p>
+                    <strong>Ticket:</strong>
+                    {{ approval_notification_latest.ma_ho_so.ma_ticket.ma_ticket }}
+                </p>
+
+                <p>
+                    <strong>Khách hàng:</strong>
+                    {{ approval_notification_latest.ma_ho_so.ma_ticket.khach_hang.ho_ten }}
+                </p>
+
+                <p>
+                    <strong>Đơn hàng:</strong>
+
+                    {% if approval_notification_latest.ma_ho_so.ma_don_hang %}
+                        {{ approval_notification_latest.ma_ho_so.ma_don_hang }}
+                    {% else %}
+                        Chưa có thông tin
+                    {% endif %}
+                </p>
+
+                <p>
+                    <strong>Hình thức xử lý:</strong>
+                    Hoàn tiền
+                </p>
+
+                <p>
+                    <strong>Phiên bản phương án:</strong>
+                    V{{ approval_notification_latest.phien_ban }}
+                </p>
+
+                <p>
+                    <strong>Số tiền đề xuất hoàn:</strong>
+                </p>
+
+                <div class="manager-approval-modal-amount">
+                    {{ approval_notification_latest.so_tien_hoan|floatformat:0 }}
+                    {{ approval_notification_latest.don_vi_tien_te }}
+                </div>
+
+                <p>
+                    <strong>Nhân viên đề xuất:</strong>
+                    {{ approval_notification_latest.nguoi_de_xuat.ho_ten }}
+                </p>
+
+                <p>
+                    <strong>Trạng thái:</strong>
+                    <span class="status-badge badge-yellow">
+                        Chờ MANAGER phê duyệt
+                    </span>
+                </p>
+
+            </div>
+
+
+            {% if approval_notifications_count > 1 %}
+
+                <p class="manager-approval-modal-note">
+                    Bạn còn
+                    <strong>
+                        {{ approval_notifications_count|add:"-1" }}
+                    </strong>
+                    đề xuất khác đang chờ phê duyệt.
+                    Có thể xem danh sách trên Dashboard.
+                </p>
+
+            {% else %}
+
+                <p class="manager-approval-modal-note">
+                    Nhấn <strong>Xem đề xuất</strong> để
+                    mở hồ sơ và kiểm tra phương án.
+                    Thao tác này chưa phải là phê duyệt.
+                </p>
+
+            {% endif %}
+
+
+            <div class="manager-approval-modal-actions">
+
+                <button
+                    type="button"
+                    class="manager-approval-button manager-approval-button-secondary"
+                    id="manager-approval-later"
+                >
+                    Để sau
+                </button>
+
+                <a
+                    href="{% url 'disputes:detail' approval_notification_latest.ma_ho_so.pk %}"
+                    class="manager-approval-button manager-approval-button-primary"
+                >
+                    Xem đề xuất
+                </a>
+
+            </div>
+
+        </section>
+    </div>
+
+{% endif %}
+
+
+<!-- ==========================================
+     JAVASCRIPT POPUP MANAGER
+     ========================================== -->
+
+{% if approval_notification_latest %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const overlay = document.getElementById(
+        "manager-approval-overlay"
+    );
+
+    const laterButton = document.getElementById(
+        "manager-approval-later"
+    );
+
+    const reopenButton = document.getElementById(
+        "manager-open-approval-modal"
+    );
+
+    if (!overlay || !laterButton) {
+        return;
+    }
+
+    const modal = overlay.querySelector(
+        ".manager-approval-modal"
+    );
+
+    const previousOverflow = document.body.style.overflow;
+
+    function openApprovalModal() {
+
+        overlay.hidden = false;
+
+        document.body.style.overflow = "hidden";
+
+        if (modal) {
+            modal.focus();
+        }
+    }
+
+    function closeApprovalModal() {
+
+        overlay.hidden = true;
+
+        document.body.style.overflow = previousOverflow;
+
+        if (reopenButton) {
+            reopenButton.focus();
+        }
+    }
+
+    // Tự động mở khi Dashboard có
+    // phương án hoàn tiền CHO_DUYET.
+    openApprovalModal();
+
+    // Để sau chỉ đóng hộp thoại.
+    // Không thay đổi trạng thái phương án.
+    laterButton.addEventListener(
+        "click",
+        closeApprovalModal
+    );
+
+    // Mở lại từ thanh nhắc nhở.
+    if (reopenButton) {
+
+        reopenButton.addEventListener(
+            "click",
+            openApprovalModal
+        );
+    }
+
+    // Đóng bằng phím Escape.
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Escape" &&
+                !overlay.hidden
+            ) {
+                closeApprovalModal();
+            }
+        }
+    );
+
+});
+</script>
+
+{% endif %}
+
+{% endblock %}

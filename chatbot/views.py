@@ -19,9 +19,10 @@ from uuid import uuid4
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from PIL import Image, UnidentifiedImageError
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
 from django.views.decorators.http import require_http_methods
+
+
 # ==================================================
 # UC-2.1: HIỂN THỊ GIAO DIỆN CHATBOT
 # ==================================================
@@ -34,7 +35,6 @@ def chatbot_home(request):
         ma_tai_khoan=request.user
     ).first()
 
-    # Nếu tài khoản chưa có hồ sơ khách hàng
     if khach_hang is None:
         return HttpResponseForbidden(
             "Tài khoản chưa có hồ sơ khách hàng."
@@ -109,7 +109,6 @@ def chatbot_send_message(request):
             status=400
         )
 
-    # Kiểm tra dữ liệu JSON
     if not isinstance(du_lieu, dict):
         return JsonResponse(
             {
@@ -120,7 +119,6 @@ def chatbot_send_message(request):
 
     cau_hoi = du_lieu.get('cau_hoi', '')
 
-    # Kiểm tra câu hỏi
     if not isinstance(cau_hoi, str):
         return JsonResponse(
             {
@@ -139,7 +137,6 @@ def chatbot_send_message(request):
             status=400
         )
 
-    # Giới hạn độ dài câu hỏi
     if len(cau_hoi) > 1000:
         return JsonResponse(
             {
@@ -151,7 +148,6 @@ def chatbot_send_message(request):
     # Bước 3: Tìm hoặc tạo phiên và lưu tin nhắn
     with transaction.atomic():
 
-        # Tìm phiên trò chuyện đang hoạt động
         phien_chat = ChatSession.objects.filter(
             ma_khach_hang=khach_hang,
             trang_thai='DANG_CHAT'
@@ -160,7 +156,6 @@ def chatbot_send_message(request):
             '-ma_phien'
         ).first()
 
-        # SỬA LỖI: Nếu chưa có phiên, tự động tạo mới
         if phien_chat is None:
             phien_chat = ChatSession.objects.create(
                 ma_khach_hang=khach_hang,
@@ -192,7 +187,6 @@ def chatbot_send_message(request):
         'ma_phien': phien_chat.ma_phien,
         'ma_tin_nhan': tin_nhan_bot.ma_tin_nhan
     })
-# UC-2.3: CHUYỂN SANG NHÂN VIÊN HỖ TRỢ
 
 
 # ==================================================
@@ -273,6 +267,7 @@ def chuyen_ho_tro(request):
         }
     )
 
+
 # ==================================================
 # UC-2.4: KHAI BÁO THÔNG TIN YÊU CẦU HỖ TRỢ
 # ==================================================
@@ -295,13 +290,13 @@ def khai_bao_yeu_cau(request):
         'm2_yeu_cau_ho_tro'
     )
 
-    # Không cho bỏ qua bước chọn loại vấn đề
     if not isinstance(yeu_cau, dict):
         return redirect('chatbot:chuyen_ho_tro')
 
     # Kiểm tra bản nháp thuộc khách hàng hiện tại
     if yeu_cau.get('ma_khach_hang') != khach_hang.pk:
         return redirect('chatbot:chuyen_ho_tro')
+
     # UC-2.6: Tạo mã yêu cầu nguồn cho M3
     # Chỉ tạo một lần cho mỗi bản nháp
     if not yeu_cau.get('source_request_id'):
@@ -312,6 +307,7 @@ def khai_bao_yeu_cau(request):
         request.session[
             'm2_yeu_cau_ho_tro'
         ] = yeu_cau
+
     # Các loại vấn đề hợp lệ
     ten_cac_loai = {
         'DON_HANG': 'Vấn đề đơn hàng',
@@ -332,9 +328,13 @@ def khai_bao_yeu_cau(request):
     # Bước 3: Xử lý dữ liệu khách hàng gửi lên
     if request.method == 'POST':
 
-        form = YeuCauHoTroForm(request.POST)
+        # CẬP NHẬT: Truyền khách hàng vào Form
+        # để kiểm tra đơn hàng thuộc đúng tài khoản.
+        form = YeuCauHoTroForm(
+            request.POST,
+            customer=khach_hang,
+        )
 
-        # Kiểm tra dữ liệu hợp lệ
         if form.is_valid():
 
             # Lưu bản nháp vào Django session
@@ -364,10 +364,12 @@ def khai_bao_yeu_cau(request):
             yeu_cau.get('thong_tin', {})
         )
 
+        # CẬP NHẬT: Dropdown lấy các đơn hàng
+        # theo khách hàng đang đăng nhập.
         form = YeuCauHoTroForm(
-            initial=du_lieu_ban_dau
+            initial=du_lieu_ban_dau,
+            customer=khach_hang,
         )
-
 
     # Bước 5: Lấy danh sách bằng chứng đã tải
     danh_sach_tep = yeu_cau.get('bang_chung', [])
@@ -397,7 +399,6 @@ def khai_bao_yeu_cau(request):
             'thong_bao_tep': thong_bao_tep,
         }
     )
-
 
 
 # ==================================================
@@ -475,7 +476,6 @@ def tai_bang_chung(request):
                                 anh.format == 'JPEG'
                                 and anh.width * anh.height <= 20_000_000
                             ):
-                                # Đọc dữ liệu ảnh để kiểm tra
                                 anh.load()
                                 hop_le = True
 
@@ -495,7 +495,6 @@ def tai_bang_chung(request):
                         'tep_bang_chung',
                         'Chỉ chấp nhận ảnh JPEG (JPG/JPEG) hợp lệ.'
                     )
-
 
                 else:
                     # Bước 4: Lưu tệp riêng ngoài GitHub
@@ -541,7 +540,6 @@ def tai_bang_chung(request):
     else:
         form = BangChungForm()
 
-
     # Bước 5: Quay về trang khai báo nếu truy cập trực tiếp
     if request.method != 'POST':
         return redirect('chatbot:khai_bao_yeu_cau')
@@ -554,7 +552,6 @@ def tai_bang_chung(request):
         }
 
     else:
-        # Lấy lỗi nếu tệp không hợp lệ
         loi_tep = form.errors.get('tep_bang_chung')
 
         request.session['m2_thong_bao_tep'] = {
@@ -568,6 +565,7 @@ def tai_bang_chung(request):
 
     # Bước 7: Trở về giao diện chung UC-2.4 + UC-2.5
     return redirect('chatbot:khai_bao_yeu_cau')
+
 
 # ==================================================
 # UC-2.5: XÓA BẰNG CHỨNG ĐÃ TẢI
@@ -701,8 +699,12 @@ def xac_nhan_yeu_cau(request):
     if not isinstance(thong_tin, dict):
         return redirect('chatbot:khai_bao_yeu_cau')
 
-    # Kiểm tra lại các thông tin đã lưu
-    form = YeuCauHoTroForm(thong_tin)
+    # CẬP NHẬT: Xác minh đơn hàng một lần nữa
+    # trước khi chuyển sang trang xác nhận yêu cầu.
+    form = YeuCauHoTroForm(
+        thong_tin,
+        customer=khach_hang,
+    )
 
     if not form.is_valid():
         return redirect('chatbot:khai_bao_yeu_cau')
@@ -730,7 +732,6 @@ def xac_nhan_yeu_cau(request):
     if not isinstance(danh_sach_tep, list):
         danh_sach_tep = []
 
-
     # Bước 7: Chuẩn bị dữ liệu M2 cho M3
     # Chưa tạo Ticket chính thức
     try:
@@ -752,7 +753,6 @@ def xac_nhan_yeu_cau(request):
             'du_lieu_m3': du_lieu_m3,
         }
     )
-
 
 
 # ==============================================
@@ -778,7 +778,6 @@ def bo_sung_yeu_cau(request):
             ]
 
     else:
-        # Nếu chỉ mở trang thì hiển thị form trống
         form = BoSungYeuCauForm()
 
     # Bước 3: Hiển thị form và nội dung xem trước

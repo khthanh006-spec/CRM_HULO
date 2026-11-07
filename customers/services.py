@@ -1,11 +1,18 @@
 
+from datetime import timedelta
 from uuid import UUID
 
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
 
-from .models import LoyaltyAccount, LoyaltyTransaction, LoyaltyTier
+from .models import (
+    LoyaltyAccount,
+    LoyaltyTransaction,
+    LoyaltyTier,
+    LoyaltyReward,
+    LoyaltyRedemption,
+)
 
 
 # ==============================================
@@ -22,34 +29,34 @@ def change_loyalty_points(
     idempotency_key=None
 ):
     """
-    Xu ly giao dich Loyalty.
+    Xử lý giao dịch Loyalty.
 
     EARN:
-        Cong diem kha dung va tong diem tich luy.
+        Cộng điểm khả dụng và tổng điểm tích lũy.
 
     REDEEM:
-        Tru diem kha dung.
-        Khong tru tong diem tich luy.
+        Trừ điểm khả dụng.
+        Không trừ tổng điểm tích lũy.
 
     idempotency_key:
-        Cung mot ma yeu cau chi xu ly mot lan.
-        Neu khong cung cap ma, chua co bao ve
-        chong trung cho lan goi do.
+        Cùng một mã yêu cầu chỉ xử lý một lần.
+        Nếu không cung cấp mã, chưa có bảo vệ
+        chống trùng cho lần gọi đó.
     """
 
-    # 1. Kiem tra so diem
+    # 1. Kiểm tra số điểm
     if type(points) is not int or points <= 0:
         raise ValueError(
             "Số điểm phải là số nguyên dương."
         )
 
-    # 2. Kiem tra loai giao dich
+    # 2. Kiểm tra loại giao dịch
     if transaction_type not in LoyaltyTransaction.TransactionType.values:
         raise ValueError(
             "Loại giao dịch Loyalty không hợp lệ."
         )
 
-    # 3. Kiem tra mo ta
+    # 3. Kiểm tra mô tả
     if not isinstance(description, str):
         raise ValueError(
             "Mô tả giao dịch không hợp lệ."
@@ -62,13 +69,16 @@ def change_loyalty_points(
             "Mô tả không được quá 255 ký tự."
         )
 
-    # 4. Kiem tra nguoi thuc hien neu duoc truyen
-    if performed_by is not None and getattr(performed_by, "pk", None) is None:
+    # 4. Kiểm tra người thực hiện nếu được truyền
+    if (
+        performed_by is not None
+        and getattr(performed_by, "pk", None) is None
+    ):
         raise ValueError(
             "Người thực hiện không hợp lệ."
         )
 
-    # 5. Chuan hoa ma chong trung
+    # 5. Chuẩn hóa mã chống trùng
     key = None
 
     if idempotency_key is not None:
@@ -79,7 +89,7 @@ def change_loyalty_points(
                 "Mã yêu cầu giao dịch không hợp lệ."
             )
 
-    # 6. Ham kiem tra yeu cau da xu ly
+    # 6. Hàm kiểm tra yêu cầu đã xử lý
     def check_existing(existing):
 
         if (
@@ -96,10 +106,10 @@ def change_loyalty_points(
 
     try:
 
-        # 7. Thuc hien trong mot giao dich database
+        # 7. Thực hiện trong một giao dịch database
         with transaction.atomic():
 
-            # Kiem tra ma yeu cau da ton tai
+            # Kiểm tra mã yêu cầu đã tồn tại
             if key is not None:
 
                 existing = (
@@ -112,15 +122,15 @@ def change_loyalty_points(
                 if existing is not None:
                     return check_existing(existing)
 
-            # 8. Lay tai khoan Loyalty
+            # 8. Lấy tài khoản Loyalty
             account = (
                 LoyaltyAccount.objects
                 .select_for_update()
                 .get(customer=customer)
             )
 
-            # 9. Tao giao dich truoc khi cap nhat diem
-            # Unique key ngan hai ban ghi trung ma
+            # 9. Tạo giao dịch trước khi cập nhật điểm
+            # Unique key ngăn hai bản ghi trùng mã
             loyalty_transaction = (
                 LoyaltyTransaction.objects.create(
                     account=account,
@@ -133,7 +143,10 @@ def change_loyalty_points(
             )
 
             # 10. Cộng điểm và cập nhật hạng
-            if transaction_type == LoyaltyTransaction.TransactionType.EARN:
+            if (
+                transaction_type
+                == LoyaltyTransaction.TransactionType.EARN
+            ):
 
                 LoyaltyAccount.objects.filter(
                     pk=account.pk
@@ -143,10 +156,8 @@ def change_loyalty_points(
                     updated_at=timezone.now(),
                 )
 
-                # Đọc lại tổng điểm sau khi cộng
                 account.refresh_from_db()
 
-                # Chọn hạng có ngưỡng cao nhất mà khách đã đạt
                 new_tier = (
                     LoyaltyTier.objects
                     .filter(
@@ -162,8 +173,12 @@ def change_loyalty_points(
                     ).update(tier=new_tier)
 
                     account.tier = new_tier
-            # 11. Doi diem
-            elif transaction_type == LoyaltyTransaction.TransactionType.REDEEM:
+
+            # 11. Đổi điểm
+            elif (
+                transaction_type
+                == LoyaltyTransaction.TransactionType.REDEEM
+            ):
 
                 updated = (
                     LoyaltyAccount.objects
@@ -182,13 +197,13 @@ def change_loyalty_points(
                         "Khách hàng không đủ điểm để đổi."
                     )
 
-            # 12. Tra ket qua
+            # 12. Trả kết quả
             return loyalty_transaction
 
     except IntegrityError:
 
-        # Neu hai yeu cau cung ma duoc gui gan nhau,
-        # tim giao dich da luu sau khi transaction rollback.
+        # Nếu hai yêu cầu cùng mã được gửi gần nhau,
+        # tìm giao dịch đã lưu sau khi transaction rollback.
         if key is None:
             raise
 
@@ -203,18 +218,12 @@ def change_loyalty_points(
             raise
 
         return check_existing(existing)
-from datetime import timedelta
-from uuid import UUID
 
-from django.db import transaction
-from django.utils import timezone
 
-from .models import (
-    LoyaltyAccount,
-    LoyaltyTransaction,
-    LoyaltyReward,
-    LoyaltyRedemption,
-)
+# ==============================================
+# MODULE 5 - LOYALTY VOUCHER REDEMPTION
+# ==============================================
+
 def redeem_loyalty_voucher(
     *,
     customer,
@@ -225,28 +234,49 @@ def redeem_loyalty_voucher(
 ):
     """
     Trừ điểm và tạo Voucher trong cùng giao dịch.
-    Gửi lại cùng yêu cầu trả về Voucher đã tạo.
+
+    Giao dịch mới không có tiền tố DEMO.
+
+    Các yêu cầu cũ đã được lưu với tiền tố DEMO
+    vẫn được nhận diện khi gửi lại cùng mã yêu cầu.
+
+    Gửi lại cùng yêu cầu trả về Voucher đã tạo,
+    không trừ điểm lần thứ hai.
     """
+
     if performed_by is None or performed_by.pk is None:
-        raise ValueError('Người thực hiện không hợp lệ.')
+        raise ValueError(
+            "Người thực hiện không hợp lệ."
+        )
 
     try:
         key = UUID(str(idempotency_key))
     except (ValueError, TypeError, AttributeError):
-        raise ValueError('Mã yêu cầu không hợp lệ.')
+        raise ValueError(
+            "Mã yêu cầu không hợp lệ."
+        )
 
     if not isinstance(description, str):
-        raise ValueError('Lý do giao dịch không hợp lệ.')
+        raise ValueError(
+            "Lý do giao dịch không hợp lệ."
+        )
 
     description = description.strip()
 
     if not 5 <= len(description) <= 240:
-        raise ValueError('Lý do cần từ 5 đến 240 ký tự.')
+        raise ValueError(
+            "Lý do cần từ 5 đến 240 ký tự."
+        )
 
-    transaction_description = 'DEMO - ' + description
+    # Không thêm tiền tố DEMO cho giao dịch mới.
+    transaction_description = description
+
+    # Chỉ sử dụng để tương thích giao dịch cũ.
+    legacy_description = "DEMO - " + description
 
     with transaction.atomic():
-        # Khóa tài khoản trước khi kiểm tra yêu cầu và trừ điểm.
+
+        # Khóa tài khoản trước khi kiểm tra và trừ điểm.
         account = (
             LoyaltyAccount.objects
             .select_for_update()
@@ -260,22 +290,30 @@ def redeem_loyalty_voucher(
         )
 
         if existing is not None:
+
             redemption = (
                 LoyaltyRedemption.objects
                 .filter(transaction=existing)
                 .first()
             )
 
+            # Chấp nhận mô tả mới hoặc định dạng cũ
+            # khi kiểm tra lại một yêu cầu đã xử lý.
+            valid_description = existing.description in (
+                transaction_description,
+                legacy_description,
+            )
+
             if (
                 existing.account_id != account.pk
                 or existing.transaction_type != 'REDEEM'
-                or existing.description != transaction_description
+                or not valid_description
                 or existing.performed_by_id != performed_by.pk
                 or redemption is None
                 or redemption.reward_id != reward_id
             ):
                 raise ValueError(
-                    'Mã yêu cầu đã được dùng cho giao dịch khác.'
+                    "Mã yêu cầu đã được dùng cho giao dịch khác."
                 )
 
             return redemption, False
@@ -288,17 +326,23 @@ def redeem_loyalty_voucher(
         )
 
         if reward is None or not reward.is_enabled:
-            raise ValueError('Voucher không còn được phép đổi.')
+            raise ValueError(
+                "Voucher không còn được phép đổi."
+            )
 
         if (
             reward.points_cost < 1
             or reward.discount_amount < 1
             or reward.validity_days < 1
         ):
-            raise ValueError('Cấu hình Voucher không hợp lệ.')
+            raise ValueError(
+                "Cấu hình Voucher không hợp lệ."
+            )
 
         if account.points_balance < reward.points_cost:
-            raise ValueError('Khách hàng không đủ điểm đổi Voucher.')
+            raise ValueError(
+                "Khách hàng không đủ điểm đổi Voucher."
+            )
 
         point_transaction = change_loyalty_points(
             customer=customer,
@@ -319,7 +363,9 @@ def redeem_loyalty_voucher(
             discount_amount=reward.discount_amount,
             terms=reward.terms,
             issued_at=now,
-            expires_at=now + timedelta(days=reward.validity_days),
+            expires_at=now + timedelta(
+                days=reward.validity_days
+            ),
         )
 
         return redemption, True

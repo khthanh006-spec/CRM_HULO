@@ -4,8 +4,11 @@
 {% block title %}Trung tâm hỗ trợ - CRM HULO{% endblock %}
 
 {% block content %}
-
 <style>
+    /* ==========================================
+       1. GIAO DIEN CHUNG
+       ========================================== */
+
     .hulo-page {
         max-width: 1250px;
         margin: 25px auto;
@@ -74,6 +77,10 @@
         border-color: #1680e5;
     }
 
+    /* ==========================================
+       2. HAI KHUNG FAQ VA CHATBOT
+       ========================================== */
+
     .hulo-main {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
@@ -88,6 +95,13 @@
         border-radius: 14px;
         overflow: hidden;
         box-shadow: 0 3px 12px rgba(0, 65, 130, .06);
+    }
+
+    .hulo-main > .hulo-panel:last-child {
+        display: flex;
+        flex-direction: column;
+        height: 550px;
+        min-height: 0;
     }
 
     .hulo-panel-title {
@@ -107,7 +121,9 @@
         line-height: 1.6;
     }
 
-    /* FAQ M1 */
+    /* ==========================================
+       3. FAQ M1
+       ========================================== */
 
     .hulo-search {
         display: flex;
@@ -198,7 +214,9 @@
         text-decoration: underline;
     }
 
-    /* DANH GIA FAQ */
+    /* ==========================================
+       4. DANH GIA FAQ
+       ========================================== */
 
     .hulo-feedback {
         margin-top: 16px;
@@ -241,7 +259,9 @@
         line-height: 1.6;
     }
 
-    /* THONG BAO */
+    /* ==========================================
+       5. THONG BAO HE THONG
+       ========================================== */
 
     .hulo-notice {
         padding: 18px 22px;
@@ -332,12 +352,15 @@
         color: #145da8;
     }
 
-    /* CHATBOT M2 */
+    /* ==========================================
+       6. CHATBOT M2
+       ========================================== */
 
     .hulo-chat-header {
         background: #176cc1;
         color: white;
         padding: 17px 20px;
+        flex-shrink: 0;
     }
 
     .hulo-chat-header h2 {
@@ -350,15 +373,19 @@
     }
 
     .hulo-messages {
-        height: 355px;
+        flex: 1 1 auto;
+        height: 0;
+        min-height: 0;
+        min-width: 0;
         overflow-y: auto;
+        overflow-x: hidden;
         padding: 20px;
         background: #fafcff;
     }
 
     .hulo-message {
         width: fit-content;
-        max-width: 85%;
+        max-width: 100%;
         padding: 12px 15px;
         margin-bottom: 12px;
         border-radius: 14px;
@@ -386,6 +413,8 @@
         gap: 10px;
         padding: 15px;
         border-top: 1px solid #e0ebf5;
+        flex-shrink: 0;
+        margin-top: 0;
     }
 
     .hulo-chat-input {
@@ -417,7 +446,9 @@
         cursor: wait;
     }
 
-    /* HO TRO NHAN VIEN */
+    /* ==========================================
+       7. HO TRO NHAN VIEN
+       ========================================== */
 
     .hulo-bottom {
         text-align: center;
@@ -444,9 +475,204 @@
 
     .hulo-support-btn:hover {
         background: #075ba8;
+        color: white;
     }
 
-    /* RESPONSIVE */
+    /* ==========================================
+       8. MOI: THANH THONG BAO MINH CHUNG
+       ========================================== */
+
+    .hulo-evidence-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 20px 23px;
+        margin-bottom: 22px;
+        background: #fff8e9;
+        border: 1px solid #f4d39b;
+        border-left: 5px solid #e59a25;
+        border-radius: 13px;
+        box-shadow: 0 4px 15px rgba(124, 88, 26, .07);
+    }
+
+    .hulo-evidence-banner-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .hulo-evidence-banner-title {
+        margin: 0 0 7px;
+        color: #92400e;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .hulo-evidence-banner-info p {
+        margin: 0;
+        color: #8a5a20;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .hulo-evidence-banner-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .hulo-evidence-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 42px;
+        padding: 11px 18px;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: Arial, sans-serif;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background .2s ease;
+    }
+
+    .hulo-evidence-btn-primary {
+        border: 1px solid #176cc1;
+        background: #176cc1;
+        color: white;
+    }
+
+    .hulo-evidence-btn-primary:hover {
+        background: #0d579f;
+        color: white;
+    }
+
+    .hulo-evidence-btn-secondary {
+        border: 1px solid #d0d9e5;
+        background: white;
+        color: #475569;
+    }
+
+    .hulo-evidence-btn-secondary:hover {
+        background: #f1f5f9;
+    }
+
+    /* ==========================================
+       9. MOI: HOP THOAI THONG BAO TU DONG
+       ========================================== */
+
+    .hulo-evidence-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(15, 23, 42, .58);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .hulo-evidence-overlay[hidden] {
+        display: none !important;
+    }
+
+    .hulo-evidence-modal {
+        width: 100%;
+        max-width: 560px;
+        max-height: 90vh;
+        overflow-y: auto;
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 24px 70px rgba(15, 23, 42, .28);
+        padding: 28px;
+        color: #173a67;
+    }
+
+    .hulo-evidence-modal-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 54px;
+        height: 54px;
+        border-radius: 15px;
+        background: #fff1d6;
+        font-size: 27px;
+        margin-bottom: 17px;
+    }
+
+    .hulo-evidence-modal h2 {
+        margin: 0 0 11px;
+        font-size: 23px;
+        line-height: 1.35;
+        color: #153f70;
+    }
+
+    .hulo-evidence-modal-subtitle {
+        margin: 0 0 20px;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .hulo-evidence-modal-ticket {
+        background: #f5f9ff;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        padding: 17px;
+        margin-bottom: 20px;
+    }
+
+    .hulo-evidence-modal-ticket p {
+        margin: 0 0 9px;
+        line-height: 1.6;
+        font-size: 14px;
+        color: #405b7a;
+    }
+
+    .hulo-evidence-modal-ticket p:last-child {
+        margin-bottom: 0;
+    }
+
+    .hulo-evidence-modal-ticket strong {
+        color: #164b88;
+    }
+
+    .hulo-evidence-message {
+        padding: 14px 15px;
+        margin-top: 12px;
+        border-radius: 9px;
+        background: white;
+        border: 1px solid #dbe7f5;
+        color: #334155;
+        line-height: 1.8;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }
+
+    .hulo-evidence-modal-note {
+        margin: 0 0 20px;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .hulo-evidence-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .hulo-evidence-more {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 12px;
+    }
+
+    /* ==========================================
+       10. RESPONSIVE
+       ========================================== */
 
     @media (max-width: 750px) {
         .hulo-main {
@@ -464,6 +690,23 @@
         .hulo-banner h1 {
             font-size: 25px;
         }
+
+        .hulo-messages {
+            min-height: 0;
+        }
+
+        .hulo-main > .hulo-panel:last-child {
+            height: 550px !important;
+        }
+
+        .hulo-evidence-banner {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .hulo-evidence-banner-actions {
+            justify-content: flex-start;
+        }
     }
 
     @media (max-width: 450px) {
@@ -478,15 +721,35 @@
         .hulo-send {
             padding: 10px 13px;
         }
+
+        .hulo-evidence-modal {
+            padding: 20px;
+        }
+
+        .hulo-evidence-modal h2 {
+            font-size: 20px;
+        }
+
+        .hulo-evidence-modal-actions {
+            flex-direction: column-reverse;
+        }
+
+        .hulo-evidence-modal-actions .hulo-evidence-btn {
+            width: 100%;
+        }
     }
 </style>
 
 
 <div class="hulo-page">
 
-    <!-- BANNER -->
+    <!-- ======================================
+         BANNER TRANG CHU
+         ====================================== -->
+
     <section class="hulo-banner">
         <h1>HULO có thể giúp gì cho bạn?</h1>
+
         <p>
             Tìm câu trả lời hoặc trò chuyện cùng HULO Assistant.
             Chúng tôi luôn sẵn sàng hỗ trợ bạn!
@@ -494,15 +757,21 @@
     </section>
 
 
-    <!-- THONG BAO SAU KHI DANH GIA -->
+    <!-- ======================================
+         THONG BAO TU DJANGO MESSAGES
+         ====================================== -->
+
     {% if messages %}
         {% for message in messages %}
 
             {% if 'success' in message.tags %}
-                <div class="hulo-notice hulo-notice-success" role="status">
+                <div
+                    class="hulo-notice hulo-notice-success"
+                    role="status"
+                >
                     <div class="notice-heading">
                         <span class="notice-icon">✓</span>
-                        <span>Đánh giá thành công!</span>
+                        <span>Thông báo thành công</span>
                     </div>
 
                     <p class="notice-content">
@@ -511,11 +780,14 @@
                 </div>
 
             {% elif 'warning' in message.tags %}
-                <div class="hulo-notice hulo-notice-warning" role="alert">
+                <div
+                    class="hulo-notice hulo-notice-warning"
+                    role="alert"
+                >
                     <div class="notice-heading">
                         <span class="notice-icon">⚠️</span>
                         <span>
-                            Chúng tôi rất tiếc vì câu trả lời chưa hữu ích!
+                            HULO cần thêm thông tin từ bạn
                         </span>
                     </div>
 
@@ -523,7 +795,10 @@
                         {{ message }}
                     </p>
 
-                    <a href="#hulo-chat-form" class="notice-chat-link">
+                    <a
+                        href="#hulo-chat-form"
+                        class="notice-chat-link"
+                    >
                         🤖 Bạn vẫn cần hỗ trợ?
                         Tiếp tục với HULO Assistant để được giải đáp
                         chi tiết hơn nhé!
@@ -531,12 +806,18 @@
                 </div>
 
             {% elif 'error' in message.tags %}
-                <div class="hulo-notice hulo-notice-error" role="alert">
+                <div
+                    class="hulo-notice hulo-notice-error"
+                    role="alert"
+                >
                     {{ message }}
                 </div>
 
             {% else %}
-                <div class="hulo-notice hulo-notice-info" role="status">
+                <div
+                    class="hulo-notice hulo-notice-info"
+                    role="status"
+                >
                     {{ message }}
                 </div>
             {% endif %}
@@ -545,21 +826,86 @@
     {% endif %}
 
 
-    <!-- BON CHU DE HO TRO -->
+    <!-- ======================================
+         MOI: THANH THONG BAO YEU CAU BO SUNG
+         ====================================== -->
+
+    {% if evidence_request_notification %}
+
+        <section
+            class="hulo-evidence-banner"
+            id="hulo-evidence-banner"
+            aria-label="Yêu cầu bổ sung minh chứng"
+        >
+            <div class="hulo-evidence-banner-info">
+
+                <h2 class="hulo-evidence-banner-title">
+                    📎 Bạn có yêu cầu bổ sung minh chứng
+                </h2>
+
+                <p>
+                    Nhân viên CSKH đã gửi yêu cầu bổ sung
+                    cho Ticket
+
+                    <strong>
+                        #{{ evidence_request_notification.ticket.ma_ticket|default:evidence_request_notification.ticket.pk }}
+                    </strong>.
+
+                    Vui lòng xem và cung cấp thông tin
+                    để HULO tiếp tục xử lý.
+                </p>
+
+                {% if evidence_requests_pending_count > 1 %}
+                    <p>
+                        Hiện có
+                        <strong>
+                            {{ evidence_requests_pending_count }}
+                        </strong>
+                        yêu cầu đang chờ bổ sung.
+                    </p>
+                {% endif %}
+
+            </div>
+
+            <div class="hulo-evidence-banner-actions">
+
+                <button
+                    type="button"
+                    class="hulo-evidence-btn hulo-evidence-btn-secondary"
+                    id="hulo-open-evidence-modal"
+                >
+                    Xem thông báo
+                </button>
+
+                <a
+                    href="{% url 'tickets:customer_result' evidence_request_notification.ticket.pk %}"
+                    class="hulo-evidence-btn hulo-evidence-btn-primary"
+                >
+                    Xem yêu cầu
+                </a>
+
+            </div>
+        </section>
+
+    {% endif %}
+
+
+    <!-- ======================================
+         BON CHU DE HO TRO
+         ====================================== -->
+
     <h2 class="hulo-title">
         Các chủ đề hỗ trợ phổ biến
     </h2>
 
     <div class="hulo-topics">
-
         {% for category in categories %}
+
             <a
                 href="{% url 'support:home' %}?category={{ category.id }}"
-                class="hulo-topic
-                {% if selected_category == category.id|stringformat:'s' %}
-                    active
-                {% endif %}"
+                class="hulo-topic {% if selected_category == category.id|stringformat:'s' %}active{% endif %}"
             >
+
                 {% if category.ten_danh_muc == "Đơn hàng" %}
                     📦
                 {% elif category.ten_danh_muc == "Giao hàng" %}
@@ -573,20 +919,29 @@
                 {% endif %}
 
                 &nbsp;{{ category.ten_danh_muc }}
+
             </a>
+
         {% empty %}
+
             <div class="hulo-empty">
                 Chưa có danh mục FAQ đang hiển thị.
             </div>
-        {% endfor %}
 
+        {% endfor %}
     </div>
 
 
-    <!-- FAQ M1 BEN TRAI - CHATBOT M2 BEN PHAI -->
+    <!-- ======================================
+         FAQ M1 BEN TRAI - CHATBOT M2 BEN PHAI
+         ====================================== -->
+
     <div class="hulo-main">
 
-        <!-- FAQ M1 -->
+        <!-- ==================================
+             FAQ M1
+             ================================== -->
+
         <section class="hulo-panel">
 
             <div class="hulo-panel-title">
@@ -603,6 +958,7 @@
 
 
                 <!-- TIM KIEM FAQ -->
+
                 <form
                     method="GET"
                     action="{% url 'support:home' %}"
@@ -641,11 +997,13 @@
 
 
                 <!-- FAQ GOI Y CA NHAN HOA -->
+
                 <h3 class="hulo-small-title">
                     {{ ten_goi_y|default:"Câu hỏi được quan tâm" }}
                 </h3>
 
                 {% for faq in faq_goi_y %}
+
                     <details class="hulo-faq-item">
 
                         <summary>
@@ -653,6 +1011,7 @@
                         </summary>
 
                         <div class="hulo-faq-answer">
+
                             <div>
                                 {{ faq.cau_tra_loi|linebreaksbr }}
                             </div>
@@ -663,18 +1022,23 @@
                             >
                                 Xem chi tiết →
                             </a>
-                        </div>
 
+                        </div>
                     </details>
+
                 {% empty %}
+
                     <div class="hulo-empty">
                         Chưa có câu hỏi gợi ý.
                     </div>
+
                 {% endfor %}
 
 
                 <!-- DANH SACH FAQ -->
+
                 <h3 class="hulo-small-title">
+
                     {% if keyword %}
                         Kết quả tìm kiếm
                     {% elif selected_category %}
@@ -682,6 +1046,7 @@
                     {% else %}
                         Tất cả câu hỏi thường gặp
                     {% endif %}
+
                 </h3>
 
                 {% for faq in faqs %}
@@ -705,6 +1070,7 @@
 
 
                             <!-- DANH GIA FAQ -->
+
                             <div class="hulo-feedback">
 
                                 <p>
@@ -717,7 +1083,6 @@
                                     action="{% url 'support:faq_feedback' faq.id %}"
                                     class="hulo-feedback-form"
                                 >
-
                                     {% csrf_token %}
 
                                     <input
@@ -751,9 +1116,7 @@
                                     </button>
 
                                 </form>
-
                             </div>
-
                         </div>
 
                     </details>
@@ -761,6 +1124,7 @@
                 {% empty %}
 
                     <div class="hulo-empty">
+
                         <strong>
                             Không tìm thấy câu hỏi phù hợp.
                         </strong>
@@ -769,28 +1133,29 @@
                             Bạn có thể thay đổi từ khóa
                             hoặc chọn danh mục khác.
                         </p>
+
                     </div>
 
                 {% endfor %}
 
             </div>
-
         </section>
 
 
-        <!-- CHATBOT M2 - GIU NGUYEN CAU TRUC -->
+        <!-- ==================================
+             CHATBOT M2
+             ================================== -->
+
         <section class="hulo-panel">
 
             <div class="hulo-chat-header">
-
                 <h2>🤖 HULO Assistant</h2>
-
                 <small>● Hỗ trợ tự động</small>
-
             </div>
 
 
             <!-- KHUNG TIN NHAN -->
+
             <div
                 class="hulo-messages"
                 id="hulo-messages"
@@ -805,6 +1170,7 @@
 
 
                 <!-- LICH SU CHATBOT -->
+
                 {% for msg in tin_nhan %}
 
                     {% if msg.ben_gui == 'KHACH_HANG' %}
@@ -827,11 +1193,11 @@
 
 
             <!-- FORM GUI TIN NHAN -->
+
             <form
                 id="hulo-chat-form"
                 class="hulo-chat-form"
             >
-
                 {% csrf_token %}
 
                 <input
@@ -855,11 +1221,13 @@
             </form>
 
         </section>
-
     </div>
 
 
-    <!-- CHUYEN NHAN VIEN HO TRO -->
+    <!-- ======================================
+         CHUYEN NHAN VIEN HO TRO
+         ====================================== -->
+
     <div class="hulo-bottom">
 
         <p>
@@ -878,7 +1246,137 @@
 </div>
 
 
-<!-- JAVASCRIPT CHATBOT M2 -->
+<!-- ==========================================
+     MOI: POPUP THONG BAO BO SUNG MINH CHUNG
+     CHI HIEN THI KHI CO YEU CAU PENDING
+     ========================================== -->
+
+{% if evidence_request_notification %}
+
+    <div
+        class="hulo-evidence-overlay"
+        id="hulo-evidence-overlay"
+        hidden
+    >
+
+        <section
+            class="hulo-evidence-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="hulo-evidence-modal-title"
+            aria-describedby="hulo-evidence-modal-description"
+            tabindex="-1"
+        >
+
+            <div
+                class="hulo-evidence-modal-icon"
+                aria-hidden="true"
+            >
+                📎
+            </div>
+
+            <h2 id="hulo-evidence-modal-title">
+                Yêu cầu bổ sung minh chứng
+            </h2>
+
+            <p
+                class="hulo-evidence-modal-subtitle"
+                id="hulo-evidence-modal-description"
+            >
+                Nhân viên chăm sóc khách hàng của HULO
+                cần bạn bổ sung minh chứng để tiếp tục
+                xử lý yêu cầu hỗ trợ.
+            </p>
+
+
+            <div class="hulo-evidence-modal-ticket">
+
+                <p>
+                    <strong>Ticket:</strong>
+
+                    #{{ evidence_request_notification.ticket.ma_ticket|default:evidence_request_notification.ticket.pk }}
+                </p>
+
+                <p>
+                    <strong>Vấn đề:</strong>
+
+                    {{ evidence_request_notification.ticket.tieu_de }}
+                </p>
+
+                <p>
+                    <strong>Thời điểm yêu cầu:</strong>
+
+                    {{ evidence_request_notification.thoi_diem_tao|date:"d/m/Y H:i" }}
+                </p>
+
+                <p>
+                    <strong>Nội dung CSKH yêu cầu:</strong>
+                </p>
+
+                <div class="hulo-evidence-message">
+                    {{ evidence_request_notification.tin_nhan_yeu_cau.noi_dung|linebreaksbr }}
+                </div>
+
+                {% if evidence_request_notification.yeu_cau_tep %}
+
+                    <p style="margin-top:12px;">
+                        <strong>
+                            📎 Cần đính kèm tệp minh chứng
+                        </strong>
+                    </p>
+
+                {% endif %}
+
+                {% if evidence_requests_pending_count > 1 %}
+
+                    <div class="hulo-evidence-more">
+                        Ngoài yêu cầu này, bạn còn
+                        {{ evidence_requests_pending_count|add:"-1" }}
+                        yêu cầu bổ sung khác đang chờ xử lý.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <p class="hulo-evidence-modal-note">
+                Bạn có thể chọn <strong>Để sau</strong>
+                nếu chưa sẵn sàng. Yêu cầu vẫn được lưu
+                và bạn có thể mở lại từ thanh thông báo
+                trên trang Trung tâm hỗ trợ.
+            </p>
+
+
+            <div class="hulo-evidence-modal-actions">
+
+                <button
+                    type="button"
+                    class="hulo-evidence-btn hulo-evidence-btn-secondary"
+                    id="hulo-evidence-later"
+                >
+                    Để sau
+                </button>
+
+                <a
+                    href="{% url 'tickets:customer_result' evidence_request_notification.ticket.pk %}"
+                    class="hulo-evidence-btn hulo-evidence-btn-primary"
+                >
+                    Xem yêu cầu
+                </a>
+
+            </div>
+
+        </section>
+    </div>
+
+{% endif %}
+
+
+<!-- ==========================================
+     JAVASCRIPT CHATBOT M2
+     ========================================== -->
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -893,23 +1391,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const sendUrl = "{% url 'chatbot:send_message' %}";
 
-
     function addMessage(content, sender) {
-
         const message = document.createElement("div");
 
         message.className = "hulo-message " +
-            (sender === "customer"
-                ? "hulo-customer"
-                : "hulo-bot");
+            (
+                sender === "customer"
+                    ? "hulo-customer"
+                    : "hulo-bot"
+            );
 
         message.textContent = content;
 
         chatBox.appendChild(message);
-
         chatBox.scrollTop = chatBox.scrollHeight;
     }
-
 
     async function sendMessage(question) {
 
@@ -924,11 +1420,11 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
 
             const response = await fetch(sendUrl, {
-
                 method: "POST",
 
                 headers: {
                     "Content-Type": "application/json",
+
                     "X-CSRFToken": chatForm.querySelector(
                         "[name=csrfmiddlewaretoken]"
                     ).value
@@ -937,34 +1433,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify({
                     cau_hoi: question
                 })
-
             });
-
 
             const contentType =
                 response.headers.get("content-type") || "";
 
             if (!contentType.includes("application/json")) {
-
                 throw new Error(
                     "Phiên đăng nhập hoặc phản hồi máy chủ không hợp lệ."
                 );
-
             }
-
 
             const result = await response.json();
 
             if (!response.ok) {
-
                 throw new Error(
                     result.error ||
                     result.message ||
                     "Không gửi được câu hỏi."
                 );
-
             }
-
 
             addMessage(question, "customer");
 
@@ -989,23 +1477,17 @@ document.addEventListener("DOMContentLoaded", function () {
             chatInput.focus();
 
         }
-
     }
 
-
     chatForm.addEventListener("submit", function (event) {
-
         event.preventDefault();
-
         sendMessage(chatInput.value);
-
     });
-
 
     chatBox.scrollTop = chatBox.scrollHeight;
 
+    /* Nut tiep tuc voi HULO Assistant */
 
-    /* Bam nut tiep tuc voi HULO Assistant */
     const noticeChatLink = document.querySelector(
         ".notice-chat-link"
     );
@@ -1019,10 +1501,156 @@ document.addEventListener("DOMContentLoaded", function () {
             }, 100);
 
         });
-
     }
 
 });
 </script>
+
+
+<!-- ==========================================
+     JAVASCRIPT CAN CHIEU CAO FAQ - CHATBOT
+     ========================================== -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const layout = document.querySelector(".hulo-main");
+
+    if (!layout) {
+        return;
+    }
+
+    const faq = layout.querySelector(
+        ".hulo-panel:first-child"
+    );
+
+    const chat = layout.querySelector(
+        ".hulo-panel:last-child"
+    );
+
+    if (!faq || !chat) {
+        return;
+    }
+
+    function syncChatHeight() {
+
+        if (window.innerWidth <= 750) {
+            chat.style.height = "550px";
+            return;
+        }
+
+        const faqHeight = Math.ceil(
+            faq.getBoundingClientRect().height
+        );
+
+        chat.style.height = (
+            Math.max(400, faqHeight) + "px"
+        );
+    }
+
+    syncChatHeight();
+
+    if (typeof ResizeObserver !== "undefined") {
+
+        const observer = new ResizeObserver(
+            syncChatHeight
+        );
+
+        observer.observe(faq);
+    }
+
+    window.addEventListener(
+        "resize",
+        syncChatHeight
+    );
+
+});
+</script>
+
+
+<!-- ==========================================
+     JAVASCRIPT POPUP THONG BAO MINH CHUNG
+     ========================================== -->
+
+{% if evidence_request_notification %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const overlay = document.getElementById(
+        "hulo-evidence-overlay"
+    );
+
+    const laterButton = document.getElementById(
+        "hulo-evidence-later"
+    );
+
+    const reopenButton = document.getElementById(
+        "hulo-open-evidence-modal"
+    );
+
+    if (!overlay || !laterButton) {
+        return;
+    }
+
+    const modal = overlay.querySelector(
+        ".hulo-evidence-modal"
+    );
+
+    function openEvidenceModal() {
+        overlay.hidden = false;
+
+        document.body.style.overflow = "hidden";
+
+        if (modal) {
+            modal.focus();
+        }
+    }
+
+    function closeEvidenceModal() {
+        overlay.hidden = true;
+
+        document.body.style.overflow = "";
+    }
+
+    /* Hien thi tu dong khi trang duoc tai */
+
+    openEvidenceModal();
+
+    /* Nut De sau */
+
+    laterButton.addEventListener("click", function () {
+        closeEvidenceModal();
+    });
+
+    /* Mo lai tu thanh nhac nho */
+
+    if (reopenButton) {
+
+        reopenButton.addEventListener(
+            "click",
+            function () {
+                openEvidenceModal();
+            }
+        );
+    }
+
+    /* Cho phep dong bang phim ESC */
+
+    document.addEventListener("keydown", function (event) {
+
+        if (
+            event.key === "Escape" &&
+            !overlay.hidden
+        ) {
+            closeEvidenceModal();
+        }
+
+    });
+
+});
+</script>
+
+{% endif %}
 
 {% endblock %}

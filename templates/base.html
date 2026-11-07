@@ -1,132 +1,552 @@
-
-{% load static %}
 <!DOCTYPE html>
+{% load static %}
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>{% block title %}CRM HULO{% endblock %}</title>
 
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'css/style.css' %}">
+
+    <style>
+        /* THANH MENU CHÍNH */
+
+        .header {
+            position: relative;
+            z-index: 200;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .navbar > a,
+        .hulo-nav-trigger {
+            color: #103b78;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .navbar > a:hover {
+            color: #176cc1;
+        }
+
+        /* MENU THẢ XUỐNG */
+
+        .hulo-nav-menu {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .hulo-nav-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 5px;
+            border: 0;
+            background: transparent;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .hulo-nav-trigger:hover,
+        .hulo-nav-trigger[aria-expanded="true"] {
+            color: #176cc1;
+        }
+
+        .hulo-nav-arrow {
+            font-size: 10px;
+            transition: transform .2s;
+        }
+
+        .hulo-nav-trigger[aria-expanded="true"]
+        .hulo-nav-arrow {
+            transform: rotate(180deg);
+        }
+
+        .hulo-nav-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            min-width: 245px;
+            padding: 8px;
+            background: #fff;
+            border: 1px solid #dbe6f5;
+            border-radius: 12px;
+            box-shadow:
+                0 12px 30px rgba(16, 59, 120, .13);
+            z-index: 1000;
+        }
+
+        .hulo-nav-dropdown.is-open {
+            display: block;
+        }
+
+        .hulo-nav-dropdown-title {
+            padding: 9px 11px;
+            color: #7a8da8;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .hulo-nav-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            color: #173b70;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        .hulo-nav-dropdown a:hover {
+            color: #1267ce;
+            background: #eef5ff;
+        }
+
+        /* MENU TÀI KHOẢN KHÁCH HÀNG */
+
+        .hulo-account-menu {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .hulo-account-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 10px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #103b78;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .hulo-account-trigger:hover,
+        .hulo-account-trigger[aria-expanded="true"] {
+            background: #eef5ff;
+        }
+
+        .hulo-account-arrow {
+            font-size: 11px;
+            transition: transform .2s;
+        }
+
+        .hulo-account-trigger[aria-expanded="true"]
+        .hulo-account-arrow {
+            transform: rotate(180deg);
+        }
+
+        .hulo-account-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            width: 235px;
+            padding: 9px;
+            background: #fff;
+            border: 1px solid #dbe6f5;
+            border-radius: 12px;
+            box-shadow:
+                0 12px 30px rgba(16, 59, 120, .13);
+            z-index: 1000;
+        }
+
+        .hulo-account-dropdown.is-open {
+            display: block;
+        }
+
+        .hulo-account-dropdown-title {
+            padding: 9px 11px;
+            font-size: 12px;
+            color: #7a8da8;
+            font-weight: 600;
+        }
+
+        .hulo-account-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 11px;
+            border-radius: 8px;
+            color: #173b70;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .hulo-account-dropdown a:hover {
+            background: #eef5ff;
+            color: #1267ce;
+        }
+
+        .hulo-account-dropdown-divider {
+            height: 1px;
+            margin: 5px 0;
+            background: #edf1f7;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .hulo-nav-menu:hover
+            .hulo-nav-dropdown {
+                display: block;
+            }
+
+            .hulo-account-menu:hover
+            .hulo-account-dropdown {
+                display: block;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .navbar {
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .navbar > a,
+            .hulo-nav-trigger {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hulo-nav-dropdown {
+                min-width: 210px;
+            }
+
+            .hulo-account-dropdown {
+                width: min(235px, 85vw);
+            }
+
+            .hulo-account-trigger {
+                padding: 8px 5px;
+                font-size: 13px;
+            }
+        }
+    </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 
 <body>
-    <header class="header">
 
-        <a href="{% url 'home' %}" class="brand">
-            HULOECOM
-        </a>
+<header class="header">
 
-        <nav class="navbar">
+    <a href="{% url 'home' %}" class="brand">
+        HULOECOM
+    </a>
+
+    <nav class="navbar" aria-label="Điều hướng chính">
+
+        {% if user_role == 'CUSTOMER' %}
+
+            <a href="{% url 'support:home' %}">
+                Trung tâm trợ giúp
+            </a>
+
+            <a href="{% url 'customer_orders_support' %}">
+                Đơn hàng &amp; Hỗ trợ
+            </a>
+
+            <a href="{% url 'customers:my_vouchers' %}">
+                Ưu đãi của tôi
+            </a>
+
+        {% elif user_role == 'MANAGER' %}
+
+            <!-- TỔNG QUAN -->
+            <a href="{% url 'manager_dashboard' %}">
+                Tổng quan
+            </a>
+
+            <!-- TICKET -->
+            <a href="{% url 'tickets:home' %}">
+                Quản lý Tickets
+            </a>
+
+            <!-- THẨM ĐỊNH -->
+            <a href="{% url 'disputes:home' %}">
+                Hồ sơ thẩm định
+            </a>
+
+            <!-- CHĂM SÓC KHÁCH HÀNG -->
+            <div class="hulo-nav-menu"
+                 id="huloM5Menu">
+
+                <button
+                    type="button"
+                    class="hulo-nav-trigger"
+                    id="huloM5Trigger"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="huloM5Dropdown"
+                >
+                    Chăm sóc khách hàng
+                    <span class="hulo-nav-arrow"
+                          aria-hidden="true">▼</span>
+                </button>
+
+                <div class="hulo-nav-dropdown"
+                     id="huloM5Dropdown">
+
+                    <div class="hulo-nav-dropdown-title">
+                        CHĂM SÓC KHÁCH HÀNG
+                    </div>
+
+                    <a href="{% url 'customers:csat_overview' %}">
+                        Đánh giá hài lòng – CSAT
+                    </a>
+
+                    <a href="{% url 'customers:after_sales_overview' %}">
+                        Chăm sóc sau bán
+                    </a>
+
+                    <a href="{% url 'customers:loyalty_overview' %}">
+                        Khách hàng thân thiết
+                    </a>
+                </div>
+            </div>
+
+            <!-- KHÁCH HÀNG: TRANG MỚI -->
+            <a href="{% url 'manager_customer_list' %}">
+                Khách hàng
+            </a>
+
+        {% elif user_role == 'CSKH' %}
+
             <a href="{% url 'home' %}">
                 Trang chủ
             </a>
 
+            <a href="{% url 'tickets:home' %}">
+                Quản lý Ticket
+            </a>
+
+            <a href="{% url 'customers:list' %}">
+                Khách hàng
+            </a>
+
+        {% elif user_role == 'ASSESSOR' %}
+
+            <a href="{% url 'home' %}">
+                Trang chủ
+            </a>
+
+            <a href="{% url 'disputes:home' %}">
+                Hồ sơ thẩm định
+            </a>
+
+        {% elif user_role == 'ADMIN' %}
+
+            <a href="{% url 'admin:index' %}">
+                Quản trị hệ thống
+            </a>
+
+        {% else %}
+
+            <a href="{% url 'home' %}">
+                Trang chủ
+            </a>
+
+        {% endif %}
+
+    </nav>
+
+    <div class="account-area">
+
+        {% if request.user.is_authenticated %}
+
             {% if user_role == 'CUSTOMER' %}
 
-                <span class="nav-placeholder">
-                    Đơn hàng
-                </span>
+                <div class="hulo-account-menu"
+                     id="huloAccountMenu">
 
-                <span class="nav-placeholder">
-                    Yêu cầu của tôi
-                </span>
+                    <button
+                        type="button"
+                        class="hulo-account-trigger"
+                        id="huloAccountTrigger"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-controls="huloAccountDropdown"
+                    >
+                        {{ request.user.username }}
 
-                <a href="{% url 'support:home' %}">
-                    Hỗ trợ
-                </a>
+                        <span class="hulo-account-arrow"
+                              aria-hidden="true">
+                            ▼
+                        </span>
+                    </button>
 
-            {% elif user_role == 'CSKH' %}
+                    <div class="hulo-account-dropdown"
+                         id="huloAccountDropdown">
 
-                <a href="{% url 'tickets:home' %}">
-                    Quản lý Ticket
-                </a>
+                        <div class="hulo-account-dropdown-title">
+                            TÀI KHOẢN CỦA TÔI
+                        </div>
 
-                <!-- Module 5: Customer 360, CSAT & Loyalty -->
-                <a href="{% url 'customers:list' %}">
-                    Khách hàng
-                </a>
+                        <a href="{% url 'customer_profile' %}?tab=profile">
+                            <span aria-hidden="true">👤</span>
+                            Thông tin cá nhân
+                        </a>
 
-            {% elif user_role == 'ASSESSOR' %}
+                        <div class="hulo-account-dropdown-divider"></div>
 
-                <a href="{% url 'disputes:home' %}">
-                    Hồ sơ thẩm định
-                </a>
+                        <a href="{% url 'customer_profile' %}?tab=history">
+                            <span aria-hidden="true">🕘</span>
+                            Lịch sử hoạt động
+                        </a>
 
-            {% elif user_role == 'MANAGER' %}
+                    </div>
+                </div>
 
-                <a href="{% url 'tickets:home' %}">
-                    Quản lý Ticket
-                </a>
-
-                <a href="{% url 'disputes:home' %}">
-                    Hồ sơ thẩm định
-                </a>
-
-                <span class="nav-placeholder">
-                    Chăm sóc khách hàng
-                </span>
-
-            {% elif user_role == 'ADMIN' %}
-
-                <a href="{% url 'tickets:home' %}">
-                    Quản lý Ticket
-                </a>
-
-                <a href="{% url 'disputes:home' %}">
-                    Hồ sơ thẩm định
-                </a>
-
-            {% endif %}
-
-            {% if request.user.is_authenticated %}
-                {% if request.user.is_staff or request.user.is_superuser %}
-                    <a href="{% url 'admin:index' %}">
-                        <span aria-hidden="true">⚙</span>
-                        Quản trị hệ thống
-                    </a>
-                {% endif %}
-            {% endif %}
-        </nav>
-
-        <div class="account-area">
-            {% if request.user.is_authenticated %}
+            {% else %}
 
                 <span class="username">
                     {{ request.user.username }}
                 </span>
 
-                <form method="POST" action="{% url 'logout' %}">
-                    {% csrf_token %}
-
-                    <button type="submit" class="logout-button">
-                        Đăng xuất
-                    </button>
-                </form>
-
-            {% else %}
-
-                <a href="{% url 'login' %}">
-                    Đăng nhập
-                </a>
-
             {% endif %}
-        </div>
 
-    </header>
+            <form method="POST"
+                  action="{% url 'logout' %}">
+                {% csrf_token %}
 
-    <main class="main-content">
-        {% block content %}{% endblock %}
-    </main>
+                <button type="submit"
+                        class="logout-button">
+                    Đăng xuất
+                </button>
+            </form>
 
-    <footer class="footer">
-        © 2026 HULOECOM –
-        Hệ thống quản lý và chăm sóc khách hàng
-    </footer>
+        {% else %}
 
-    {% block extra_js %}{% endblock %}
+            <a href="{% url 'login' %}">
+                Đăng nhập
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</header>
+
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    © 2026 HULOECOM –
+    Hệ thống quản lý và chăm sóc khách hàng
+</footer>
+
+{% block extra_js %}{% endblock %}
+
+<script>
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        function setupDropdown(
+            menuId,
+            triggerId,
+            dropdownId
+        ) {
+            const menu =
+                document.getElementById(menuId);
+
+            const trigger =
+                document.getElementById(triggerId);
+
+            const dropdown =
+                document.getElementById(dropdownId);
+
+            if (!menu || !trigger || !dropdown) {
+                return;
+            }
+
+            function setOpen(isOpen) {
+                dropdown.classList.toggle(
+                    "is-open",
+                    isOpen
+                );
+
+                trigger.setAttribute(
+                    "aria-expanded",
+                    String(isOpen)
+                );
+            }
+
+            trigger.addEventListener(
+                "click",
+                function (event) {
+                    event.stopPropagation();
+
+                    const isOpen =
+                        dropdown.classList.contains(
+                            "is-open"
+                        );
+
+                    setOpen(!isOpen);
+                }
+            );
+
+            document.addEventListener(
+                "click",
+                function (event) {
+                    if (!menu.contains(event.target)) {
+                        setOpen(false);
+                    }
+                }
+            );
+
+            document.addEventListener(
+                "keydown",
+                function (event) {
+                    if (event.key === "Escape") {
+                        if (
+                            dropdown.classList.contains(
+                                "is-open"
+                            )
+                        ) {
+                            setOpen(false);
+                            trigger.focus();
+                        }
+                    }
+                }
+            );
+        }
+
+        setupDropdown(
+            "huloAccountMenu",
+            "huloAccountTrigger",
+            "huloAccountDropdown"
+        );
+
+        setupDropdown(
+            "huloM5Menu",
+            "huloM5Trigger",
+            "huloM5Dropdown"
+        );
+    }
+);
+</script>
+
 </body>
 </html>

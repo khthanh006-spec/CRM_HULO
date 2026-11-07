@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% load static %}
 
@@ -211,8 +212,8 @@
             </div>
 
             <p id="plan-notice" class="m4-plan__notice" aria-live="polite">
-                Chỉ phương án hoàn tiền cần quản lý phê duyệt.
-                Các phương án còn lại do nhân viên thẩm định quyết định.
+                Vui lòng chọn hình thức xử lý để xem
+                hướng dẫn và các bước tiếp theo.
             </p>
 
             <div class="m4-plan__actions">
@@ -300,17 +301,38 @@
         if (type === "HOAN_TIEN") {
             button.textContent = "📨 Gửi đề xuất hoàn tiền";
             notice.textContent =
-                "Đề xuất sẽ chuyển sang Chờ phê duyệt. " +
-                "Chưa được thực hiện hoàn tiền khi quản lý chưa chấp thuận.";
-        } else if (type) {
-            button.textContent = "✓ Lưu phương án";
+                "Phương án hoàn tiền sẽ được chuyển đến quản lý " +
+                "để xem xét và phê duyệt. Việc hoàn tiền chỉ được " +
+                "triển khai sau khi phương án được chấp thuận.";
+
+        } else if (type === "DOI_HANG") {
+            button.textContent = "✓ Lưu phương án đổi hàng";
             notice.textContent =
-                "Lưu thành công sẽ chuyển phương án sang Sẵn sàng thực hiện. " +
-                "Không cần quản lý phê duyệt; chưa ghi nhận đã thực hiện.";
+                "Sau khi lưu thành công, phương án đổi hàng sẽ " +
+                "chuyển sang trạng thái Sẵn sàng thực hiện. " +
+                "Nhân viên phụ trách tiếp tục triển khai " +
+                "và cập nhật kết quả thực hiện trên hệ thống.";
+
+        } else if (type === "GIAO_BO_SUNG") {
+            button.textContent = "✓ Lưu phương án giao bổ sung";
+            notice.textContent =
+                "Sau khi lưu thành công, phương án giao bổ sung " +
+                "sẽ chuyển sang trạng thái Sẵn sàng thực hiện. " +
+                "Nhân viên phụ trách cần phối hợp thực hiện " +
+                "và cập nhật kết quả khi hoàn tất.";
+
+        } else if (type === "TU_CHOI_HO_TRO") {
+            button.textContent = "✓ Lưu phương án từ chối";
+            notice.textContent =
+                "Vui lòng ghi rõ căn cứ và lý do từ chối hỗ trợ. " +
+                "Sau khi lưu, phương án sẽ được ghi nhận " +
+                "để tiếp tục quy trình xử lý và thông báo kết quả.";
+
         } else {
             button.textContent = "✓ Lưu phương án";
             notice.textContent =
-                "Chọn một phương án để nhập thông tin tương ứng.";
+                "Vui lòng chọn hình thức xử lý " +
+                "để xem hướng dẫn và các bước tiếp theo.";
         }
     }
 

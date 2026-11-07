@@ -1,0 +1,776 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Tài khoản của tôi - HULOECOM
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hulo-profile-page {
+        max-width: 1180px;
+        margin: 32px auto 70px;
+        padding: 0 20px;
+        color: #17365d;
+    }
+
+    .hulo-profile-heading {
+        margin-bottom: 24px;
+    }
+
+    .hulo-profile-heading h1 {
+        margin: 0 0 9px;
+        color: #103b78;
+        font-size: 28px;
+    }
+
+    .hulo-profile-heading p {
+        margin: 0;
+        color: #7186a3;
+        line-height: 1.6;
+    }
+
+    .hulo-profile-tabs {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #dce6f4;
+    }
+
+    .hulo-profile-tabs a {
+        display: inline-block;
+        padding: 14px 17px;
+        color: #657c9c;
+        text-decoration: none;
+        font-weight: 600;
+        border-bottom: 3px solid transparent;
+    }
+
+    .hulo-profile-tabs a.active {
+        color: #1768d0;
+        border-bottom-color: #1768d0;
+    }
+
+    .hulo-profile-card {
+        margin-bottom: 22px;
+        padding: 26px;
+        border: 1px solid #dce6f4;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 4px 15px rgba(16, 59, 120, .04);
+    }
+
+    .hulo-profile-card h2 {
+        margin: 0 0 20px;
+        font-size: 20px;
+        color: #103b78;
+    }
+
+    .hulo-profile-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .hulo-profile-field {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .hulo-profile-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .hulo-profile-field label {
+        color: #24466f;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .hulo-profile-field input,
+    .hulo-profile-field textarea {
+        width: 100%;
+        padding: 13px 14px;
+        border: 1px solid #cfdced;
+        border-radius: 8px;
+        font: inherit;
+        font-size: 14px;
+        color: #263f60;
+        box-sizing: border-box;
+    }
+
+    .hulo-profile-field input:focus,
+    .hulo-profile-field textarea:focus {
+        outline: 2px solid #80b5f4;
+        border-color: #2876df;
+    }
+
+    .hulo-profile-field input[readonly] {
+        background: #f4f7fb;
+        color: #7085a1;
+    }
+
+    .hulo-profile-field textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .hulo-profile-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 25px;
+    }
+
+    .hulo-profile-save {
+        padding: 13px 26px;
+        background: #2276e5;
+        color: #fff;
+        border: 0;
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .hulo-profile-save:hover {
+        background: #155ec4;
+    }
+
+    .hulo-profile-message {
+        padding: 14px 18px;
+        margin-bottom: 18px;
+        border-radius: 9px;
+        background: #e9f7ef;
+        color: #157347;
+    }
+
+    .hulo-profile-message.error {
+        background: #fff0f0;
+        color: #bb3030;
+    }
+
+    .hulo-history-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 15px;
+        margin-bottom: 22px;
+    }
+
+    .hulo-summary-card {
+        padding: 20px;
+        border: 1px solid #dce6f4;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .hulo-summary-card .label {
+        display: block;
+        margin-bottom: 10px;
+        color: #7186a3;
+        font-size: 13px;
+    }
+
+    .hulo-summary-card .value {
+        color: #103b78;
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    .hulo-history-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .hulo-history-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    .hulo-history-table th {
+        padding: 13px 12px;
+        background: #f3f7fc;
+        color: #365a86;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .hulo-history-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #edf1f7;
+        vertical-align: top;
+        color: #3e5879;
+    }
+
+    .hulo-history-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .hulo-history-table strong {
+        color: #173b70;
+    }
+
+    .hulo-history-empty {
+        padding: 25px 10px;
+        text-align: center;
+        color: #8293aa;
+    }
+
+    .hulo-history-section-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .hulo-history-section-title h2 {
+        margin: 0;
+    }
+
+    .hulo-history-section-title a {
+        color: #1768d0;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .hulo-history-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #edf4ff;
+        color: #1768d0;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .hulo-history-stars {
+        color: #e7a321;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .hulo-history-positive {
+        color: #15803d;
+        font-weight: 700;
+    }
+
+    .hulo-history-negative {
+        color: #c2410c;
+        font-weight: 700;
+    }
+
+    .hulo-loyalty-info {
+        margin-bottom: 16px;
+        color: #58708e;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 850px) {
+        .hulo-history-summary {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 700px) {
+        .hulo-profile-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .hulo-profile-card {
+            padding: 18px;
+        }
+
+        .hulo-profile-tabs a {
+            padding: 12px 10px;
+            font-size: 13px;
+        }
+
+        .hulo-profile-heading h1 {
+            font-size: 24px;
+        }
+    }
+
+    @media (max-width: 430px) {
+        .hulo-history-summary {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .hulo-summary-card {
+            padding: 14px;
+        }
+
+        .hulo-summary-card .value {
+            font-size: 22px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hulo-profile-page">
+
+    <div class="hulo-profile-heading">
+        <h1>Tài khoản của tôi</h1>
+        <p>
+            Quản lý thông tin cá nhân và theo dõi
+            hoạt động của bạn tại HULOECOM.
+        </p>
+    </div>
+
+    <nav class="hulo-profile-tabs">
+        <a
+            href="{% url 'customer_profile' %}?tab=profile"
+            class="{% if active_tab == 'profile' %}active{% endif %}"
+        >
+            Thông tin cá nhân
+        </a>
+
+        <a
+            href="{% url 'customer_profile' %}?tab=history"
+            class="{% if active_tab == 'history' %}active{% endif %}"
+        >
+            Lịch sử hoạt động
+        </a>
+    </nav>
+
+    {% for message in messages %}
+        <div class="hulo-profile-message {% if 'error' in message.tags %}error{% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% if active_tab == 'profile' %}
+
+        <!-- THÔNG TIN CÁ NHÂN -->
+        <section class="hulo-profile-card">
+            <h2>Thông tin cá nhân</h2>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="hulo-profile-grid">
+
+                    <div class="hulo-profile-field">
+                        <label>Tên đăng nhập</label>
+                        <input
+                            type="text"
+                            value="{{ request.user.username }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="hulo-profile-field">
+                        <label>Mã khách hàng</label>
+                        <input
+                            type="text"
+                            value="{{ customer.ma_khach_hang }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="hulo-profile-field">
+                        <label for="ho_ten">Họ và tên</label>
+                        <input
+                            id="ho_ten"
+                            type="text"
+                            name="ho_ten"
+                            value="{% if form_values %}{{ form_values.ho_ten }}{% else %}{{ customer.ho_ten }}{% endif %}"
+                            maxlength="150"
+                            required
+                        >
+                    </div>
+
+                    <div class="hulo-profile-field">
+                        <label for="email">Email</label>
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value="{% if form_values %}{{ form_values.email }}{% else %}{{ customer.email }}{% endif %}"
+                            maxlength="254"
+                            required
+                        >
+                    </div>
+
+                    <div class="hulo-profile-field">
+                        <label for="so_dien_thoai">
+                            Số điện thoại
+                        </label>
+                        <input
+                            id="so_dien_thoai"
+                            type="tel"
+                            name="so_dien_thoai"
+                            value="{% if form_values %}{{ form_values.so_dien_thoai }}{% else %}{{ customer.so_dien_thoai|default_if_none:'' }}{% endif %}"
+                            maxlength="20"
+                        >
+                    </div>
+
+                    <div class="hulo-profile-field">
+                        <label>Ngày tham gia</label>
+                        <input
+                            type="text"
+                            value="{{ customer.thoi_diem_tao|date:'d/m/Y H:i' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="hulo-profile-field full">
+                        <label for="dia_chi_mac_dinh">
+                            Địa chỉ mặc định
+                        </label>
+
+                        <textarea
+                            id="dia_chi_mac_dinh"
+                            name="dia_chi_mac_dinh"
+                        >{% if form_values %}{{ form_values.dia_chi_mac_dinh }}{% else %}{{ customer.dia_chi_mac_dinh|default_if_none:'' }}{% endif %}</textarea>
+                    </div>
+
+                </div>
+
+                <div class="hulo-profile-actions">
+                    <button
+                        type="submit"
+                        class="hulo-profile-save"
+                    >
+                        Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </section>
+
+    {% else %}
+
+        <!-- TỔNG QUAN LỊCH SỬ -->
+        <div class="hulo-history-summary">
+
+            <div class="hulo-summary-card">
+                <span class="label">Đơn hàng</span>
+                <span class="value">{{ orders.count }}</span>
+            </div>
+
+            <div class="hulo-summary-card">
+                <span class="label">Ticket hỗ trợ</span>
+                <span class="value">{{ tickets.count }}</span>
+            </div>
+
+            <div class="hulo-summary-card">
+                <span class="label">Đánh giá CSAT</span>
+                <span class="value">{{ csat_reviews.count }}</span>
+            </div>
+
+            <div class="hulo-summary-card">
+                <span class="label">Điểm hiện có</span>
+                <span class="value">
+                    {% if loyalty_account %}
+                        {{ loyalty_account.points_balance }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </span>
+            </div>
+
+        </div>
+
+        <!-- LỊCH SỬ ĐƠN HÀNG -->
+        <section class="hulo-profile-card">
+
+            <div class="hulo-history-section-title">
+                <h2>Lịch sử đơn hàng</h2>
+                <a href="{% url 'customer_orders_support' %}?tab=orders">
+                    Xem trang đơn hàng
+                </a>
+            </div>
+
+            <div class="hulo-history-table-wrap">
+                <table class="hulo-history-table">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Ngày đặt</th>
+                            <th>Trạng thái</th>
+                            <th>Tổng giá trị</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>
+                                    <strong>{{ order.so_don_hang }}</strong>
+                                </td>
+
+                                <td>
+                                    {{ order.thoi_diem_dat|date:"d/m/Y H:i" }}
+                                </td>
+
+                                <td>
+                                    <span class="hulo-history-badge">
+                                        {{ order.get_trang_thai_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ order.total_amount|default_if_none:0|floatformat:0 }}
+                                    {{ order.don_vi_tien_te }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="hulo-history-empty">
+                                    Bạn chưa có đơn hàng nào.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- LỊCH SỬ TICKET -->
+        <section class="hulo-profile-card">
+
+            <div class="hulo-history-section-title">
+                <h2>Lịch sử yêu cầu hỗ trợ</h2>
+                <a href="{% url 'customer_orders_support' %}?tab=tickets">
+                    Xem trang hỗ trợ
+                </a>
+            </div>
+
+            <div class="hulo-history-table-wrap">
+                <table class="hulo-history-table">
+                    <thead>
+                        <tr>
+                            <th>Mã Ticket</th>
+                            <th>Tiêu đề</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                            <th>Xác nhận</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for ticket in tickets %}
+                            <tr>
+                                <td>
+                                    <strong>
+                                        {{ ticket.ma_ticket|default:"Chưa cấp mã" }}
+                                    </strong>
+                                </td>
+
+                                <td>{{ ticket.tieu_de }}</td>
+
+                                <td>
+                                    {{ ticket.thoi_diem_tao|date:"d/m/Y H:i" }}
+                                </td>
+
+                                <td>
+                                    <span class="hulo-history-badge">
+                                        {{ ticket.get_trang_thai_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ ticket.get_trang_thai_xac_nhan_display }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="hulo-history-empty">
+                                    Bạn chưa có yêu cầu hỗ trợ nào.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- LỊCH SỬ CSAT -->
+        <section class="hulo-profile-card">
+            <h2>Lịch sử đánh giá hài lòng</h2>
+
+            <div class="hulo-history-table-wrap">
+                <table class="hulo-history-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket</th>
+                            <th>Đánh giá</th>
+                            <th>Nhận xét</th>
+                            <th>Thời gian</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for review in csat_reviews %}
+                            <tr>
+                                <td>
+                                    <strong>
+                                        {{ review.ticket.ma_ticket|default:"Chưa cấp mã" }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    <span class="hulo-history-stars">
+                                        {{ review.score }}/5 ★
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ review.comment|default:"Không có nhận xét" }}
+                                </td>
+
+                                <td>
+                                    {{ review.created_at|date:"d/m/Y H:i" }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="hulo-history-empty">
+                                    Bạn chưa gửi đánh giá CSAT nào.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- LỊCH SỬ ĐIỂM THƯỞNG -->
+        <section class="hulo-profile-card">
+
+            <div class="hulo-history-section-title">
+                <h2>Lịch sử điểm thưởng</h2>
+                <a href="{% url 'customers:my_vouchers' %}">
+                    Ưu đãi của tôi
+                </a>
+            </div>
+
+            {% if loyalty_account %}
+                <p class="hulo-loyalty-info">
+                    Hạng thành viên:
+                    <strong>
+                        {% if loyalty_account.tier %}
+                            {{ loyalty_account.tier.get_code_display }}
+                        {% else %}
+                            Chưa xếp hạng
+                        {% endif %}
+                    </strong>
+                    &nbsp;·&nbsp;
+                    Điểm hiện có:
+                    <strong>{{ loyalty_account.points_balance }}</strong>
+                </p>
+            {% endif %}
+
+            <div class="hulo-history-table-wrap">
+                <table class="hulo-history-table">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Loại giao dịch</th>
+                            <th>Số điểm</th>
+                            <th>Nội dung</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in loyalty_transactions %}
+                            <tr>
+                                <td>
+                                    {{ item.created_at|date:"d/m/Y H:i" }}
+                                </td>
+
+                                <td>
+                                    {{ item.get_transaction_type_display }}
+                                </td>
+
+                                <td>
+                                    {% if item.transaction_type == 'EARN' %}
+                                        <span class="hulo-history-positive">
+                                            +{{ item.points }}
+                                        </span>
+                                    {% else %}
+                                        <span class="hulo-history-negative">
+                                            -{{ item.points }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {{ item.description|default:"—" }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="hulo-history-empty">
+                                    Chưa có giao dịch điểm thưởng.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- LỊCH SỬ VOUCHER -->
+        <section class="hulo-profile-card">
+            <h2>Lịch sử đổi Voucher</h2>
+
+            <div class="hulo-history-table-wrap">
+                <table class="hulo-history-table">
+                    <thead>
+                        <tr>
+                            <th>Tên Voucher</th>
+                            <th>Điểm đã đổi</th>
+                            <th>Giá trị giảm</th>
+                            <th>Ngày cấp</th>
+                            <th>Hạn sử dụng</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for redemption in redemptions %}
+                            <tr>
+                                <td>
+                                    <strong>
+                                        {{ redemption.voucher_name }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    {{ redemption.points_spent }} điểm
+                                </td>
+
+                                <td>
+                                    {{ redemption.discount_amount|floatformat:0 }}
+                                </td>
+
+                                <td>
+                                    {{ redemption.issued_at|date:"d/m/Y" }}
+                                </td>
+
+                                <td>
+                                    {{ redemption.expires_at|date:"d/m/Y" }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="hulo-history-empty">
+                                    Bạn chưa đổi Voucher nào.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,1465 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Tổng quan công việc - CSKH | HULOECOM
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ==========================================
+       GIAO DIEN DASHBOARD HIEN TAI
+       ========================================== */
+
+    .cskh-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 22px 18px 45px;
+        color: #17365d;
+    }
+
+    .cskh-dashboard * {
+        box-sizing: border-box;
+    }
+
+    .cskh-dashboard .hero {
+        background: #dcecff;
+        border-radius: 17px;
+        padding: 27px 30px;
+        margin-bottom: 20px;
+    }
+
+    .cskh-dashboard .hero-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #176cc1;
+        margin-bottom: 8px;
+    }
+
+    .cskh-dashboard .hero h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #103b78;
+        margin: 0 0 8px;
+    }
+
+    .cskh-dashboard .hero p {
+        font-size: 13px;
+        color: #607da8;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .cskh-dashboard .section-box {
+        background: #ffffff;
+        border: 1px solid #dbe7f6;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .cskh-dashboard .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .cskh-dashboard .section-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #103b78;
+        margin: 0;
+    }
+
+    .cskh-dashboard .section-desc {
+        font-size: 12px;
+        color: #7489a8;
+        margin: 5px 0 0;
+    }
+
+    .cskh-dashboard .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .cskh-dashboard .stat-card {
+        background: #ffffff;
+        border: 1px solid #dbe7f6;
+        border-radius: 13px;
+        padding: 19px;
+        min-height: 110px;
+    }
+
+    .cskh-dashboard .stat-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .cskh-dashboard .stat-label {
+        color: #607da8;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .cskh-dashboard .stat-icon {
+        font-size: 17px;
+    }
+
+    .cskh-dashboard .stat-value {
+        font-size: 29px;
+        font-weight: 700;
+        color: #103b78;
+        margin: 13px 0 5px;
+        line-height: 1;
+    }
+
+    .cskh-dashboard .stat-note {
+        color: #7489a8;
+        font-size: 12px;
+    }
+
+    .cskh-dashboard .sla-summary {
+        display: flex;
+        gap: 9px;
+        flex-wrap: wrap;
+    }
+
+    .cskh-dashboard .status-pill {
+        display: inline-block;
+        border-radius: 20px;
+        padding: 6px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .cskh-dashboard .pill-orange {
+        color: #a66c16;
+        background: #fff3dd;
+    }
+
+    .cskh-dashboard .pill-red {
+        color: #bc3547;
+        background: #fde8eb;
+    }
+
+    .cskh-dashboard .pill-blue {
+        color: #176cc1;
+        background: #e6f0ff;
+    }
+
+    .cskh-dashboard .pill-green {
+        color: #24754c;
+        background: #e5f5eb;
+    }
+
+    .cskh-dashboard .pill-gray {
+        color: #62748a;
+        background: #eef2f6;
+    }
+
+    .cskh-dashboard .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #e2ebf6;
+        border-radius: 11px;
+    }
+
+    .cskh-dashboard table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+
+    .cskh-dashboard th,
+    .cskh-dashboard td {
+        text-align: left;
+        padding: 14px 12px;
+        font-size: 12px;
+        line-height: 1.5;
+        vertical-align: middle;
+        border-bottom: 1px solid #e7eef8;
+    }
+
+    .cskh-dashboard th {
+        background: #edf5ff;
+        color: #103b78;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .cskh-dashboard tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .cskh-dashboard tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .cskh-dashboard .ticket-link {
+        color: #176cc1;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .cskh-dashboard .ticket-link:hover {
+        text-decoration: underline;
+    }
+
+    .cskh-dashboard .muted {
+        color: #7489a8;
+        font-size: 11px;
+        margin-top: 4px;
+    }
+
+    .cskh-dashboard .empty-state {
+        text-align: center;
+        padding: 30px 18px;
+        color: #7489a8;
+        font-size: 13px;
+    }
+
+    .cskh-dashboard .empty-icon {
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .cskh-dashboard .quick-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+    }
+
+    .cskh-dashboard .quick-link {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid #dbe7f6;
+        border-radius: 10px;
+        color: #17365d;
+        background: #ffffff;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+    .cskh-dashboard .quick-link:hover {
+        background: #eef5ff;
+        border-color: #a9cff6;
+        color: #176cc1;
+    }
+
+    .cskh-dashboard .quick-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 31px;
+        height: 31px;
+        border-radius: 8px;
+        background: #edf5ff;
+        color: #176cc1;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .cskh-dashboard .section-footer {
+        margin-top: 15px;
+        text-align: right;
+    }
+
+    .cskh-dashboard .view-all {
+        text-decoration: none;
+        color: #176cc1;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    /* ==========================================
+       MOI: THONG BAO MINH CHUNG CHUA XEM
+       ========================================== */
+
+    .cskh-evidence-banner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        padding: 19px 22px;
+        margin-bottom: 20px;
+        background: #edf8f2;
+        border: 1px solid #b8e5c9;
+        border-left: 5px solid #27935c;
+        border-radius: 13px;
+    }
+
+    .cskh-evidence-banner h2 {
+        color: #176442;
+        font-size: 17px;
+        margin: 0 0 7px;
+    }
+
+    .cskh-evidence-banner p {
+        color: #42745b;
+        font-size: 13px;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .cskh-evidence-banner-actions {
+        display: flex;
+        gap: 9px;
+        flex-wrap: wrap;
+        flex-shrink: 0;
+    }
+
+    .cskh-evidence-button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 11px 17px;
+        min-height: 42px;
+        border-radius: 9px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        border: 1px solid transparent;
+    }
+
+    .cskh-evidence-button-primary {
+        background: #176cc1;
+        color: #ffffff;
+        border-color: #176cc1;
+    }
+
+    .cskh-evidence-button-primary:hover {
+        background: #0d559c;
+        color: #ffffff;
+    }
+
+    .cskh-evidence-button-secondary {
+        background: #ffffff;
+        color: #475569;
+        border-color: #cbd5e1;
+    }
+
+    .cskh-evidence-button-secondary:hover {
+        background: #f1f5f9;
+    }
+
+    .cskh-evidence-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .cskh-evidence-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 16px;
+        background: #f8fbff;
+        border: 1px solid #e0eaf7;
+        border-radius: 10px;
+    }
+
+    .cskh-evidence-item-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .cskh-evidence-item-title {
+        display: block;
+        margin-bottom: 6px;
+        color: #154d89;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .cskh-evidence-item p {
+        margin: 4px 0;
+        color: #526b86;
+        font-size: 12px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .cskh-evidence-item form {
+        margin: 0;
+    }
+
+    /* ==========================================
+       MOI: HOP THOAI TU DONG
+       ========================================== */
+
+    .cskh-evidence-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.58);
+        padding: 20px;
+    }
+
+    .cskh-evidence-overlay[hidden] {
+        display: none !important;
+    }
+
+    .cskh-evidence-modal {
+        width: 100%;
+        max-width: 570px;
+        max-height: 90vh;
+        overflow-y: auto;
+        background: #ffffff;
+        color: #17365d;
+        padding: 28px;
+        border-radius: 18px;
+        box-shadow: 0 25px 75px rgba(15, 23, 42, 0.27);
+    }
+
+    .cskh-evidence-modal-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 55px;
+        height: 55px;
+        border-radius: 15px;
+        background: #e3f5e9;
+        font-size: 28px;
+        margin-bottom: 17px;
+    }
+
+    .cskh-evidence-modal h2 {
+        color: #123c6c;
+        margin: 0 0 10px;
+        font-size: 23px;
+        line-height: 1.4;
+    }
+
+    .cskh-evidence-modal-desc {
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.7;
+        margin: 0 0 19px;
+    }
+
+    .cskh-evidence-modal-detail {
+        background: #f5f9ff;
+        border: 1px solid #dce9f9;
+        border-radius: 12px;
+        padding: 17px;
+        margin-bottom: 18px;
+    }
+
+    .cskh-evidence-modal-detail p {
+        margin: 0 0 9px;
+        color: #4d6581;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .cskh-evidence-modal-detail p:last-child {
+        margin-bottom: 0;
+    }
+
+    .cskh-evidence-modal-detail strong {
+        color: #164b88;
+    }
+
+    .cskh-evidence-message {
+        margin-top: 11px;
+        padding: 13px 15px;
+        background: #ffffff;
+        border: 1px solid #dce8f6;
+        border-radius: 9px;
+        line-height: 1.7;
+        color: #334155;
+        overflow-wrap: anywhere;
+        font-size: 13px;
+    }
+
+    .cskh-evidence-modal-note {
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.7;
+        margin: 0 0 18px;
+    }
+
+    .cskh-evidence-modal-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .cskh-evidence-modal-actions form {
+        margin: 0;
+    }
+
+    .cskh-evidence-count {
+        display: inline-block;
+        padding: 5px 9px;
+        background: #fff1d6;
+        color: #9a5a12;
+        font-weight: 700;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    @media (max-width: 750px) {
+        .cskh-evidence-banner,
+        .cskh-evidence-item {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .cskh-evidence-banner-actions {
+            justify-content: flex-start;
+        }
+    }
+
+    @media (max-width: 650px) {
+        .cskh-dashboard .stats-grid,
+        .cskh-dashboard .quick-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cskh-dashboard .hero {
+            padding: 22px;
+        }
+
+        .cskh-dashboard .hero h1 {
+            font-size: 21px;
+        }
+
+        .cskh-dashboard .section-box {
+            padding: 14px;
+        }
+
+        .cskh-evidence-modal {
+            padding: 20px;
+        }
+
+        .cskh-evidence-modal h2 {
+            font-size: 20px;
+        }
+    }
+
+    @media (max-width: 450px) {
+        .cskh-evidence-modal-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .cskh-evidence-modal-actions form,
+        .cskh-evidence-modal-actions button {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="cskh-dashboard">
+
+    <!-- ======================================
+         LOI CHAO
+         ====================================== -->
+
+    <section class="hero">
+
+        <div class="hero-label">
+            TỔNG QUAN CÔNG VIỆC
+        </div>
+
+        <h1>
+            Xin chào, {{ staff.ho_ten }}!
+        </h1>
+
+        <p>
+            Theo dõi và xử lý các yêu cầu hỗ trợ khách hàng
+            tại một nơi. Các số liệu được cập nhật từ hệ thống.
+        </p>
+
+    </section>
+
+
+    <!-- ======================================
+         MOI: THANH THONG BAO MINH CHUNG
+         ====================================== -->
+
+    {% if evidence_notification_latest %}
+
+        <section
+            class="cskh-evidence-banner"
+            id="cskh-evidence-banner"
+            aria-label="Thông báo minh chứng mới"
+        >
+
+            <div>
+
+                <h2>
+                    📎 Khách hàng đã bổ sung minh chứng
+                </h2>
+
+                <p>
+                    Bạn có
+
+                    <strong>
+                        {{ evidence_notifications_count }}
+                    </strong>
+
+                    thông báo minh chứng chưa xem.
+
+                    Yêu cầu mới nhất thuộc Ticket
+
+                    <strong>
+                        #{{ evidence_notification_latest.ticket.ma_ticket|default:evidence_notification_latest.ticket.pk }}
+                    </strong>.
+                </p>
+
+            </div>
+
+            <div class="cskh-evidence-banner-actions">
+
+                <button
+                    type="button"
+                    class="cskh-evidence-button cskh-evidence-button-secondary"
+                    id="cskh-open-evidence-modal"
+                >
+                    Xem thông báo
+                </button>
+
+                <form
+                    method="POST"
+                    action="{% url 'cskh_view_evidence_notification' evidence_notification_latest.pk %}"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="cskh-evidence-button cskh-evidence-button-primary"
+                    >
+                        Xem minh chứng
+                    </button>
+
+                </form>
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- ======================================
+         BON THE THONG KE
+         ====================================== -->
+
+    <section class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-heading">
+
+                <span class="stat-label">
+                    Ticket mới
+                </span>
+
+                <span class="stat-icon" style="color:#176cc1;">
+                    ▣
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                {{ stats.new|default:0 }}
+            </div>
+
+            <div class="stat-note">
+                Chưa được phân công
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-heading">
+
+                <span class="stat-label">
+                    Được phân công
+                </span>
+
+                <span class="stat-icon" style="color:#7957db;">
+                    ▤
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                {{ stats.assigned|default:0 }}
+            </div>
+
+            <div class="stat-note">
+                Chờ bạn tiếp nhận
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-heading">
+
+                <span class="stat-label">
+                    Đang xử lý
+                </span>
+
+                <span class="stat-icon" style="color:#e29123;">
+                    ◷
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                {{ stats.in_progress|default:0 }}
+            </div>
+
+            <div class="stat-note">
+                Ticket bạn đang phụ trách
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-heading">
+
+                <span class="stat-label">
+                    Mở lại
+                </span>
+
+                <span class="stat-icon" style="color:#d53a4a;">
+                    ↺
+                </span>
+
+            </div>
+
+            <div class="stat-value">
+                {{ stats.reopened|default:0 }}
+            </div>
+
+            <div class="stat-note">
+                Khách hàng yêu cầu xử lý lại
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================
+         MOI: DANH SACH MINH CHUNG CHUA XEM
+         ====================================== -->
+
+    {% if evidence_notifications %}
+
+        <section
+            class="section-box"
+            id="cskh-evidence-notification-list"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2 class="section-title">
+                        🔔 Minh chứng khách hàng mới bổ sung
+                    </h2>
+
+                    <p class="section-desc">
+                        Các yêu cầu khách hàng đã đáp ứng
+                        nhưng bạn chưa mở xem.
+                    </p>
+
+                </div>
+
+                <span class="cskh-evidence-count">
+                    {{ evidence_notifications_count }} chưa xem
+                </span>
+
+            </div>
+
+            <div class="cskh-evidence-list">
+
+                {% for notice in evidence_notifications %}
+
+                    <div class="cskh-evidence-item">
+
+                        <div class="cskh-evidence-item-info">
+
+                            <span class="cskh-evidence-item-title">
+                                #{{ notice.ticket.ma_ticket|default:notice.ticket.pk }}
+                            </span>
+
+                            <p>
+                                <strong>Khách hàng:</strong>
+                                {{ notice.ticket.khach_hang.ho_ten }}
+                            </p>
+
+                            <p>
+                                <strong>Vấn đề:</strong>
+                                {{ notice.ticket.tieu_de }}
+                            </p>
+
+                            <p>
+                                <strong>Thời điểm bổ sung:</strong>
+                                {{ notice.thoi_diem_hoan_thanh|date:"d/m/Y H:i" }}
+                            </p>
+
+                            <p>
+                                <strong>Nội dung phản hồi:</strong>
+                                {{ notice.tin_nhan_phan_hoi.noi_dung|truncatechars:180 }}
+                            </p>
+
+                        </div>
+
+                        <form
+                            method="POST"
+                            action="{% url 'cskh_view_evidence_notification' notice.pk %}"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="cskh-evidence-button cskh-evidence-button-primary"
+                            >
+                                Xem minh chứng
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% if evidence_notifications_count > 10 %}
+                <p class="section-desc" style="margin-top:13px;">
+                    Đang hiển thị 10 thông báo mới nhất.
+                    Các thông báo còn lại sẽ hiển thị
+                    khi bạn xử lý các thông báo hiện tại.
+                </p>
+            {% endif %}
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- ======================================
+         TICKET UU TIEN THEO SLA
+         ====================================== -->
+
+    <section class="section-box">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2 class="section-title">
+                    Ticket cần ưu tiên xử lý
+                </h2>
+
+                <p class="section-desc">
+                    Sắp xếp theo thời hạn xử lý gần nhất.
+                </p>
+
+            </div>
+
+            <div class="sla-summary">
+
+                <span class="status-pill pill-orange">
+                    Sắp quá hạn: {{ sla_stats.warning }}
+                </span>
+
+                <span class="status-pill pill-red">
+                    Quá hạn: {{ sla_stats.overdue }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Khách hàng</th>
+                        <th>Trạng thái</th>
+                        <th>Ưu tiên</th>
+                        <th>SLA</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for ticket in priority_tickets %}
+
+                        <tr>
+
+                            <td>
+
+                                <a
+                                    class="ticket-link"
+                                    href="{% url 'tickets:detail' ticket.pk %}"
+                                >
+                                    {{ ticket.ma_ticket }}
+                                </a>
+
+                                <div class="muted">
+                                    {{ ticket.tieu_de|truncatechars:58 }}
+                                </div>
+
+                            </td>
+
+                            <td>
+                                {{ ticket.khach_hang.ho_ten }}
+                            </td>
+
+                            <td>
+
+                                {% if ticket.trang_thai == 'NEW' %}
+
+                                    <span class="status-pill pill-gray">
+                                        Mới
+                                    </span>
+
+                                {% elif ticket.trang_thai == 'ASSIGNED' %}
+
+                                    <span class="status-pill pill-blue">
+                                        Đã phân công
+                                    </span>
+
+                                {% elif ticket.trang_thai == 'IN_PROGRESS' %}
+
+                                    <span class="status-pill pill-orange">
+                                        Đang xử lý
+                                    </span>
+
+                                {% elif ticket.trang_thai == 'REOPENED' %}
+
+                                    <span class="status-pill pill-red">
+                                        Mở lại
+                                    </span>
+
+                                {% else %}
+
+                                    {{ ticket.get_trang_thai_display }}
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ ticket.get_muc_uu_tien_display }}
+                            </td>
+
+                            <td>
+
+                                {% if ticket.dashboard_sla_status == 'OVERDUE' %}
+
+                                    <span class="status-pill pill-red">
+                                        {{ ticket.dashboard_sla_text }}
+                                    </span>
+
+                                {% elif ticket.dashboard_sla_status == 'WARNING' %}
+
+                                    <span class="status-pill pill-orange">
+                                        {{ ticket.dashboard_sla_text }}
+                                    </span>
+
+                                {% elif ticket.dashboard_sla_status == 'ON_TIME' %}
+
+                                    <span class="status-pill pill-green">
+                                        {{ ticket.dashboard_sla_text }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status-pill pill-gray">
+                                        {{ ticket.dashboard_sla_text }}
+                                    </span>
+
+                                {% endif %}
+
+                                {% if ticket.sla_deadline %}
+
+                                    <div class="muted">
+                                        Hạn:
+                                        {{ ticket.sla_deadline|date:"d/m/Y H:i" }}
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <a
+                                    class="ticket-link"
+                                    href="{% url 'tickets:detail' ticket.pk %}"
+                                >
+                                    Xem chi tiết →
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="6">
+
+                                <div class="empty-state">
+                                    <div class="empty-icon">☑</div>
+                                    Hiện không có Ticket cần ưu tiên xử lý.
+                                </div>
+
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div class="section-footer">
+
+            <a
+                class="view-all"
+                href="{% url 'tickets:home' %}"
+            >
+                Xem tất cả Ticket →
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================
+         THAO TAC NHANH
+         ====================================== -->
+
+    <section class="section-box">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2 class="section-title">
+                    Thao tác nhanh
+                </h2>
+
+                <p class="section-desc">
+                    Truy cập các chức năng công việc thường dùng.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="quick-grid">
+
+            <a
+                href="{% url 'tickets:home' %}"
+                class="quick-link"
+            >
+                <span class="quick-icon">☷</span>
+                Danh sách Ticket
+            </a>
+
+            <a
+                href="{% url 'tickets:home' %}?status=ASSIGNED"
+                class="quick-link"
+            >
+                <span class="quick-icon">♙</span>
+                Ticket chờ tiếp nhận
+            </a>
+
+            <a
+                href="{% url 'tickets:home' %}?status=IN_PROGRESS"
+                class="quick-link"
+            >
+                <span class="quick-icon">◷</span>
+                Ticket đang xử lý
+            </a>
+
+            <a
+                href="{% url 'tickets:home' %}?status=REOPENED"
+                class="quick-link"
+            >
+                <span class="quick-icon">↺</span>
+                Ticket mở lại
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================
+         TICKET CUA TOI GAN DAY
+         ====================================== -->
+
+    <section class="section-box">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2 class="section-title">
+                    Ticket của tôi gần đây
+                </h2>
+
+                <p class="section-desc">
+                    Những yêu cầu hỗ trợ được cập nhật gần nhất.
+                </p>
+
+            </div>
+
+            <span class="status-pill pill-blue">
+                Tổng được giao:
+                {{ personal_stats.total }}
+            </span>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Khách hàng</th>
+                        <th>Trạng thái</th>
+                        <th>Cập nhật gần nhất</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for ticket in my_recent_tickets %}
+
+                        <tr>
+
+                            <td>
+
+                                <a
+                                    class="ticket-link"
+                                    href="{% url 'tickets:detail' ticket.pk %}"
+                                >
+                                    {{ ticket.ma_ticket }}
+                                </a>
+
+                            </td>
+
+                            <td>
+                                {{ ticket.khach_hang.ho_ten }}
+                            </td>
+
+                            <td>
+                                {{ ticket.get_trang_thai_display }}
+                            </td>
+
+                            <td>
+                                {{ ticket.thoi_diem_cap_nhat|date:"d/m/Y H:i" }}
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="4">
+
+                                <div class="empty-state">
+                                    Bạn chưa được phân công Ticket nào.
+                                </div>
+
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- ==========================================
+     MOI: HOP THOAI MINH CHUNG CHUA XEM
+     ========================================== -->
+
+{% if evidence_notification_latest %}
+
+    <div
+        class="cskh-evidence-overlay"
+        id="cskh-evidence-overlay"
+        hidden
+    >
+
+        <section
+            class="cskh-evidence-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cskh-evidence-modal-title"
+            aria-describedby="cskh-evidence-modal-description"
+            tabindex="-1"
+        >
+
+            <div
+                class="cskh-evidence-modal-icon"
+                aria-hidden="true"
+            >
+                📎
+            </div>
+
+
+            <h2 id="cskh-evidence-modal-title">
+                Khách hàng đã bổ sung minh chứng
+            </h2>
+
+            <p
+                class="cskh-evidence-modal-desc"
+                id="cskh-evidence-modal-description"
+            >
+                Khách hàng đã gửi thêm thông tin và minh chứng
+                theo yêu cầu của bạn. Vui lòng kiểm tra để
+                tiếp tục xử lý Ticket.
+            </p>
+
+
+            <div class="cskh-evidence-modal-detail">
+
+                <p>
+                    <strong>Ticket:</strong>
+
+                    #{{ evidence_notification_latest.ticket.ma_ticket|default:evidence_notification_latest.ticket.pk }}
+                </p>
+
+                <p>
+                    <strong>Khách hàng:</strong>
+
+                    {{ evidence_notification_latest.ticket.khach_hang.ho_ten }}
+                </p>
+
+                <p>
+                    <strong>Vấn đề:</strong>
+
+                    {{ evidence_notification_latest.ticket.tieu_de }}
+                </p>
+
+                <p>
+                    <strong>Thời điểm bổ sung:</strong>
+
+                    {{ evidence_notification_latest.thoi_diem_hoan_thanh|date:"d/m/Y H:i" }}
+                </p>
+
+                <p>
+                    <strong>Nội dung khách hàng gửi:</strong>
+                </p>
+
+                <div class="cskh-evidence-message">
+                    {{ evidence_notification_latest.tin_nhan_phan_hoi.noi_dung|linebreaksbr }}
+                </div>
+
+            </div>
+
+
+            {% if evidence_notifications_count > 1 %}
+
+                <p class="cskh-evidence-modal-note">
+                    Bạn còn
+                    <strong>
+                        {{ evidence_notifications_count|add:"-1" }}
+                    </strong>
+                    thông báo chưa xem khác. Hãy mở từng
+                    Ticket để kiểm tra minh chứng.
+                </p>
+
+            {% else %}
+
+                <p class="cskh-evidence-modal-note">
+                    Chọn <strong>Xem minh chứng</strong> để
+                    mở Ticket và ghi nhận thông báo đã xem.
+                    Chọn <strong>Để sau</strong> nếu bạn
+                    chưa sẵn sàng xử lý ngay.
+                </p>
+
+            {% endif %}
+
+
+            <div class="cskh-evidence-modal-actions">
+
+                <button
+                    type="button"
+                    class="cskh-evidence-button cskh-evidence-button-secondary"
+                    id="cskh-evidence-later"
+                >
+                    Để sau
+                </button>
+
+
+                <form
+                    method="POST"
+                    action="{% url 'cskh_view_evidence_notification' evidence_notification_latest.pk %}"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="cskh-evidence-button cskh-evidence-button-primary"
+                    >
+                        Xem minh chứng
+                    </button>
+
+                </form>
+
+            </div>
+
+        </section>
+    </div>
+
+{% endif %}
+
+
+<!-- ==========================================
+     JAVASCRIPT POPUP THONG BAO CSKH
+     ========================================== -->
+
+{% if evidence_notification_latest %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const overlay = document.getElementById(
+        "cskh-evidence-overlay"
+    );
+
+    const laterButton = document.getElementById(
+        "cskh-evidence-later"
+    );
+
+    const reopenButton = document.getElementById(
+        "cskh-open-evidence-modal"
+    );
+
+    if (!overlay || !laterButton) {
+        return;
+    }
+
+    const modal = overlay.querySelector(
+        ".cskh-evidence-modal"
+    );
+
+    const previousOverflow = document.body.style.overflow;
+
+    function openEvidenceModal() {
+
+        overlay.hidden = false;
+
+        document.body.style.overflow = "hidden";
+
+        if (modal) {
+            modal.focus();
+        }
+    }
+
+    function closeEvidenceModal() {
+
+        overlay.hidden = true;
+
+        document.body.style.overflow = previousOverflow;
+
+        if (reopenButton) {
+            reopenButton.focus();
+        }
+    }
+
+    // Tu dong hien popup khi vao Dashboard
+    // va co thong bao chua xem.
+    openEvidenceModal();
+
+    // De sau: chi dong popup.
+    // Khong danh dau da xem.
+    laterButton.addEventListener(
+        "click",
+        closeEvidenceModal
+    );
+
+    // Mo lai popup tu thanh nhac nho.
+    if (reopenButton) {
+
+        reopenButton.addEventListener(
+            "click",
+            openEvidenceModal
+        );
+    }
+
+    // Dong popup bang phim Escape.
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Escape" &&
+                !overlay.hidden
+            ) {
+                closeEvidenceModal();
+            }
+        }
+    );
+
+});
+</script>
+
+{% endif %}
+
+{% endblock %}

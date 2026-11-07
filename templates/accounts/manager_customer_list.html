@@ -1,0 +1,520 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Danh sách khách hàng - CRM HULO
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .manager-customers {
+        max-width: 1280px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px 18px 45px;
+        box-sizing: border-box;
+        color: #17365d;
+    }
+
+    .manager-customers * {
+        box-sizing: border-box;
+    }
+
+    .manager-customers .customer-hero {
+        background: #dcecff;
+        border-radius: 17px;
+        padding: 28px 32px;
+        margin-bottom: 22px;
+    }
+
+    .manager-customers .customer-hero h1 {
+        margin: 0 0 9px;
+        font-size: 25px;
+        font-weight: 700;
+        color: #103b78;
+    }
+
+    .manager-customers .customer-hero p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #607da8;
+    }
+
+    .manager-customers .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 15px;
+        margin-bottom: 22px;
+    }
+
+    .manager-customers .stat-card {
+        background: #ffffff;
+        border: 1px solid #dbe7f6;
+        border-radius: 14px;
+        padding: 20px;
+    }
+
+    .manager-customers .stat-label {
+        font-size: 13px;
+        color: #607da8;
+        margin-bottom: 10px;
+    }
+
+    .manager-customers .stat-value {
+        font-size: 27px;
+        font-weight: 700;
+        color: #103b78;
+    }
+
+    .manager-customers .section-box {
+        background: #ffffff;
+        border: 1px solid #dbe7f6;
+        border-radius: 15px;
+        padding: 22px;
+    }
+
+    .manager-customers .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .manager-customers .section-title {
+        margin: 0 0 6px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #103b78;
+    }
+
+    .manager-customers .section-desc {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #607da8;
+        margin: 0;
+    }
+
+    .manager-customers .search-form {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .manager-customers .search-input {
+        width: 270px;
+        max-width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #cfdcf0;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #17365d;
+        background: #ffffff;
+    }
+
+    .manager-customers .btn-primary-custom {
+        padding: 10px 16px;
+        background: #176cc1;
+        color: #ffffff;
+        border: 1px solid #176cc1;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .manager-customers .btn-primary-custom:hover {
+        background: #0f5aa5;
+    }
+
+    .manager-customers .btn-secondary-custom {
+        padding: 10px 15px;
+        color: #176cc1;
+        background: #ffffff;
+        border: 1px solid #cfdcf0;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .manager-customers .btn-secondary-custom:hover {
+        background: #eef5ff;
+    }
+
+    .manager-customers .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #dbe7f6;
+        border-radius: 11px;
+    }
+
+    .manager-customers table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+
+    .manager-customers th,
+    .manager-customers td {
+        padding: 15px 14px;
+        border-bottom: 1px solid #e7eef8;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 13px;
+    }
+
+    .manager-customers th {
+        background: #edf5ff;
+        color: #103b78;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .manager-customers tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .manager-customers tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .manager-customers .customer-name {
+        font-weight: 700;
+        color: #103b78;
+    }
+
+    .manager-customers .muted {
+        font-size: 12px;
+        color: #7489a8;
+        margin-top: 5px;
+    }
+
+    .manager-customers .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        padding: 6px 11px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        background: #e6f0ff;
+        color: #176cc1;
+    }
+
+    .manager-customers .count-badge.support {
+        background: #e6f6ec;
+        color: #24754c;
+    }
+
+    .manager-customers .detail-link {
+        display: inline-block;
+        color: #176cc1;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .manager-customers .detail-link:hover {
+        text-decoration: underline;
+    }
+
+    .manager-customers .pagination-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .manager-customers .pagination-info {
+        font-size: 12px;
+        color: #607da8;
+    }
+
+    .manager-customers .pagination-links {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .manager-customers .pagination-links a {
+        display: inline-block;
+        padding: 8px 12px;
+        color: #176cc1;
+        border: 1px solid #dbe7f6;
+        border-radius: 7px;
+        text-decoration: none;
+        font-size: 12px;
+    }
+
+    .manager-customers .pagination-links a:hover {
+        background: #eef5ff;
+    }
+
+    .manager-customers .pagination-links span {
+        font-size: 12px;
+        color: #607da8;
+    }
+
+    @media (max-width: 900px) {
+        .manager-customers .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .manager-customers .section-heading {
+            align-items: stretch;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .manager-customers .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .manager-customers .customer-hero {
+            padding: 22px;
+        }
+
+        .manager-customers .customer-hero h1 {
+            font-size: 21px;
+        }
+
+        .manager-customers .section-box {
+            padding: 14px;
+        }
+
+        .manager-customers .search-form {
+            width: 100%;
+        }
+
+        .manager-customers .search-input {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="manager-customers">
+
+    <!-- TIÊU ĐỀ -->
+    <section class="customer-hero">
+        <h1>Quản lý khách hàng</h1>
+
+        <p>
+            Tra cứu hồ sơ khách hàng, lịch sử mua hàng
+            và các yêu cầu hỗ trợ phát sinh trong quá trình sử dụng dịch vụ.
+        </p>
+    </section>
+
+    <!-- THỐNG KÊ TỔNG QUAN -->
+    <section class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Tổng khách hàng
+            </div>
+
+            <div class="stat-value">
+                {{ total_customers|default:0 }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Tổng đơn hàng
+            </div>
+
+            <div class="stat-value">
+                {{ total_orders|default:0 }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Tổng yêu cầu hỗ trợ
+            </div>
+
+            <div class="stat-value">
+                {{ total_tickets|default:0 }}
+            </div>
+        </div>
+
+    </section>
+
+    <!-- DANH SÁCH KHÁCH HÀNG -->
+    <section class="section-box">
+
+        <div class="section-heading">
+
+            <div>
+                <h2 class="section-title">
+                    Danh sách khách hàng
+                </h2>
+
+                <p class="section-desc">
+                    Chọn một khách hàng để xem từng đơn hàng
+                    và các yêu cầu hỗ trợ tương ứng.
+                </p>
+            </div>
+
+            <form method="get" class="search-form">
+
+                <input
+                    type="text"
+                    name="q"
+                    class="search-input"
+                    placeholder="Tên, mã KH, email hoặc SĐT..."
+                    value="{{ keyword }}"
+                    aria-label="Tìm kiếm khách hàng"
+                >
+
+                <button
+                    type="submit"
+                    class="btn-primary-custom"
+                >
+                    Tìm kiếm
+                </button>
+
+                <a
+                    href="{% url 'manager_customer_list' %}"
+                    class="btn-secondary-custom"
+                >
+                    Xóa lọc
+                </a>
+
+            </form>
+
+        </div>
+
+        <div class="table-wrapper">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã khách hàng</th>
+                        <th>Họ và tên</th>
+                        <th>Email / Liên hệ</th>
+                        <th>Số đơn hàng</th>
+                        <th>Yêu cầu hỗ trợ</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in customer_rows %}
+
+                    <tr>
+                        <td>
+                            <strong>
+                                KH{{ row.customer.ma_khach_hang }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            <div class="customer-name">
+                                {{ row.customer.ho_ten }}
+                            </div>
+
+                            <div class="muted">
+                                {{ row.customer.ma_tai_khoan.username }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <div>
+                                {{ row.customer.email|default:"—" }}
+                            </div>
+
+                            <div class="muted">
+                                {{ row.customer.so_dien_thoai|default:"Chưa có SĐT" }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="count-badge">
+                                {{ row.order_count }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="count-badge support">
+                                {{ row.ticket_count }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <a
+                                class="detail-link"
+                                href="{% url 'manager_customer_detail' row.customer.pk %}"
+                            >
+                                Xem chi tiết →
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="6"
+                            style="text-align:center; padding:28px; color:#7489a8;">
+                            Không tìm thấy khách hàng phù hợp.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+        <!-- PHÂN TRANG -->
+        <div class="pagination-row">
+
+            <div class="pagination-info">
+                Hiển thị
+                {{ page_obj.start_index }}
+                –
+                {{ page_obj.end_index }}
+                trong tổng số
+                {{ page_obj.paginator.count }}
+                khách hàng.
+            </div>
+
+            <div class="pagination-links">
+
+                {% if page_obj.has_previous %}
+                    <a href="?q={{ keyword|urlencode }}&amp;page={{ page_obj.previous_page_number }}">
+                        Trước
+                    </a>
+                {% endif %}
+
+                <span>
+                    Trang {{ page_obj.number }}
+                    / {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?q={{ keyword|urlencode }}&amp;page={{ page_obj.next_page_number }}">
+                        Tiếp
+                    </a>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -1,89 +1,155 @@
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .permissions import get_user_role
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
+
+from .permissions import get_user_role, role_required
 
 
-# Chức năng đăng nhập
+def redirect_after_login(user):
+    """
+    Điều hướng sau đăng nhập theo vai trò.
+
+    ADMIN:
+        Django Admin.
+
+    MANAGER:
+        Dashboard quản lý vận hành.
+
+    CSKH:
+        Dashboard CSKH cá nhân.
+
+    ASSESSOR:
+        Dashboard thẩm định cá nhân.
+
+    CUSTOMER:
+        Trung tâm trợ giúp.
+    """
+
+    role = get_user_role(user)
+
+    if role == "ADMIN":
+        return redirect("admin:index")
+
+    if role == "MANAGER":
+        return redirect("manager_dashboard")
+
+    if role == "CSKH":
+        return redirect("cskh_dashboard")
+
+    if role == "ASSESSOR":
+        return redirect("assessor_dashboard")
+
+    if role == "CUSTOMER":
+        return redirect("support:home")
+
+    return redirect("home")
+
+
+# ==================================================
+# ĐĂNG NHẬP
+# ==================================================
+
 def login_view(request):
 
-    # Nếu đã đăng nhập thì chuyển đến Home
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect_after_login(request.user)
 
     error_message = None
 
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
 
         user = authenticate(
             request,
             username=username,
-            password=password
+            password=password,
         )
 
         if user is not None:
             login(request, user)
-            return redirect('home')
-        else:
-            error_message = 'Tên đăng nhập hoặc mật khẩu không đúng.'
+            return redirect_after_login(user)
+
+        error_message = (
+            "Tên đăng nhập hoặc mật khẩu không đúng."
+        )
 
     return render(
         request,
-        'accounts/login.html',
-        {'error_message': error_message}
+        "accounts/login.html",
+        {
+            "error_message": error_message,
+        },
     )
 
 
-# Trang Home sau khi đăng nhập
+# ==================================================
+# TRANG CHỦ THEO VAI TRÒ
+# ==================================================
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 def home_view(request):
 
     role = get_user_role(request.user)
 
+    if role == "ADMIN":
+        return redirect("admin:index")
+
+    if role == "MANAGER":
+        return redirect("manager_dashboard")
+
+    if role == "CSKH":
+        return redirect("cskh_dashboard")
+
+    if role == "ASSESSOR":
+        return redirect("assessor_dashboard")
+
+    if role == "CUSTOMER":
+        return redirect("support:home")
+
     role_names = {
-        'ADMIN': 'Quản trị hệ thống',
-        'CUSTOMER': 'Khách hàng',
-        'CSKH': 'Nhân viên CSKH',
-        'ASSESSOR': 'Nhân viên thẩm định',
-        'MANAGER': 'Quản lý',
-        'UNASSIGNED': 'Chưa được phân quyền',
+        "ADMIN": "Quản trị hệ thống",
+        "CUSTOMER": "Khách hàng",
+        "CSKH": "Nhân viên chăm sóc khách hàng",
+        "ASSESSOR": "Nhân viên thẩm định",
+        "MANAGER": "Quản lý vận hành",
+        "UNASSIGNED": "Chưa được phân quyền",
     }
 
     role_display = role_names.get(
-        role, 'Không xác định'
+        role,
+        "Không xác định",
     )
 
     return render(
         request,
-        'accounts/home.html',
+        "accounts/home.html",
         {
-            'role': role,
-            'role_display': role_display,
-        }
+            "role": role,
+            "role_display": role_display,
+        },
     )
 
 
-
-from django.contrib.auth import logout
-from django.views.decorators.http import require_POST
-
+# ==================================================
+# ĐĂNG XUẤT
+# ==================================================
 
 @require_POST
-@login_required(login_url='login')
+@login_required(login_url="login")
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect("login")
 
 
-from accounts.permissions import role_required
+# ==================================================
+# KIỂM TRA QUYỀN CSKH
+# ==================================================
 
-
-@role_required('CSKH')
+@role_required("CSKH")
 def test_cskh_view(request):
     return HttpResponse(
         "<h1>TRANG KIỂM TRA QUYỀN CSKH</h1>"

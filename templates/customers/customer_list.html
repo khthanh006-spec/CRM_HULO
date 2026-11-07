@@ -8,22 +8,36 @@ Danh sách khách hàng - CRM HULO
 {% block content %}
 
 <style>
+    /* ==========================================
+       MODULE 5 - DANH SÁCH KHÁCH HÀNG
+       ========================================== */
+
     .m5-customer-list {
         max-width: 1200px;
         margin: 0 auto;
+        color: #103b78;
+    }
+
+    .m5-customer-list * {
+        box-sizing: border-box;
     }
 
     .m5-customer-list h1 {
         color: #103b78;
         margin-bottom: 10px;
+        font-size: 32px;
     }
 
     .m5-description {
         color: #607da8;
         margin-bottom: 25px;
+        line-height: 1.7;
     }
 
-    /* THANH ĐIỀU HƯỚNG MODULE 5 */
+    /* ==========================================
+       THANH ĐIỀU HƯỚNG MODULE 5
+       ========================================== */
+
     .m5-tabs {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -47,19 +61,12 @@ Danh sách khách hàng - CRM HULO
         text-align: center;
         font-weight: 600;
         font-size: 14px;
-        box-sizing: border-box;
     }
 
     .m5-tab.active {
         background: #eaf2ff;
         border: 2px solid #2878e7;
         color: #103b78;
-    }
-
-    .m5-tab.disabled {
-        color: #7489a8;
-        background: #f8faff;
-        cursor: default;
     }
 
     .m5-tab-icon {
@@ -75,49 +82,162 @@ Danh sách khách hàng - CRM HULO
     .m5-section-title {
         color: #103b78;
         margin: 0 0 10px;
+        font-size: 24px;
     }
 
-    /* TÌM KIẾM */
-    .m5-search {
+    .m5-section-description {
+        color: #607da8;
+        line-height: 1.7;
+        margin-bottom: 24px;
+    }
+
+    /* ==========================================
+       BỘ LỌC - ĐỒNG BỘ TRANG HẬU MÃI
+       ========================================== */
+
+    .m5-filter-form {
         display: flex;
-        gap: 10px;
-        margin: 25px 0;
+        align-items: flex-end;
+        gap: 12px;
         flex-wrap: wrap;
-        align-items: center;
+
+        width: 100%;
+        padding: 20px 21px;
+
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 13px;
     }
 
-    .m5-search input {
-        flex: 1;
-        min-width: 220px;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
+    .m5-filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .m5-filter-field.search-field {
+        flex: 1.25 1 0;
+    }
+
+    .m5-filter-field label {
+        color: #103b78;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: nowrap;
+    }
+
+    .m5-filter-input,
+    .m5-filter-select {
+        display: block;
+        width: 100%;
+        height: 47px;
+        padding: 10px 12px;
+
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 8px;
+
+        color: #17365d;
+        font-family: inherit;
         font-size: 14px;
     }
 
-    .m5-search button {
-        padding: 12px 24px;
+    .m5-filter-input::placeholder {
+        color: #8a98aa;
+    }
+
+    .m5-filter-input:focus,
+    .m5-filter-select:focus {
+        border-color: #2878e7;
+        outline: 2px solid rgba(40, 120, 231, .12);
+    }
+
+    .m5-filter-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        flex: 0 0 auto;
+        min-height: 47px;
+    }
+
+    .m5-filter-button {
+        height: 47px;
+        padding: 0 20px;
+
         background: #103b78;
-        color: white;
+        color: #fff;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
+
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
         cursor: pointer;
     }
 
-    .m5-search button:hover {
+    .m5-filter-button:hover {
         background: #0a2b57;
     }
 
-    .m5-search a {
-        padding: 12px;
+    .m5-filter-clear {
+        display: inline-flex;
+        align-items: center;
+        height: 47px;
+
         color: #103b78;
+        font-size: 14px;
         text-decoration: underline;
+        white-space: nowrap;
     }
 
-    /* BẢNG KHÁCH HÀNG */
+    .m5-filter-clear:hover {
+        color: #2878e7;
+    }
+
+    /* ==========================================
+       SỐ LƯỢNG KẾT QUẢ
+       ========================================== */
+
+    .m5-result-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+
+        margin-top: 24px;
+        margin-bottom: 16px;
+        color: #103b78;
+        font-size: 14px;
+    }
+
+    .m5-result-count {
+        font-weight: 500;
+    }
+
+    .m5-result-count strong {
+        font-weight: 700;
+    }
+
+    .m5-result-info {
+        color: #607da8;
+        font-size: 13px;
+    }
+
+    /* ==========================================
+       BẢNG DANH SÁCH KHÁCH HÀNG
+       ========================================== */
+
     .m5-table-wrapper {
         overflow-x: auto;
-        margin-top: 20px;
+        border: 1px solid #d5e3fa;
+        border-radius: 10px;
+        background: white;
     }
 
     .m5-table {
@@ -128,15 +248,17 @@ Danh sách khách hàng - CRM HULO
 
     .m5-table th,
     .m5-table td {
-        padding: 14px;
-        border-bottom: 1px solid #ddd;
+        padding: 15px 14px;
+        border-bottom: 1px solid #e1e5ec;
         text-align: left;
         vertical-align: middle;
+        font-size: 14px;
     }
 
     .m5-table th {
         background: #103b78;
         color: white;
+        font-weight: 700;
         white-space: nowrap;
     }
 
@@ -144,17 +266,29 @@ Danh sách khách hàng - CRM HULO
         background: #f2f6fc;
     }
 
+    .m5-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
     .m5-table td {
         color: #17365d;
     }
 
+    .m5-table .customer-name {
+        font-weight: 500;
+    }
+
+    .m5-table .customer-email {
+        overflow-wrap: anywhere;
+    }
+
     .m5-action-btn {
         display: inline-block;
-        padding: 8px 14px;
+        padding: 9px 14px;
         background: #eaf2ff;
         color: #103b78;
         text-decoration: none;
-        border-radius: 6px;
+        border-radius: 7px;
         font-size: 14px;
         font-weight: 600;
         white-space: nowrap;
@@ -166,25 +300,118 @@ Danh sách khách hàng - CRM HULO
     }
 
     .m5-empty {
-        padding: 24px;
+        padding: 38px 20px !important;
         text-align: center !important;
-        color: #666;
+        color: #607da8 !important;
+        line-height: 1.8;
     }
 
-    .m5-back {
-        display: inline-block;
+    /* ==========================================
+       PHÂN TRANG
+       ========================================== */
+
+    .m5-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
         margin-top: 25px;
-        color: #103b78;
-        text-decoration: none;
     }
 
-    .m5-back:hover {
-        text-decoration: underline;
+    .m5-page-link {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+
+        min-width: 39px;
+        height: 39px;
+        padding: 0 12px;
+
+        color: #103b78;
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 7px;
+
+        font-size: 14px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .m5-page-link:hover {
+        background: #eaf2ff;
+    }
+
+    .m5-page-link.current {
+        background: #103b78;
+        color: white;
+        border-color: #103b78;
+        font-weight: 700;
+    }
+
+    .m5-page-link.disabled {
+        color: #9aa8bb;
+        background: #f6f8fc;
+        cursor: default;
+    }
+
+    .m5-page-summary {
+        margin-top: 12px;
+        text-align: center;
+        color: #607da8;
+        font-size: 13px;
+    }
+
+    /* ==========================================
+       RESPONSIVE
+       ========================================== */
+
+    @media (max-width: 1180px) {
+        .m5-filter-field {
+            flex: 1 1 calc(50% - 12px);
+        }
+
+        .m5-filter-field.search-field {
+            flex: 1 1 calc(50% - 12px);
+        }
+
+        .m5-filter-actions {
+            flex: 1 1 100%;
+            justify-content: flex-end;
+        }
     }
 
     @media (max-width: 850px) {
         .m5-tabs {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .m5-customer-list h1 {
+            font-size: 27px;
+        }
+
+        .m5-table {
+            min-width: 780px;
+        }
+    }
+
+    @media (max-width: 580px) {
+        .m5-filter-field,
+        .m5-filter-field.search-field {
+            flex: 1 1 100%;
+        }
+
+        .m5-filter-actions {
+            justify-content: flex-start;
+        }
+
+        .m5-filter-form {
+            padding: 16px;
+        }
+
+        .m5-result-bar {
+            align-items: flex-start;
+            flex-direction: column;
         }
     }
 
@@ -195,7 +422,12 @@ Danh sách khách hàng - CRM HULO
     }
 </style>
 
+
 <div class="content-container m5-customer-list">
+
+    <!-- ======================================
+         TIÊU ĐỀ
+         ====================================== -->
 
     <h1>Quản lý khách hàng</h1>
 
@@ -204,70 +436,332 @@ Danh sách khách hàng - CRM HULO
         mức độ hài lòng và khách hàng thân thiết.
     </p>
 
-    <!-- 4 MỤC CHÍNH MODULE 5 -->
+
+    <!-- ======================================
+         ĐIỀU HƯỚNG MODULE 5
+         ====================================== -->
+
     <nav class="m5-tabs" aria-label="Điều hướng Module 5">
 
-        <a href="{% url 'customers:list' %}"
-           class="m5-tab active"
-           aria-current="page">
+        <a
+            href="{% url 'customers:list' %}"
+            class="m5-tab active"
+            aria-current="page">
+
             <span class="m5-tab-icon">👥</span>
             <span>Danh sách khách hàng</span>
         </a>
 
-        <a href="{% url 'customers:after_sales_overview' %}"
-   class="m5-tab">
-    <span class="m5-tab-icon" aria-hidden="true">💝</span>
-    <span>Hậu mãi &amp; Giữ chân</span>
-    <small>Chương trình chăm sóc và Voucher</small>
-</a>
+        <a
+            href="{% url 'customers:after_sales_overview' %}"
+            class="m5-tab">
 
-        <a href="{% url 'customers:csat_overview' %}" class="m5-tab">
-    <span class="m5-tab-icon">💬</span>
-    <span>CSAT &amp; Chăm sóc</span>
-    <small>Theo dõi đánh giá và chăm sóc</small>
+            <span class="m5-tab-icon" aria-hidden="true">
+                💝
+            </span>
+
+            <span>Hậu mãi &amp; Giữ chân</span>
+
+            <small>
+                Chương trình chăm sóc và Voucher
+            </small>
         </a>
 
-        <a href="{% url 'customers:loyalty_overview' %}" class="m5-tab">
-    <span class="m5-tab-icon" aria-hidden="true">🎁</span>
-    <span>Loyalty</span>
-    <small>Điểm thưởng và hạng thành viên</small>
+        <a
+            href="{% url 'customers:csat_overview' %}"
+            class="m5-tab">
+
+            <span class="m5-tab-icon">💬</span>
+
+            <span>CSAT &amp; Chăm sóc</span>
+
+            <small>
+                Theo dõi đánh giá và chăm sóc
+            </small>
+        </a>
+
+        <a
+            href="{% url 'customers:loyalty_overview' %}"
+            class="m5-tab">
+
+            <span class="m5-tab-icon" aria-hidden="true">
+                🎁
+            </span>
+
+            <span>Loyalty</span>
+
+            <small>
+                Điểm thưởng và hạng thành viên
+            </small>
         </a>
 
     </nav>
 
-    <!-- NỘI DUNG DANH SÁCH KHÁCH HÀNG -->
+
+    <!-- ======================================
+         DANH SÁCH KHÁCH HÀNG
+         ====================================== -->
+
     <h2 class="m5-section-title">
         Danh sách khách hàng
     </h2>
 
-    <p>
+    <p class="m5-section-description">
         Tra cứu và quản lý thông tin khách hàng
         trong hệ thống CRM HULO.
     </p>
 
-    <!-- THANH TÌM KIẾM -->
-    <form method="get"
-          action="{% url 'customers:list' %}"
-          class="m5-search">
 
-        <input
-            type="text"
-            name="q"
-            value="{{ keyword }}"
-            placeholder="Nhập mã, tên hoặc email khách hàng..."
-            aria-label="Tìm kiếm khách hàng"
-        >
+    <!-- ======================================
+         FORM BỘ LỌC NÂNG CAO
+         ====================================== -->
 
-        <button type="submit">
-            Tìm kiếm
-        </button>
+    <form
+        method="get"
+        action="{% url 'customers:list' %}"
+        class="m5-filter-form"
+        role="search">
 
-        <a href="{% url 'customers:list' %}">
-        </a>
+        <!-- Tìm kiếm khách hàng -->
+        <div class="m5-filter-field search-field">
+
+            <label for="filter-keyword">
+                Khách hàng
+            </label>
+
+            <input
+                id="filter-keyword"
+                class="m5-filter-input"
+                type="text"
+                name="q"
+                value="{{ keyword }}"
+                placeholder="Tên, email, SĐT, mã KH..."
+                aria-label="Tìm kiếm khách hàng">
+
+        </div>
+
+
+        <!-- Hạng thành viên -->
+        <div class="m5-filter-field">
+
+            <label for="filter-tier">
+                Hạng thành viên
+            </label>
+
+            <select
+                id="filter-tier"
+                class="m5-filter-select"
+                name="tier">
+
+                <option value="">
+                    Tất cả
+                </option>
+
+                {% for tier in tiers %}
+                    <option
+                        value="{{ tier.pk }}"
+                        {% if tier_id == tier.pk|stringformat:"s" %}
+                            selected
+                        {% endif %}>
+
+                        {{ tier.get_code_display }}
+
+                    </option>
+                {% endfor %}
+
+                <option
+                    value="none"
+                    {% if tier_id == 'none' %}
+                        selected
+                    {% endif %}>
+
+                    Chưa có hạng
+
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Thời gian tạo -->
+        <div class="m5-filter-field">
+
+            <label for="filter-date">
+                Thời gian tạo
+            </label>
+
+            <select
+                id="filter-date"
+                class="m5-filter-select"
+                name="date_range">
+
+                <option
+                    value=""
+                    {% if not date_range %}
+                        selected
+                    {% endif %}>
+                    Tất cả
+                </option>
+
+                <option
+                    value="7"
+                    {% if date_range == '7' %}
+                        selected
+                    {% endif %}>
+                    7 ngày gần đây
+                </option>
+
+                <option
+                    value="30"
+                    {% if date_range == '30' %}
+                        selected
+                    {% endif %}>
+                    30 ngày gần đây
+                </option>
+
+                <option
+                    value="90"
+                    {% if date_range == '90' %}
+                        selected
+                    {% endif %}>
+                    90 ngày gần đây
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Sắp xếp -->
+        <div class="m5-filter-field">
+
+            <label for="filter-sort">
+                Sắp xếp
+            </label>
+
+            <select
+                id="filter-sort"
+                class="m5-filter-select"
+                name="sort">
+
+                <option
+                    value="newest"
+                    {% if sort_by == 'newest' %}
+                        selected
+                    {% endif %}>
+                    Mới nhất
+                </option>
+
+                <option
+                    value="oldest"
+                    {% if sort_by == 'oldest' %}
+                        selected
+                    {% endif %}>
+                    Cũ nhất
+                </option>
+
+                <option
+                    value="name_asc"
+                    {% if sort_by == 'name_asc' %}
+                        selected
+                    {% endif %}>
+                    Tên A-Z
+                </option>
+
+                <option
+                    value="name_desc"
+                    {% if sort_by == 'name_desc' %}
+                        selected
+                    {% endif %}>
+                    Tên Z-A
+                </option>
+
+                <option
+                    value="code_asc"
+                    {% if sort_by == 'code_asc' %}
+                        selected
+                    {% endif %}>
+                    Mã KH tăng dần
+                </option>
+
+                <option
+                    value="code_desc"
+                    {% if sort_by == 'code_desc' %}
+                        selected
+                    {% endif %}>
+                    Mã KH giảm dần
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Nút thao tác -->
+        <div class="m5-filter-actions">
+
+            <button
+                type="submit"
+                class="m5-filter-button">
+
+                Lọc kết quả
+
+            </button>
+
+            <a
+                class="m5-filter-clear"
+                href="{% url 'customers:list' %}">
+
+                Xóa lọc
+
+            </a>
+
+        </div>
 
     </form>
 
-    <!-- BẢNG DANH SÁCH KHÁCH HÀNG -->
+
+    <!-- ======================================
+         THỐNG KÊ KẾT QUẢ
+         ====================================== -->
+
+    <div class="m5-result-bar">
+
+        <div class="m5-result-count">
+
+            <strong>{{ total_results }}</strong>
+            khách hàng phù hợp
+
+        </div>
+
+        <div class="m5-result-info">
+
+            {% if total_results > 0 %}
+
+                Hiển thị
+                {{ page_obj.start_index }}
+                -
+                {{ page_obj.end_index }}
+                trong
+                {{ total_results }}
+                khách hàng
+
+            {% else %}
+
+                Không có kết quả phù hợp
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================
+         BẢNG DANH SÁCH KHÁCH HÀNG
+         ====================================== -->
+
     <div class="m5-table-wrapper">
 
         <table class="m5-table">
@@ -287,42 +781,60 @@ Danh sách khách hàng - CRM HULO
 
                 {% for customer in customers %}
 
-                <tr>
-                    <td>
-                        {{ customer.ma_khach_hang }}
-                    </td>
+                    <tr>
 
-                    <td>
-                        {{ customer.ho_ten }}
-                    </td>
+                        <td>
+                            {{ customer.ma_khach_hang }}
+                        </td>
 
-                    <td>
-                        {{ customer.email }}
-                    </td>
+                        <td class="customer-name">
+                            {{ customer.ho_ten }}
+                        </td>
 
-                    <td>
-                        {{ customer.so_dien_thoai|default:"Chưa cập nhật" }}
-                    </td>
+                        <td class="customer-email">
+                            {{ customer.email }}
+                        </td>
 
-                    <td>
-                        {{ customer.thoi_diem_tao|date:"d/m/Y" }}
-                    </td>
+                        <td>
+                            {{ customer.so_dien_thoai|default:"Chưa cập nhật" }}
+                        </td>
 
-                    <td>
-                        <a class="m5-action-btn"
-                           href="{% url 'customers:detail' customer.ma_khach_hang %}">
-                            Xem hồ sơ
-                        </a>
-                    </td>
-                </tr>
+                        <td>
+                            {{ customer.thoi_diem_tao|date:"d/m/Y" }}
+                        </td>
+
+                        <td>
+                            <a
+                                class="m5-action-btn"
+                                href="{% url 'customers:detail' customer.ma_khach_hang %}">
+
+                                Xem hồ sơ
+
+                            </a>
+                        </td>
+
+                    </tr>
 
                 {% empty %}
 
-                <tr>
-                    <td colspan="6" class="m5-empty">
-                        Không tìm thấy khách hàng phù hợp.
-                    </td>
-                </tr>
+                    <tr>
+                        <td
+                            colspan="6"
+                            class="m5-empty">
+
+                            Không tìm thấy khách hàng phù hợp
+                            với các điều kiện lọc.
+
+                            {% if has_filters %}
+                                <div style="margin-top: 12px;">
+                                    <a href="{% url 'customers:list' %}">
+                                        Xóa bộ lọc để xem tất cả khách hàng
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                        </td>
+                    </tr>
 
                 {% endfor %}
 
@@ -332,6 +844,112 @@ Danh sách khách hàng - CRM HULO
 
     </div>
 
+
+    <!-- ======================================
+         PHÂN TRANG
+         ====================================== -->
+
+    {% if page_obj.paginator.num_pages > 1 %}
+
+        <nav
+            class="m5-pagination"
+            aria-label="Phân trang danh sách khách hàng">
+
+            <!-- Trang đầu -->
+            {% if page_obj.has_previous %}
+
+                <a
+                    class="m5-page-link"
+                    href="?page=1{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+                    Đầu
+                </a>
+
+                <a
+                    class="m5-page-link"
+                    href="?page={{ page_obj.previous_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+                    Trước
+                </a>
+
+            {% else %}
+
+                <span class="m5-page-link disabled">
+                    Đầu
+                </span>
+
+                <span class="m5-page-link disabled">
+                    Trước
+                </span>
+
+            {% endif %}
+
+
+            <!-- Các trang -->
+            {% for number in page_obj.paginator.page_range %}
+
+                {% if number == page_obj.number %}
+
+                    <span
+                        class="m5-page-link current"
+                        aria-current="page">
+
+                        {{ number }}
+
+                    </span>
+
+                {% elif number >= page_obj.number|add:"-2" and number <= page_obj.number|add:"2" %}
+
+                    <a
+                        class="m5-page-link"
+                        href="?page={{ number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+
+                        {{ number }}
+
+                    </a>
+
+                {% endif %}
+
+            {% endfor %}
+
+
+            <!-- Trang cuối -->
+            {% if page_obj.has_next %}
+
+                <a
+                    class="m5-page-link"
+                    href="?page={{ page_obj.next_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+
+                    Sau
+
+                </a>
+
+                <a
+                    class="m5-page-link"
+                    href="?page={{ page_obj.paginator.num_pages }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+
+                    Cuối
+
+                </a>
+
+            {% else %}
+
+                <span class="m5-page-link disabled">
+                    Sau
+                </span>
+
+                <span class="m5-page-link disabled">
+                    Cuối
+                </span>
+
+            {% endif %}
+
+        </nav>
+
+        <p class="m5-page-summary">
+            Trang {{ page_obj.number }}
+            / {{ page_obj.paginator.num_pages }}
+        </p>
+
+    {% endif %}
 
 </div>
 

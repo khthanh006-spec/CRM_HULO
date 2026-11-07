@@ -21,6 +21,16 @@ db.sqlite3-shm
 db.sqlite3-wal
 *.sqlite3-journal
 
+# Local SQLite database backups
+db.sqlite3.*
+*.sqlite3.bak
+*.sqlite3.backup
+backups/
+
+# Source code and template backups
+*.bak
+*.backup
+
 # IDE
 .idea/
 .vscode/
@@ -38,11 +48,8 @@ Thumbs.db
 .coverage
 htmlcov/
 
-# Uploaded media (if used later)
+# Uploaded media
 media/
-
-# Local database backups
-backups/
 
 # Ticket evidence attachments
 ticket_attachments/

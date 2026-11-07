@@ -1,0 +1,652 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Tổng quan công việc - Thẩm định | HULOECOM
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .assessor-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 22px 18px 45px;
+        color: #17365d;
+    }
+
+    .assessor-dashboard * {
+        box-sizing: border-box;
+    }
+
+    .assessor-dashboard .hero {
+        background: #dcecff;
+        border-radius: 17px;
+        padding: 27px 30px;
+        margin-bottom: 20px;
+    }
+
+    .assessor-dashboard .hero-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #176cc1;
+        margin-bottom: 8px;
+    }
+
+    .assessor-dashboard .hero h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #103b78;
+        margin: 0 0 8px;
+    }
+
+    .assessor-dashboard .hero p {
+        font-size: 13px;
+        color: #607da8;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .assessor-dashboard .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .assessor-dashboard .stat-card {
+        background: #fff;
+        border: 1px solid #dbe7f6;
+        border-radius: 13px;
+        padding: 19px;
+        min-height: 110px;
+    }
+
+    .assessor-dashboard .stat-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .assessor-dashboard .stat-label {
+        color: #607da8;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .assessor-dashboard .stat-icon {
+        font-size: 19px;
+    }
+
+    .assessor-dashboard .stat-value {
+        font-size: 29px;
+        font-weight: 700;
+        color: #103b78;
+        margin: 13px 0 5px;
+        line-height: 1;
+    }
+
+    .assessor-dashboard .stat-note {
+        color: #7489a8;
+        font-size: 12px;
+    }
+
+    .assessor-dashboard .section-box {
+        background: #fff;
+        border: 1px solid #dbe7f6;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .assessor-dashboard .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .assessor-dashboard .section-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #103b78;
+        margin: 0;
+    }
+
+    .assessor-dashboard .section-desc {
+        font-size: 12px;
+        color: #7489a8;
+        margin: 5px 0 0;
+    }
+
+    .assessor-dashboard .summary-pills {
+        display: flex;
+        gap: 9px;
+        flex-wrap: wrap;
+    }
+
+    .assessor-dashboard .status-pill {
+        display: inline-block;
+        border-radius: 20px;
+        padding: 6px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .assessor-dashboard .pill-blue {
+        color: #176cc1;
+        background: #e6f0ff;
+    }
+
+    .assessor-dashboard .pill-orange {
+        color: #a66c16;
+        background: #fff3dd;
+    }
+
+    .assessor-dashboard .pill-red {
+        color: #bc3547;
+        background: #fde8eb;
+    }
+
+    .assessor-dashboard .pill-green {
+        color: #24754c;
+        background: #e5f5eb;
+    }
+
+    .assessor-dashboard .pill-gray {
+        color: #62748a;
+        background: #eef2f6;
+    }
+
+    .assessor-dashboard .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #e2ebf6;
+        border-radius: 11px;
+    }
+
+    .assessor-dashboard table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+    }
+
+    .assessor-dashboard th,
+    .assessor-dashboard td {
+        text-align: left;
+        padding: 14px 12px;
+        font-size: 12px;
+        line-height: 1.5;
+        vertical-align: middle;
+        border-bottom: 1px solid #e7eef8;
+    }
+
+    .assessor-dashboard th {
+        background: #edf5ff;
+        color: #103b78;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .assessor-dashboard tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .assessor-dashboard tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .assessor-dashboard .case-link {
+        color: #176cc1;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .assessor-dashboard .case-link:hover {
+        text-decoration: underline;
+    }
+
+    .assessor-dashboard .muted {
+        color: #7489a8;
+        font-size: 11px;
+        margin-top: 4px;
+    }
+
+    .assessor-dashboard .empty-state {
+        text-align: center;
+        padding: 30px 18px;
+        color: #7489a8;
+        font-size: 13px;
+    }
+
+    .assessor-dashboard .quick-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+    }
+
+    .assessor-dashboard .quick-link {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid #dbe7f6;
+        border-radius: 10px;
+        color: #17365d;
+        background: #fff;
+        transition: background .2s, border-color .2s;
+    }
+
+    .assessor-dashboard .quick-link:hover {
+        background: #eef5ff;
+        border-color: #a9cff6;
+        color: #176cc1;
+    }
+
+    .assessor-dashboard .quick-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: #edf5ff;
+        color: #176cc1;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .assessor-dashboard .section-footer {
+        margin-top: 15px;
+        text-align: right;
+    }
+
+    .assessor-dashboard .view-all {
+        text-decoration: none;
+        color: #176cc1;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    @media (max-width: 650px) {
+        .assessor-dashboard .stats-grid,
+        .assessor-dashboard .quick-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .assessor-dashboard .hero {
+            padding: 22px;
+        }
+
+        .assessor-dashboard .hero h1 {
+            font-size: 21px;
+        }
+
+        .assessor-dashboard .section-box {
+            padding: 14px;
+        }
+    }
+</style>
+
+<div class="assessor-dashboard">
+
+    <!-- LỜI CHÀO -->
+    <section class="hero">
+        <div class="hero-label">
+            TỔNG QUAN CÔNG VIỆC THẨM ĐỊNH
+        </div>
+
+        <h1>
+            Xin chào, {{ staff.ho_ten }}!
+        </h1>
+
+        <p>
+            Theo dõi hồ sơ được phân công, tiến độ thẩm định
+            và kết quả xử lý tại một nơi.
+        </p>
+    </section>
+
+    <!-- BỐN THẺ THỐNG KÊ -->
+    <section class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-heading">
+                <span class="stat-label">
+                    Hồ sơ được giao
+                </span>
+                <span class="stat-icon" style="color:#176cc1;">
+                    ▤
+                </span>
+            </div>
+
+            <div class="stat-value">
+                {{ stats.total|default:0 }}
+            </div>
+
+            <div class="stat-note">
+                Tổng hồ sơ bạn phụ trách
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-heading">
+                <span class="stat-label">
+                    Chờ tiếp nhận
+                </span>
+                <span class="stat-icon" style="color:#7957db;">
+                    ▣
+                </span>
+            </div>
+
+            <div class="stat-value">
+                {{ stats.waiting|default:0 }}
+            </div>
+
+            <div class="stat-note">
+                Hồ sơ cần tiếp nhận
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-heading">
+                <span class="stat-label">
+                    Đang thẩm định
+                </span>
+                <span class="stat-icon" style="color:#e29123;">
+                    ◷
+                </span>
+            </div>
+
+            <div class="stat-value">
+                {{ stats.processing|default:0 }}
+            </div>
+
+            <div class="stat-note">
+                Hồ sơ đang trong quá trình xử lý
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-heading">
+                <span class="stat-label">
+                    Chờ bổ sung
+                </span>
+                <span class="stat-icon" style="color:#d53a4a;">
+                    ↺
+                </span>
+            </div>
+
+            <div class="stat-value">
+                {{ stats.supplement|default:0 }}
+            </div>
+
+            <div class="stat-note">
+                Hồ sơ cần bổ sung thông tin
+            </div>
+        </div>
+
+    </section>
+
+    <!-- HỒ SƠ CẦN ƯU TIÊN -->
+    <section class="section-box">
+
+        <div class="section-heading">
+            <div>
+                <h2 class="section-title">
+                    Hồ sơ cần ưu tiên xử lý
+                </h2>
+
+                <p class="section-desc">
+                    Các hồ sơ chưa kết luận, sắp theo thời điểm tạo.
+                </p>
+            </div>
+
+            <div class="summary-pills">
+                <span class="status-pill pill-green">
+                    Đã kết luận: {{ stats.concluded|default:0 }}
+                </span>
+
+                <span class="status-pill pill-orange">
+                    Chờ duyệt hoàn tiền:
+                    {{ waiting_approval_count|default:0 }}
+                </span>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hồ sơ</th>
+                        <th>Khách hàng</th>
+                        <th>CSKH phụ trách</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for case in priority_cases %}
+                    <tr>
+                        <td>
+                            <a
+                                class="case-link"
+                                href="{% url 'disputes:detail' case.pk %}"
+                            >
+                                Hồ sơ #{{ case.pk }}
+                            </a>
+
+                            <div class="muted">
+                                Ticket:
+                                {{ case.ma_ticket.ma_ticket }}
+                            </div>
+
+                            <div class="muted">
+                                {{ case.ma_ticket.tieu_de|truncatechars:45 }}
+                            </div>
+                        </td>
+
+                        <td>
+                            {{ case.ma_ticket.khach_hang.ho_ten }}
+                        </td>
+
+                        <td>
+                            {% if case.ma_ticket.nguoi_phu_trach %}
+                                {{ case.ma_ticket.nguoi_phu_trach.ho_ten }}
+                            {% else %}
+                                Chưa phân công
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if case.trang_thai == 'CHO_TIEP_NHAN' %}
+                                <span class="status-pill pill-blue">
+                                    Chờ tiếp nhận
+                                </span>
+                            {% elif case.trang_thai == 'DANG_THAM_DINH' %}
+                                <span class="status-pill pill-orange">
+                                    Đang thẩm định
+                                </span>
+                            {% elif case.trang_thai == 'CHO_BO_SUNG' %}
+                                <span class="status-pill pill-red">
+                                    Chờ bổ sung
+                                </span>
+                            {% elif case.trang_thai == 'DA_KET_LUAN' %}
+                                <span class="status-pill pill-green">
+                                    Đã kết luận
+                                </span>
+                            {% else %}
+                                {{ case.get_trang_thai_display }}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ case.thoi_diem_tao|date:"d/m/Y H:i" }}
+                        </td>
+
+                        <td>
+                            <a
+                                class="case-link"
+                                href="{% url 'disputes:detail' case.pk %}"
+                            >
+                                Xem chi tiết →
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                ☑ Hiện không có hồ sơ cần xử lý.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-footer">
+            <a
+                class="view-all"
+                href="{% url 'disputes:home' %}"
+            >
+                Xem tất cả hồ sơ →
+            </a>
+        </div>
+
+    </section>
+
+    <!-- THAO TÁC NHANH -->
+    <section class="section-box">
+
+        <div class="section-heading">
+            <div>
+                <h2 class="section-title">
+                    Thao tác nhanh
+                </h2>
+
+                <p class="section-desc">
+                    Truy cập các công việc thẩm định thường dùng.
+                </p>
+            </div>
+        </div>
+
+        <div class="quick-grid">
+
+            <a
+                href="{% url 'disputes:home' %}"
+                class="quick-link"
+            >
+                <span class="quick-icon">☷</span>
+                Danh sách hồ sơ
+            </a>
+
+            <a
+                href="{% url 'disputes:home' %}?trang_thai=CHO_TIEP_NHAN"
+                class="quick-link"
+            >
+                <span class="quick-icon">▣</span>
+                Hồ sơ chờ tiếp nhận
+            </a>
+
+            <a
+                href="{% url 'disputes:home' %}?trang_thai=DANG_THAM_DINH"
+                class="quick-link"
+            >
+                <span class="quick-icon">◷</span>
+                Hồ sơ đang thẩm định
+            </a>
+
+            <a
+                href="{% url 'disputes:home' %}?trang_thai=CHO_BO_SUNG"
+                class="quick-link"
+            >
+                <span class="quick-icon">↺</span>
+                Hồ sơ chờ bổ sung
+            </a>
+
+        </div>
+
+    </section>
+
+    <!-- HỒ SƠ GẦN ĐÂY -->
+    <section class="section-box">
+
+        <div class="section-heading">
+            <div>
+                <h2 class="section-title">
+                    Hồ sơ của tôi gần đây
+                </h2>
+
+                <p class="section-desc">
+                    Các hồ sơ được cập nhật gần nhất.
+                </p>
+            </div>
+
+            <span class="status-pill pill-blue">
+                Tổng được giao: {{ stats.total|default:0 }}
+            </span>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hồ sơ</th>
+                        <th>Ticket nguồn</th>
+                        <th>Trạng thái</th>
+                        <th>Cập nhật gần nhất</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for case in recent_cases %}
+                    <tr>
+                        <td>
+                            <a
+                                class="case-link"
+                                href="{% url 'disputes:detail' case.pk %}"
+                            >
+                                Hồ sơ #{{ case.pk }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ case.ma_ticket.ma_ticket }}
+                        </td>
+
+                        <td>
+                            {{ case.get_trang_thai_display }}
+                        </td>
+
+                        <td>
+                            {{ case.thoi_diem_cap_nhat|date:"d/m/Y H:i" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                Bạn chưa được phân công hồ sơ nào.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

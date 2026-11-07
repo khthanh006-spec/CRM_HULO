@@ -2,7 +2,14 @@
 from urllib.parse import urlencode
 
 from django.contrib import messages
-from django.db.models import Q, Case, When, Value, IntegerField, Count
+from django.db.models import (
+    Q,
+    Case,
+    When,
+    Value,
+    IntegerField,
+    Count,
+)
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -18,13 +25,22 @@ from .models import (
 def support_home(request):
     """
     Trang Help Center tích hợp M1 FAQ và M2 Chatbot.
+
+    Bổ sung:
+    - Kiểm tra yêu cầu bổ sung minh chứng từ CSKH.
+    - Chỉ lấy yêu cầu của khách hàng đang đăng nhập.
+    - Chỉ lấy yêu cầu PENDING thuộc Ticket IN_PROGRESS.
+    - Truyền thông báo sang support/home.html.
     """
 
     keyword = request.GET.get("q", "").strip()
     category_id = request.GET.get("category", "").strip()
     faq_id = request.GET.get("faq", "").strip()
 
-    # 1. Danh mục FAQ
+    # ==========================================
+    # 1. DANH MỤC FAQ
+    # ==========================================
+
     categories = FAQCategory.objects.filter(
         dang_hien_thi=True
     ).annotate(
@@ -38,13 +54,19 @@ def support_home(request):
         )
     ).order_by("thu_tu_hien_thi", "id")
 
-    # 2. FAQ đang hiển thị
+    # ==========================================
+    # 2. FAQ ĐANG HIỂN THỊ
+    # ==========================================
+
     faq_co_so = FAQArticle.objects.filter(
         dang_hien_thi=True,
         danh_muc__dang_hien_thi=True
     ).select_related("danh_muc")
 
-    # 3. FAQ phổ biến
+    # ==========================================
+    # 3. FAQ PHỔ BIẾN
+    # ==========================================
+
     faq_pho_bien = faq_co_so.annotate(
         so_luot_xem=Count("interactions")
     ).order_by(
@@ -53,7 +75,10 @@ def support_home(request):
         "-id"
     )[:4]
 
-    # 4. FAQ gợi ý cá nhân hóa
+    # ==========================================
+    # 4. FAQ GỢI Ý CÁ NHÂN HÓA
+    # ==========================================
+
     ten_goi_y = "Câu hỏi được quan tâm"
     faq_goi_y = faq_pho_bien
 
@@ -79,17 +104,24 @@ def support_home(request):
                 ten_goi_y = "Câu hỏi được quan tâm"
                 faq_goi_y = faq_pho_bien
 
-    # 5. Lọc FAQ theo danh mục
+    # ==========================================
+    # 5. LỌC FAQ THEO DANH MỤC
+    # ==========================================
+
     faq_queryset = faq_co_so
 
     if category_id.isdigit():
         faq_queryset = faq_queryset.filter(
             danh_muc_id=int(category_id)
         )
+
     elif category_id:
         faq_queryset = faq_queryset.none()
 
-    # 6. Tìm kiếm FAQ
+    # ==========================================
+    # 6. TÌM KIẾM FAQ
+    # ==========================================
+
     if keyword:
         faq_queryset = faq_queryset.filter(
             Q(cau_hoi__icontains=keyword)
@@ -101,7 +133,10 @@ def support_home(request):
         "-id"
     )
 
-    # 7. FAQ được khách hàng lựa chọn
+    # ==========================================
+    # 7. FAQ ĐƯỢC KHÁCH HÀNG LỰA CHỌN
+    # ==========================================
+
     selected_faq = None
 
     if faq_id.isdigit():
@@ -119,21 +154,46 @@ def support_home(request):
                 )
             )
 
-    # 8. Hiển thị tối đa 4 FAQ
+    # ==========================================
+    # 8. HIỂN THỊ TỐI ĐA 4 FAQ
+    # ==========================================
+
     faqs = faq_queryset[:4]
 
-    # 9. Lịch sử Chatbot M2
+    # ==========================================
+    # 9. LỊCH SỬ CHATBOT M2
+    # ==========================================
+
     tin_nhan = []
 
+    # ==========================================
+    # 10. THÔNG BÁO YÊU CẦU BỔ SUNG MINH CHỨNG
+    # ==========================================
+
+    # Danh sách thông báo chưa hoàn thành.
+    # Chỉ được hiển thị cho chủ sở hữu Ticket.
+    evidence_requests_pending = []
+
+    # Yêu cầu mới nhất, dùng để hiển thị
+    # thông báo nổi bật trên trang Help Center.
+    evidence_request_notification = None
+
     if request.user.is_authenticated:
+
         from customers.models import Customer
         from chatbot.models import ChatSession
+        from tickets.models import TicketEvidenceRequest
 
         khach_hang = Customer.objects.filter(
             ma_tai_khoan=request.user
         ).first()
 
         if khach_hang is not None:
+
+            # ==================================
+            # 10.1. LỊCH SỬ CHATBOT M2
+            # ==================================
+
             phien_chat = ChatSession.objects.filter(
                 ma_khach_hang=khach_hang,
                 trang_thai="DANG_CHAT"
@@ -154,7 +214,41 @@ def support_home(request):
                     "ma_tin_nhan"
                 )
 
-    # 10. Truyền dữ liệu sang template
+            # ==================================
+            # 10.2. YÊU CẦU ĐANG CHỜ BỔ SUNG
+            # ==================================
+
+            # Điều kiện truy vấn:
+            # - Ticket thuộc đúng tài khoản hiện tại.
+            # - Ticket đang trong quá trình xử lý.
+            # - Yêu cầu chưa được khách hàng đáp ứng.
+            # - Tin nhắn yêu cầu phải là PUBLIC.
+
+            evidence_requests_pending = list(
+                TicketEvidenceRequest.objects.filter(
+                    ticket__khach_hang=khach_hang,
+                    ticket__trang_thai="IN_PROGRESS",
+                    trang_thai="PENDING",
+                    tin_nhan_yeu_cau__loai_tin_nhan="PUBLIC",
+                ).select_related(
+                    "ticket",
+                    "tin_nhan_yeu_cau",
+                    "tin_nhan_yeu_cau__nguoi_gui",
+                ).order_by(
+                    "-thoi_diem_tao",
+                    "-pk",
+                )[:10]
+            )
+
+            if evidence_requests_pending:
+                evidence_request_notification = (
+                    evidence_requests_pending[0]
+                )
+
+    # ==========================================
+    # 11. TRUYỀN DỮ LIỆU SANG TEMPLATE
+    # ==========================================
+
     context = {
         "categories": categories,
         "faqs": faqs,
@@ -164,6 +258,17 @@ def support_home(request):
         "selected_category": category_id,
         "selected_faq": selected_faq,
         "tin_nhan": tin_nhan,
+
+        # Dữ liệu dành cho thông báo bổ sung minh chứng.
+        "evidence_requests_pending": (
+            evidence_requests_pending
+        ),
+        "evidence_request_notification": (
+            evidence_request_notification
+        ),
+        "evidence_requests_pending_count": (
+            len(evidence_requests_pending)
+        ),
     }
 
     return render(
@@ -247,6 +352,7 @@ def faq_feedback(request, faq_id):
             request,
             "Đánh giá không hợp lệ. Vui lòng thử lại."
         )
+
     else:
         gia_tri_bool = gia_tri == "true"
 
@@ -258,6 +364,7 @@ def faq_feedback(request, faq_id):
                     "huu_ich": gia_tri_bool
                 }
             )
+
         else:
             feedback_ids = request.session.get(
                 "faq_feedback_ids",
@@ -278,6 +385,7 @@ def faq_feedback(request, faq_id):
             if feedback is not None:
                 feedback.huu_ich = gia_tri_bool
                 feedback.save(update_fields=["huu_ich"])
+
             else:
                 feedback = FAQFeedback.objects.create(
                     faq=faq,
@@ -286,7 +394,9 @@ def faq_feedback(request, faq_id):
                 )
 
                 feedback_ids[str(faq.id)] = feedback.pk
-                request.session["faq_feedback_ids"] = feedback_ids
+                request.session["faq_feedback_ids"] = (
+                    feedback_ids
+                )
 
             danh_sach_da_danh_gia = request.session.get(
                 "faq_da_danh_gia",
@@ -298,7 +408,9 @@ def faq_feedback(request, faq_id):
             ]:
                 danh_sach_da_danh_gia.append(faq.id)
 
-            request.session["faq_da_danh_gia"] = danh_sach_da_danh_gia
+            request.session["faq_da_danh_gia"] = (
+                danh_sach_da_danh_gia
+            )
 
         if gia_tri_bool:
             messages.success(
@@ -307,6 +419,7 @@ def faq_feedback(request, faq_id):
                 "Chúng tôi rất vui vì thông tin này "
                 "đã giúp ích cho bạn!"
             )
+
         else:
             messages.warning(
                 request,

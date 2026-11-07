@@ -1,18 +1,18 @@
 
 """
-MODULE 3 - TICKET ATTACHMENT VIEWS
+TICKET ATTACHMENT VIEWS - HULOECOM
 
 Chức năng:
-- Xem trực tiếp ảnh bằng chứng.
-- Tải ảnh bằng chứng về máy.
-- Kiểm tra quyền truy cập trước khi mở file.
+- Xem ảnh minh chứng JPG, JPEG, PNG.
+- Tải ảnh hoặc tài liệu PDF.
+- Kiểm tra quyền truy cập trước khi mở tệp.
 
 Phân quyền:
-- Customer: Chỉ xem Ticket của mình.
+- CUSTOMER: Chỉ tệp thuộc Ticket của mình.
 - CSKH: Ticket được giao hoặc NEW chưa phân công.
-- MANAGER: Được xem.
-- Superuser: Được xem.
-- ASSESSOR: Chưa cấp quyền tự động.
+- MANAGER: Được xem toàn bộ minh chứng.
+- ADMIN: Không truy cập qua chức năng nghiệp vụ.
+- ASSESSOR: Chưa cấp quyền qua endpoint này.
 """
 
 from pathlib import Path
@@ -26,15 +26,25 @@ from django.http import (
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET
 
+from accounts.permissions import get_user_role
 from customers.models import Customer
 
 from .models import TicketAttachment
 
 
+CONTENT_TYPES = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".pdf": "application/pdf",
+}
+
+
 def _lay_bang_chung_co_quyen(request, pk):
     """
-    Lấy bằng chứng và kiểm tra quyền truy cập.
-    Dùng chung cho View và Download.
+    Lấy tệp minh chứng và kiểm tra quyền truy cập.
+
+    Dùng chung cho xem và tải tệp.
     """
 
     bang_chung = get_object_or_404(
@@ -49,19 +59,27 @@ def _lay_bang_chung_co_quyen(request, pk):
     ticket = bang_chung.ticket
     user = request.user
 
-    staff = getattr(
-        user,
-        "staff_profile",
-        None,
-    )
+    role = get_user_role(user)
 
-    if user.is_superuser:
-        duoc_phep = True
+    # ADMIN không truy cập endpoint nghiệp vụ.
+    if role == "ADMIN":
+        return None
 
-    elif staff is not None and staff.vai_tro == "MANAGER":
-        duoc_phep = True
+    # MANAGER được xem toàn bộ minh chứng.
+    if role == "MANAGER":
+        return bang_chung
 
-    elif staff is not None and staff.vai_tro == "CSKH":
+    # CSKH chỉ xem Ticket thuộc quyền xử lý.
+    if role == "CSKH":
+
+        staff = getattr(
+            user,
+            "staff_profile",
+            None,
+        )
+
+        if staff is None or staff.vai_tro != "CSKH":
+            return None
 
         ticket_moi = (
             ticket.trang_thai == "NEW"
@@ -72,41 +90,42 @@ def _lay_bang_chung_co_quyen(request, pk):
             ticket.nguoi_phu_trach_id == staff.pk
         )
 
-        duoc_phep = (
-            ticket_moi or ticket_duoc_giao
-        )
+        if ticket_moi or ticket_duoc_giao:
+            return bang_chung
 
-    else:
-        duoc_phep = Customer.objects.filter(
+        return None
+
+    # CUSTOMER chỉ xem Ticket của chính mình.
+    if role == "CUSTOMER":
+
+        la_chu_ticket = Customer.objects.filter(
             ma_tai_khoan=user,
             pk=ticket.khach_hang_id,
         ).exists()
 
-    if not duoc_phep:
+        if la_chu_ticket:
+            return bang_chung
+
         return None
 
-    return bang_chung
+    # Các vai trò khác chưa được cấp quyền.
+    return None
 
 
 def _tra_file_bang_chung(bang_chung, tai_xuong):
     """
-    Mở file từ storage riêng của M3.
+    Trả về tệp từ storage.
 
-    tai_xuong=False: Xem trực tiếp.
-    tai_xuong=True: Tải file.
+    - Ảnh JPG, JPEG, PNG có thể xem trực tiếp.
+    - PDF được tải xuống.
+    - Không phục vụ định dạng ngoài danh sách hỗ trợ.
     """
 
-    if not bang_chung.tep_dinh_kem.name:
-        raise Http404(
-            "Tệp bằng chứng không tồn tại."
-        )
+    file_field = bang_chung.tep_dinh_kem
 
-    try:
-        tep = bang_chung.tep_dinh_kem.open("rb")
-
-    except (FileNotFoundError, OSError):
+    if not file_field.name:
         raise Http404(
-            "Tệp bằng chứng không tồn tại."
+            "Tệp minh chứng không tồn tại."
         )
 
     ten_tep = (
@@ -114,18 +133,46 @@ def _tra_file_bang_chung(bang_chung, tai_xuong):
             bang_chung.ten_tep_goc.replace("\\", "/")
         ).name
         if bang_chung.ten_tep_goc
-        else "bang_chung.jpg"
+        else Path(file_field.name).name
     )
+
+    phan_mo_rong = Path(
+        file_field.name
+    ).suffix.lower()
+
+    content_type = CONTENT_TYPES.get(
+        phan_mo_rong
+    )
+
+    if content_type is None:
+        raise Http404(
+            "Định dạng tệp chưa được hỗ trợ."
+        )
+
+    # PDF tải xuống thay vì hiển thị trực tiếp.
+    download = (
+        tai_xuong
+        or phan_mo_rong == ".pdf"
+    )
+
+    try:
+        tep = file_field.open("rb")
+
+    except (FileNotFoundError, OSError):
+        raise Http404(
+            "Tệp minh chứng không tồn tại."
+        )
 
     response = FileResponse(
         tep,
-        content_type="image/jpeg",
-        as_attachment=tai_xuong,
+        content_type=content_type,
+        as_attachment=download,
         filename=ten_tep,
     )
 
     response["Cache-Control"] = "private, no-store"
     response["X-Content-Type-Options"] = "nosniff"
+    response["X-Frame-Options"] = "DENY"
 
     return response
 
@@ -134,7 +181,8 @@ def _tra_file_bang_chung(bang_chung, tai_xuong):
 @require_GET
 def ticket_attachment_view(request, pk):
     """
-    Xem ảnh trực tiếp sau khi kiểm tra quyền.
+    Xem ảnh minh chứng sau khi kiểm tra quyền.
+    PDF sẽ được tải xuống.
     """
 
     bang_chung = _lay_bang_chung_co_quyen(
@@ -144,7 +192,7 @@ def ticket_attachment_view(request, pk):
 
     if bang_chung is None:
         return HttpResponseForbidden(
-            "Bạn không có quyền xem bằng chứng này."
+            "Bạn không có quyền xem minh chứng này."
         )
 
     return _tra_file_bang_chung(
@@ -157,7 +205,7 @@ def ticket_attachment_view(request, pk):
 @require_GET
 def ticket_attachment_download(request, pk):
     """
-    Tải ảnh về máy sau khi kiểm tra quyền.
+    Tải tệp minh chứng sau khi kiểm tra quyền.
     """
 
     bang_chung = _lay_bang_chung_co_quyen(
@@ -167,7 +215,7 @@ def ticket_attachment_download(request, pk):
 
     if bang_chung is None:
         return HttpResponseForbidden(
-            "Bạn không có quyền tải bằng chứng này."
+            "Bạn không có quyền tải minh chứng này."
         )
 
     return _tra_file_bang_chung(

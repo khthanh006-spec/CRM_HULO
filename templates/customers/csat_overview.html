@@ -1,26 +1,43 @@
+
 {% extends 'base.html' %}
 
-{% block title %}CSAT & Chăm sóc - CRM HULO{% endblock %}
+{% block title %}
+CSAT & Chăm sóc - CRM HULO
+{% endblock %}
 
 {% block content %}
 
 <style>
+    /* ==========================================
+       MODULE 5 - CSAT & CHĂM SÓC
+       ========================================== */
+
     .m5-csat-overview {
         max-width: 1200px;
         margin: 0 auto;
+        color: #103b78;
+    }
+
+    .m5-csat-overview * {
+        box-sizing: border-box;
     }
 
     .m5-csat-overview h1 {
         color: #103b78;
         margin-bottom: 10px;
+        font-size: 32px;
     }
 
     .m5-csat-overview .m5-description {
         color: #607da8;
         margin-bottom: 25px;
+        line-height: 1.7;
     }
 
-    /* THỐNG KÊ */
+    /* ==========================================
+       THẺ THỐNG KÊ CSAT
+       ========================================== */
+
     .m5-csat-overview .m5-stats {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -47,52 +64,157 @@
         font-weight: 700;
     }
 
-    .m5-csat-overview .m5-stat-card.warning .m5-stat-value {
+    .m5-csat-overview .m5-stat-card.warning
+    .m5-stat-value {
         color: #c45a21;
     }
 
-    /* TÌM KIẾM */
-    .m5-csat-overview .m5-search {
+    /* ==========================================
+       BỘ LỌC NÂNG CAO
+       ĐỒNG BỘ VỚI TRANG HẬU MÃI
+       ========================================== */
+
+    .m5-csat-overview .m5-filter-form {
         display: flex;
-        gap: 10px;
-        margin: 25px 0;
+        align-items: flex-end;
+        gap: 12px;
         flex-wrap: wrap;
-        align-items: center;
+
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 13px;
+
+        padding: 20px 21px;
+        margin: 25px 0 20px;
+        width: 100%;
     }
 
-    .m5-csat-overview .m5-search input {
-        flex: 1;
+    .m5-csat-overview .m5-filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        flex: 1 1 0;
         min-width: 0;
+    }
+
+    .m5-csat-overview .m5-filter-field.search-field {
+        flex: 1.3 1 0;
+    }
+
+    .m5-csat-overview .m5-filter-field label {
+        color: #103b78;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: nowrap;
+    }
+
+    .m5-csat-overview .m5-filter-input,
+    .m5-csat-overview .m5-filter-select {
+        display: block;
         width: 100%;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
+        height: 47px;
+        padding: 10px 12px;
+
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 8px;
+
+        color: #17365d;
+        font-family: inherit;
         font-size: 14px;
     }
 
-    .m5-csat-overview .m5-search button {
-        padding: 12px 24px;
+    .m5-csat-overview .m5-filter-input::placeholder {
+        color: #8a98aa;
+    }
+
+    .m5-csat-overview .m5-filter-input:focus,
+    .m5-csat-overview .m5-filter-select:focus {
+        border-color: #2878e7;
+        outline: 2px solid rgba(40, 120, 231, .12);
+    }
+
+    .m5-csat-overview .m5-filter-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        flex: 0 0 auto;
+        min-height: 47px;
+    }
+
+    .m5-csat-overview .m5-filter-button {
+        height: 47px;
+        padding: 0 20px;
+
         background: #103b78;
         color: #fff;
+
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
+
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
         cursor: pointer;
     }
 
-    .m5-csat-overview .m5-search button:hover {
+    .m5-csat-overview .m5-filter-button:hover {
         background: #0a2b57;
     }
 
-    .m5-csat-overview .m5-search a {
-        padding: 12px;
+    .m5-csat-overview .m5-filter-clear {
+        display: inline-flex;
+        align-items: center;
+        height: 47px;
+
         color: #103b78;
+        font-size: 14px;
         text-decoration: underline;
+        white-space: nowrap;
     }
 
-    /* BẢNG TỔNG HỢP CSAT */
+    .m5-csat-overview .m5-filter-clear:hover {
+        color: #2878e7;
+    }
+
+    /* ==========================================
+       THÔNG TIN KẾT QUẢ
+       ========================================== */
+
+    .m5-csat-overview .m5-result-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+
+        margin: 22px 0 16px;
+        color: #103b78;
+        font-size: 14px;
+    }
+
+    .m5-csat-overview .m5-result-count {
+        font-weight: 500;
+    }
+
+    .m5-csat-overview .m5-result-info {
+        color: #607da8;
+        font-size: 13px;
+    }
+
+    /* ==========================================
+       BẢNG TỔNG HỢP CSAT
+       ========================================== */
+
     .m5-csat-overview .m5-table-wrapper {
         overflow-x: auto;
-        margin-top: 20px;
+
+        background: #fff;
+        border: 1px solid #d5e3fa;
+        border-radius: 10px;
     }
 
     .m5-csat-overview .m5-table {
@@ -103,15 +225,17 @@
 
     .m5-csat-overview .m5-table th,
     .m5-csat-overview .m5-table td {
-        padding: 14px;
-        border-bottom: 1px solid #ddd;
+        padding: 15px 14px;
+        border-bottom: 1px solid #e1e5ec;
         text-align: left;
         vertical-align: middle;
+        font-size: 14px;
     }
 
     .m5-csat-overview .m5-table th {
         background: #103b78;
         color: #fff;
+        font-weight: 700;
         white-space: nowrap;
     }
 
@@ -119,9 +243,25 @@
         background: #f2f6fc;
     }
 
+    .m5-csat-overview .m5-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
     .m5-csat-overview .m5-table td {
         color: #17365d;
     }
+
+    .m5-csat-overview .m5-customer-name {
+        font-weight: 600;
+    }
+
+    .m5-csat-overview .m5-customer-email {
+        overflow-wrap: anywhere;
+    }
+
+    /* ==========================================
+       TRẠNG THÁI CSAT
+       ========================================== */
 
     .m5-csat-overview .m5-csat-low {
         color: #c45a21;
@@ -135,15 +275,23 @@
 
     .m5-csat-overview .m5-csat-empty {
         color: #7489a8;
+        font-size: 13px;
     }
+
+    /* ==========================================
+       NÚT THAO TÁC
+       ========================================== */
 
     .m5-csat-overview .m5-action-btn {
         display: inline-block;
-        padding: 8px 14px;
+        padding: 9px 14px;
+
         background: #eaf2ff;
         color: #103b78;
+
         text-decoration: none;
-        border-radius: 6px;
+        border-radius: 7px;
+
         font-size: 14px;
         font-weight: 600;
         white-space: nowrap;
@@ -155,10 +303,77 @@
     }
 
     .m5-csat-overview .m5-empty {
-        padding: 24px;
+        padding: 38px 20px !important;
         text-align: center !important;
-        color: #666;
+        color: #607da8 !important;
+        line-height: 1.8;
     }
+
+    .m5-csat-overview .m5-empty a {
+        color: #103b78;
+        text-decoration: underline;
+    }
+
+    /* ==========================================
+       PHÂN TRANG
+       ========================================== */
+
+    .m5-csat-overview .m5-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 25px;
+    }
+
+    .m5-csat-overview .m5-page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        min-width: 39px;
+        height: 39px;
+        padding: 0 12px;
+
+        color: #103b78;
+        background: #fff;
+
+        border: 1px solid #d5e3fa;
+        border-radius: 7px;
+
+        font-size: 14px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .m5-csat-overview .m5-page-link:hover {
+        background: #eaf2ff;
+    }
+
+    .m5-csat-overview .m5-page-link.current {
+        background: #103b78;
+        color: #fff;
+        border-color: #103b78;
+        font-weight: 700;
+    }
+
+    .m5-csat-overview .m5-page-link.disabled {
+        color: #9aa8bb;
+        background: #f6f8fc;
+        cursor: default;
+    }
+
+    .m5-csat-overview .m5-page-summary {
+        margin: 12px 0 0;
+        text-align: center;
+        color: #607da8;
+        font-size: 13px;
+    }
+
+    /* ==========================================
+       QUAY LẠI
+       ========================================== */
 
     .m5-csat-overview .m5-back {
         display: inline-block;
@@ -171,20 +386,63 @@
         text-decoration: underline;
     }
 
+    /* ==========================================
+       RESPONSIVE
+       ========================================== */
+
+    @media (max-width: 1180px) {
+        .m5-csat-overview .m5-filter-field,
+        .m5-csat-overview .m5-filter-field.search-field {
+            flex: 1 1 calc(50% - 12px);
+        }
+
+        .m5-csat-overview .m5-filter-actions {
+            flex: 1 1 100%;
+            justify-content: flex-end;
+        }
+    }
+
     @media (max-width: 850px) {
         .m5-csat-overview .m5-stats {
             grid-template-columns: 1fr;
         }
+
+        .m5-csat-overview h1 {
+            font-size: 27px;
+        }
+
+        .m5-csat-overview .m5-table {
+            min-width: 750px;
+        }
     }
 
-    @media (max-width: 480px) {
-        .m5-csat-overview .m5-search input {
-            flex-basis: 100%;
+    @media (max-width: 580px) {
+        .m5-csat-overview .m5-filter-field,
+        .m5-csat-overview .m5-filter-field.search-field {
+            flex: 1 1 100%;
+        }
+
+        .m5-csat-overview .m5-filter-actions {
+            justify-content: flex-start;
+        }
+
+        .m5-csat-overview .m5-filter-form {
+            padding: 16px;
+        }
+
+        .m5-csat-overview .m5-result-bar {
+            flex-direction: column;
+            align-items: flex-start;
         }
     }
 </style>
 
+
 <div class="content-container m5-csat-overview">
+
+    <!-- ======================================
+         TIÊU ĐỀ
+         ====================================== -->
 
     <h1>CSAT &amp; Chăm sóc</h1>
 
@@ -193,13 +451,18 @@
         và lựa chọn khách hàng cần chăm sóc.
     </p>
 
-    <!-- THỐNG KÊ -->
+
+    <!-- ======================================
+         THỐNG KÊ CSAT TOÀN HỆ THỐNG
+         ====================================== -->
+
     <div class="m5-stats">
 
         <div class="m5-stat-card">
             <div class="m5-stat-label">
                 Tổng số đánh giá CSAT
             </div>
+
             <div class="m5-stat-value">
                 {{ total_reviews|default:0 }}
             </div>
@@ -209,6 +472,7 @@
             <div class="m5-stat-label">
                 Điểm CSAT trung bình
             </div>
+
             <div class="m5-stat-value">
                 {% if average_score is not None %}
                     {{ average_score|floatformat:1 }}/5
@@ -222,6 +486,7 @@
             <div class="m5-stat-label">
                 Đánh giá thấp (1–3 sao)
             </div>
+
             <div class="m5-stat-value">
                 {{ low_reviews|default:0 }}
             </div>
@@ -229,24 +494,267 @@
 
     </div>
 
-    <!-- TÌM KIẾM -->
-    <form method="get"
-          action="{% url 'customers:csat_overview' %}"
-          class="m5-search">
 
-        <input type="text"
-               name="q"
-               value="{{ keyword|default:'' }}"
-               placeholder="Nhập mã, tên hoặc email khách hàng..."
-               aria-label="Tìm kiếm khách hàng">
+    <!-- ======================================
+         FORM BỘ LỌC NÂNG CAO
+         ====================================== -->
 
-        <button type="submit">Tìm kiếm</button>
+    <form
+        method="get"
+        action="{% url 'customers:csat_overview' %}"
+        class="m5-filter-form"
+        role="search">
+
+        <!-- Tìm kiếm khách hàng -->
+        <div class="m5-filter-field search-field">
+
+            <label for="csat-filter-keyword">
+                Khách hàng
+            </label>
+
+            <input
+                type="text"
+                id="csat-filter-keyword"
+                class="m5-filter-input"
+                name="q"
+                value="{{ keyword }}"
+                placeholder="Tên, email, SĐT, mã KH..."
+                aria-label="Tìm kiếm khách hàng">
+
+        </div>
+
+
+        <!-- Lọc theo điểm CSAT -->
+        <div class="m5-filter-field">
+
+            <label for="csat-filter-score">
+                Mức đánh giá
+            </label>
+
+            <select
+                id="csat-filter-score"
+                class="m5-filter-select"
+                name="score">
+
+                <option
+                    value=""
+                    {% if not score_filter %}selected{% endif %}>
+                    Tất cả
+                </option>
+
+                <option
+                    value="low"
+                    {% if score_filter == 'low' %}selected{% endif %}>
+                    Đánh giá thấp (1–3 sao)
+                </option>
+
+                <option
+                    value="5"
+                    {% if score_filter == '5' %}selected{% endif %}>
+                    5 sao
+                </option>
+
+                <option
+                    value="4"
+                    {% if score_filter == '4' %}selected{% endif %}>
+                    4 sao
+                </option>
+
+                <option
+                    value="3"
+                    {% if score_filter == '3' %}selected{% endif %}>
+                    3 sao
+                </option>
+
+                <option
+                    value="2"
+                    {% if score_filter == '2' %}selected{% endif %}>
+                    2 sao
+                </option>
+
+                <option
+                    value="1"
+                    {% if score_filter == '1' %}selected{% endif %}>
+                    1 sao
+                </option>
+
+                <option
+                    value="none"
+                    {% if score_filter == 'none' %}selected{% endif %}>
+                    Chưa có đánh giá
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Lọc thời gian -->
+        <div class="m5-filter-field">
+
+            <label for="csat-filter-date">
+                Thời gian đánh giá
+            </label>
+
+            <select
+                id="csat-filter-date"
+                class="m5-filter-select"
+                name="date_range">
+
+                <option
+                    value=""
+                    {% if not date_range %}selected{% endif %}>
+                    Tất cả
+                </option>
+
+                <option
+                    value="7"
+                    {% if date_range == '7' %}selected{% endif %}>
+                    7 ngày gần đây
+                </option>
+
+                <option
+                    value="30"
+                    {% if date_range == '30' %}selected{% endif %}>
+                    30 ngày gần đây
+                </option>
+
+                <option
+                    value="90"
+                    {% if date_range == '90' %}selected{% endif %}>
+                    90 ngày gần đây
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Sắp xếp -->
+        <div class="m5-filter-field">
+
+            <label for="csat-filter-sort">
+                Sắp xếp
+            </label>
+
+            <select
+                id="csat-filter-sort"
+                class="m5-filter-select"
+                name="sort">
+
+                <option
+                    value="newest"
+                    {% if sort_by == 'newest' %}selected{% endif %}>
+                    Đánh giá mới nhất
+                </option>
+
+                <option
+                    value="oldest"
+                    {% if sort_by == 'oldest' %}selected{% endif %}>
+                    Đánh giá cũ nhất
+                </option>
+
+                <option
+                    value="score_asc"
+                    {% if sort_by == 'score_asc' %}selected{% endif %}>
+                    Điểm thấp nhất
+                </option>
+
+                <option
+                    value="score_desc"
+                    {% if sort_by == 'score_desc' %}selected{% endif %}>
+                    Điểm cao nhất
+                </option>
+
+                <option
+                    value="name_asc"
+                    {% if sort_by == 'name_asc' %}selected{% endif %}>
+                    Tên A-Z
+                </option>
+
+                <option
+                    value="name_desc"
+                    {% if sort_by == 'name_desc' %}selected{% endif %}>
+                    Tên Z-A
+                </option>
+
+                <option
+                    value="code_asc"
+                    {% if sort_by == 'code_asc' %}selected{% endif %}>
+                    Mã KH tăng dần
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Nút lọc -->
+        <div class="m5-filter-actions">
+
+            <button
+                type="submit"
+                class="m5-filter-button">
+
+                Lọc kết quả
+
+            </button>
+
+            <a
+                href="{% url 'customers:csat_overview' %}"
+                class="m5-filter-clear">
+
+                Xóa lọc
+
+            </a>
+
+        </div>
 
     </form>
 
-    <!-- BẢNG TỔNG HỢP CSAT -->
+
+    <!-- ======================================
+         THÔNG TIN SỐ LƯỢNG KẾT QUẢ
+         ====================================== -->
+
+    <div class="m5-result-bar">
+
+        <div class="m5-result-count">
+            <strong>{{ total_results }}</strong>
+            khách hàng phù hợp
+        </div>
+
+        <div class="m5-result-info">
+
+            {% if total_results > 0 %}
+
+                Hiển thị
+                {{ page_obj.start_index }}
+                -
+                {{ page_obj.end_index }}
+                trong
+                {{ total_results }}
+                khách hàng
+
+            {% else %}
+
+                Không có kết quả phù hợp
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================
+         BẢNG TỔNG HỢP CSAT
+         ====================================== -->
+
     <div class="m5-table-wrapper">
+
         <table class="m5-table">
+
             <thead>
                 <tr>
                     <th>Mã KH</th>
@@ -259,51 +767,216 @@
             </thead>
 
             <tbody>
+
                 {% for customer in customers %}
+
                     <tr>
-                        <td>{{ customer.ma_khach_hang }}</td>
-                        <td>{{ customer.ho_ten }}</td>
-                        <td>{{ customer.email }}</td>
-                        <td>{{ customer.csat_count }}</td>
 
                         <td>
+                            {{ customer.ma_khach_hang }}
+                        </td>
+
+                        <td class="m5-customer-name">
+                            {{ customer.ho_ten }}
+                        </td>
+
+                        <td class="m5-customer-email">
+                            {{ customer.email }}
+                        </td>
+
+                        <td>
+                            {{ customer.csat_count }}
+                        </td>
+
+                        <td>
+
                             {% if customer.latest_csat_score is not None %}
+
                                 {% if customer.latest_csat_score <= 3 %}
+
                                     <span class="m5-csat-low">
                                         {{ customer.latest_csat_score }}/5 sao
                                     </span>
+
                                 {% else %}
+
                                     <span class="m5-csat-normal">
                                         {{ customer.latest_csat_score }}/5 sao
                                     </span>
+
                                 {% endif %}
+
                             {% else %}
+
                                 <span class="m5-csat-empty">
                                     Chưa có đánh giá
                                 </span>
+
                             {% endif %}
+
                         </td>
 
                         <td>
-                            <a class="m5-action-btn"
-                               href="{% url 'customers:csat_care' customer.ma_khach_hang %}">
+
+                            <a
+                                class="m5-action-btn"
+                                href="{% url 'customers:csat_care' customer.ma_khach_hang %}">
+
                                 Chăm sóc
+
                             </a>
+
                         </td>
+
                     </tr>
+
                 {% empty %}
+
                     <tr>
-                        <td colspan="6" class="m5-empty">
-                            Không tìm thấy khách hàng phù hợp.
+                        <td
+                            colspan="6"
+                            class="m5-empty">
+
+                            Không tìm thấy khách hàng phù hợp
+                            với các điều kiện lọc.
+
+                            {% if has_filters %}
+
+                                <div style="margin-top: 12px;">
+
+                                    <a href="{% url 'customers:csat_overview' %}">
+                                        Xóa bộ lọc để xem tất cả khách hàng
+                                    </a>
+
+                                </div>
+
+                            {% endif %}
+
                         </td>
                     </tr>
+
                 {% endfor %}
+
             </tbody>
+
         </table>
+
     </div>
 
-    <a class="m5-back" href="{% url 'customers:list' %}">
+
+    <!-- ======================================
+         PHÂN TRANG
+         ====================================== -->
+
+    {% if page_obj.paginator.num_pages > 1 %}
+
+        <nav
+            class="m5-pagination"
+            aria-label="Phân trang CSAT và chăm sóc">
+
+            <!-- Trang đầu và trang trước -->
+            {% if page_obj.has_previous %}
+
+                <a
+                    class="m5-page-link"
+                    href="?page=1{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+                    Đầu
+                </a>
+
+                <a
+                    class="m5-page-link"
+                    href="?page={{ page_obj.previous_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+                    Trước
+                </a>
+
+            {% else %}
+
+                <span class="m5-page-link disabled">
+                    Đầu
+                </span>
+
+                <span class="m5-page-link disabled">
+                    Trước
+                </span>
+
+            {% endif %}
+
+
+            <!-- Các số trang gần trang hiện tại -->
+            {% for number in page_obj.paginator.page_range %}
+
+                {% if number == page_obj.number %}
+
+                    <span
+                        class="m5-page-link current"
+                        aria-current="page">
+
+                        {{ number }}
+
+                    </span>
+
+                {% elif number >= page_obj.number|add:"-2" and number <= page_obj.number|add:"2" %}
+
+                    <a
+                        class="m5-page-link"
+                        href="?page={{ number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+
+                        {{ number }}
+
+                    </a>
+
+                {% endif %}
+
+            {% endfor %}
+
+
+            <!-- Trang sau và trang cuối -->
+            {% if page_obj.has_next %}
+
+                <a
+                    class="m5-page-link"
+                    href="?page={{ page_obj.next_page_number }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+                    Sau
+                </a>
+
+                <a
+                    class="m5-page-link"
+                    href="?page={{ page_obj.paginator.num_pages }}{% if filter_query %}&amp;{{ filter_query }}{% endif %}">
+                    Cuối
+                </a>
+
+            {% else %}
+
+                <span class="m5-page-link disabled">
+                    Sau
+                </span>
+
+                <span class="m5-page-link disabled">
+                    Cuối
+                </span>
+
+            {% endif %}
+
+        </nav>
+
+        <p class="m5-page-summary">
+            Trang {{ page_obj.number }}
+            / {{ page_obj.paginator.num_pages }}
+        </p>
+
+    {% endif %}
+
+
+    <!-- ======================================
+         QUAY LẠI DANH SÁCH KHÁCH HÀNG
+         ====================================== -->
+
+    <a
+        class="m5-back"
+        href="{% url 'customers:list' %}">
+
         ← Quay về danh sách khách hàng
+
     </a>
 
 </div>
