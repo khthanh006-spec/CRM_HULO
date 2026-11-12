@@ -2,6 +2,7 @@
 from django.urls import path
 
 from . import views
+from . import register_views
 from . import customer_portal_views
 from . import customer_profile_views
 from . import manager_dashboard_views
@@ -19,6 +20,16 @@ urlpatterns = [
         "login/",
         views.login_view,
         name="login",
+    ),
+
+    # ==========================================
+    # ĐĂNG KÝ TÀI KHOẢN KHÁCH HÀNG
+    # ==========================================
+
+    path(
+        "register/",
+        register_views.register_view,
+        name="register",
     ),
 
     # ==========================================
@@ -68,7 +79,7 @@ urlpatterns = [
     ),
 
     # ==========================================
-    # MỚI: CSKH XEM THÔNG BÁO MINH CHỨNG
+    # CSKH XEM THÔNG BÁO MINH CHỨNG
     # ==========================================
 
     path(

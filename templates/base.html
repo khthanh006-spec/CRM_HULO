@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 {% load static %}
 <html lang="vi">
@@ -12,7 +13,9 @@
           href="{% static 'css/style.css' %}">
 
     <style>
-        /* THANH MENU CHÍNH */
+        /* ==========================================
+           THANH MENU CHÍNH
+           ========================================== */
 
         .header {
             position: relative;
@@ -38,7 +41,9 @@
             color: #176cc1;
         }
 
-        /* MENU THẢ XUỐNG */
+        /* ==========================================
+           MENU THẢ XUỐNG
+           ========================================== */
 
         .hulo-nav-menu {
             position: relative;
@@ -116,7 +121,9 @@
             background: #eef5ff;
         }
 
-        /* MENU TÀI KHOẢN KHÁCH HÀNG */
+        /* ==========================================
+           MENU TÀI KHOẢN KHÁCH HÀNG
+           ========================================== */
 
         .hulo-account-menu {
             position: relative;
@@ -203,6 +210,79 @@
             background: #edf1f7;
         }
 
+        /* ==========================================
+           NÚT ĐĂNG KÝ - ĐĂNG NHẬP
+           ========================================== */
+
+        .account-area {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .hulo-auth-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hulo-auth-actions a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.4;
+            text-decoration: none !important;
+            white-space: nowrap;
+            transition:
+                background-color .2s ease,
+                border-color .2s ease,
+                box-shadow .2s ease;
+        }
+
+        /* Nút Đăng ký - viền xanh */
+        .hulo-auth-actions .hulo-register-link {
+            color: #103b78 !important;
+            background: #ffffff;
+            border: 1px solid #cbdcf5;
+        }
+
+        .hulo-auth-actions .hulo-register-link:hover {
+            color: #103b78 !important;
+            background: #eef5ff;
+            border-color: #a9c5ed;
+        }
+
+        /* Nút Đăng nhập - nền xanh */
+        .hulo-auth-actions .hulo-login-link {
+            color: #ffffff !important;
+            background: #103b78;
+            border: 1px solid #103b78;
+        }
+
+        .hulo-auth-actions .hulo-login-link:hover {
+            color: #ffffff !important;
+            background: #0a2b57;
+            border-color: #0a2b57;
+            box-shadow:
+                0 3px 10px rgba(16, 59, 120, .16);
+        }
+
+        .hulo-auth-actions a:focus-visible {
+            outline: 3px solid #93c5fd;
+            outline-offset: 3px;
+        }
+
+        /* ==========================================
+           HOVER MENU
+           ========================================== */
+
         @media (hover: hover) and (pointer: fine) {
             .hulo-nav-menu:hover
             .hulo-nav-dropdown {
@@ -214,6 +294,10 @@
                 display: block;
             }
         }
+
+        /* ==========================================
+           RESPONSIVE
+           ========================================== */
 
         @media (max-width: 1100px) {
             .navbar {
@@ -239,6 +323,20 @@
             .hulo-account-trigger {
                 padding: 8px 5px;
                 font-size: 13px;
+            }
+
+            .account-area {
+                gap: 7px;
+            }
+
+            .hulo-auth-actions {
+                gap: 7px;
+            }
+
+            .hulo-auth-actions a {
+                min-height: 36px;
+                padding: 8px 11px;
+                font-size: 12px;
             }
         }
     </style>
@@ -325,7 +423,7 @@
                 </div>
             </div>
 
-            <!-- KHÁCH HÀNG: TRANG MỚI -->
+            <!-- QUẢN LÝ KHÁCH HÀNG -->
             <a href="{% url 'manager_customer_list' %}">
                 Khách hàng
             </a>
@@ -437,9 +535,20 @@
 
         {% else %}
 
-            <a href="{% url 'login' %}">
-                Đăng nhập
-            </a>
+            <!-- NÚT ĐĂNG KÝ VÀ ĐĂNG NHẬP -->
+            <div class="hulo-auth-actions">
+
+                <a href="{% url 'register' %}"
+                   class="hulo-register-link">
+                    Đăng ký
+                </a>
+
+                <a href="{% url 'login' %}"
+                   class="hulo-login-link">
+                    Đăng nhập
+                </a>
+
+            </div>
 
         {% endif %}
 

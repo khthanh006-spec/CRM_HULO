@@ -1,0 +1,223 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+Đăng ký tài khoản | CRM HULO
+{% endblock %}
+
+{% block content %}
+<style>
+    .register-container {
+        max-width: 520px;
+        margin: 35px auto 65px;
+        padding: 34px;
+        background: #ffffff;
+        border: 1px solid #dce6f4;
+        border-radius: 14px;
+        box-shadow: 0 8px 25px rgba(20, 55, 100, 0.08);
+        font-family: inherit;
+    }
+
+    .register-container * {
+        box-sizing: border-box;
+    }
+
+    .register-heading {
+        text-align: center;
+        margin-bottom: 26px;
+    }
+
+    .register-heading h1 {
+        color: #103b78;
+        font-size: 28px;
+        margin: 0 0 10px;
+    }
+
+    .register-heading p {
+        color: #64748b;
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .register-form p {
+        margin-bottom: 17px;
+    }
+
+    .register-form label {
+        display: block;
+        margin-bottom: 7px;
+        color: #17365d;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .register-form input {
+        width: 100%;
+        min-height: 43px;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        background: #ffffff;
+        color: #17365d;
+        font-size: 14px;
+    }
+
+    .register-form input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .register-form .helptext {
+        display: block;
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .register-form .errorlist {
+        color: #b42318;
+        font-size: 13px;
+        padding-left: 18px;
+        margin: 7px 0;
+    }
+
+    .register-form .errorlist li {
+        margin-bottom: 5px;
+    }
+
+    .register-button {
+        width: 100%;
+        min-height: 46px;
+        margin-top: 12px;
+        padding: 12px;
+        background: #103b78;
+        border: none;
+        border-radius: 7px;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .register-button:hover {
+        background: #0a2b57;
+    }
+
+    .register-login {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+        text-align: center;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .register-login a {
+        color: #103b78;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .register-login a:hover {
+        text-decoration: underline;
+    }
+
+    .register-support-note {
+        margin-bottom: 22px;
+        padding: 13px 15px;
+        background: #eef6ff;
+        border: 1px solid #cbdff8;
+        border-radius: 8px;
+        color: #17436f;
+        font-size: 13px;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    @media (max-width: 600px) {
+        .register-container {
+            margin: 15px auto 35px;
+            padding: 22px 18px;
+        }
+
+        .register-heading h1 {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div class="register-container">
+
+    <div class="register-heading">
+        <h1>Đăng ký tài khoản</h1>
+
+        <p>
+            Tạo tài khoản khách hàng HULO để gửi yêu cầu hỗ trợ,
+            theo dõi Ticket và quản lý thông tin cá nhân.
+        </p>
+    </div>
+
+    {% if next_url %}
+        <div class="register-support-note">
+            Bạn cần có tài khoản để yêu cầu nhân viên CSKH hỗ trợ.
+            Sau khi đăng ký thành công, HULO sẽ tự động
+            đưa bạn đến bước tiếp theo.
+        </div>
+    {% endif %}
+
+    <form method="post" class="register-form">
+        {% csrf_token %}
+
+        <!-- Ghi nhớ trang cần chuyển đến sau đăng ký -->
+        {% if next_url %}
+            <input
+                type="hidden"
+                name="next"
+                value="{{ next_url }}"
+            >
+        {% endif %}
+
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+            <p>
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <span class="helptext">
+                        {{ field.help_text }}
+                    </span>
+                {% endif %}
+
+                {{ field.errors }}
+            </p>
+        {% endfor %}
+
+        <button type="submit" class="register-button">
+            Đăng ký tài khoản
+        </button>
+    </form>
+
+    <div class="register-login">
+        Đã có tài khoản?
+
+        {% if next_url %}
+            <a href="{% url 'login' %}?next={{ next_url|urlencode }}">
+                Đăng nhập ngay
+            </a>
+        {% else %}
+            <a href="{% url 'login' %}">
+                Đăng nhập ngay
+            </a>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

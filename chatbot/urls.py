@@ -2,6 +2,7 @@
 from django.urls import path
 
 from . import views
+from . import guest_views
 from . import integration_m3
 
 app_name = 'chatbot'
@@ -16,13 +17,16 @@ urlpatterns = [
     ),
 
     # UC-2.1 + UC-2.2: Gửi tin nhắn
+    # Guest: trả lời tự động, không lưu lịch sử
+    # Customer: giữ nguyên chức năng M2 hiện tại
     path(
         'gui-tin-nhan/',
-        views.chatbot_send_message,
+        guest_views.guest_or_customer_send_message,
         name='send_message'
     ),
 
     # UC-2.3: Chuyển sang nhân viên hỗ trợ
+    # Bắt buộc đăng nhập
     path(
         'chuyen-ho-tro/',
         views.chuyen_ho_tro,
@@ -57,14 +61,14 @@ urlpatterns = [
         name='xac_nhan_yeu_cau'
     ),
 
-    # UC-2.6: Gửi yêu cầu từ M2 sang M3 để tạo Ticket
+    # UC-2.6: Gửi yêu cầu từ M2 sang M3
     path(
         'gui-yeu-cau-sang-m3/',
         integration_m3.gui_yeu_cau_sang_m3,
         name='gui_yeu_cau_sang_m3'
     ),
 
-    # UC-2.7: Giao diện bổ sung thông tin yêu cầu
+    # UC-2.7: Giao diện bổ sung thông tin
     path(
         'bo-sung-yeu-cau/',
         views.bo_sung_yeu_cau,
