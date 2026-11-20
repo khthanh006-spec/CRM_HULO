@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -59,12 +58,31 @@
             color: #c62828;
             text-align: center;
         }
+
+        .register-prompt {
+            margin: 18px 0 0;
+            color: #52657d;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .register-prompt a {
+            color: #1763b1;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .register-prompt a:hover {
+            color: #104b89;
+            text-decoration: underline;
+        }
     </style>
 </head>
 
 <body>
     <div class="login-box">
         <h2>CRM HULO</h2>
+
         <p style="text-align:center;">
             Đăng nhập hệ thống
         </p>
@@ -94,6 +112,11 @@
                 Đăng nhập
             </button>
         </form>
+
+        <p class="register-prompt">
+            Nếu chưa có tài khoản thì
+            <a href="{% url 'register' %}">đăng ký</a>
+        </p>
     </div>
 </body>
 </html>

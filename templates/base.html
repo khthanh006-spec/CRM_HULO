@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 {% load static %}
 <html lang="vi">
@@ -280,6 +279,101 @@
         }
 
         /* ==========================================
+           FOOTER
+           ========================================== */
+
+        .hulo-footer {
+            margin-top: 40px;
+            padding: 34px 24px 0;
+            background: #f1f6fc;
+            border-top: 1px solid #dce8f5;
+            color: #52657d;
+        }
+
+        .hulo-footer-container {
+            width: min(100%, 1120px);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 36px;
+        }
+
+        .hulo-footer-brand {
+            color: #52657d;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .hulo-footer-logo {
+            margin: 0 0 12px;
+            color: #103b78;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: .5px;
+        }
+
+        .hulo-footer-description {
+            max-width: 380px;
+            margin: 0;
+        }
+
+        .hulo-footer-column h3 {
+            margin: 2px 0 14px;
+            color: #173b70;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .hulo-footer-column a {
+            display: block;
+            width: fit-content;
+            margin: 0 0 10px;
+            color: #52657d;
+            font-size: 14px;
+            line-height: 1.5;
+            text-decoration: none;
+            transition: color .2s ease;
+        }
+
+        .hulo-footer-column a:hover {
+            color: #176cc1;
+            text-decoration: underline;
+        }
+
+        .hulo-footer-link-button {
+            display: block;
+            margin: 0 0 10px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #52657d;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .hulo-footer-link-button:hover {
+            color: #176cc1;
+            text-decoration: underline;
+        }
+
+        .hulo-footer-bottom {
+            width: min(100%, 1120px);
+            margin: 26px auto 0;
+            padding: 16px 0;
+            border-top: 1px solid #dce8f5;
+            color: #718198;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .hulo-footer-bottom p {
+            margin: 0;
+        }
+
+        /* ==========================================
            HOVER MENU
            ========================================== */
 
@@ -308,6 +402,32 @@
             .navbar > a,
             .hulo-nav-trigger {
                 font-size: 13px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hulo-footer-container {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 26px;
+            }
+
+            .hulo-footer-brand {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hulo-footer {
+                padding: 28px 18px 0;
+            }
+
+            .hulo-footer-container {
+                grid-template-columns: 1fr;
+                gap: 22px;
+            }
+
+            .hulo-footer-brand {
+                grid-column: auto;
             }
         }
 
@@ -560,9 +680,54 @@
     {% block content %}{% endblock %}
 </main>
 
-<footer class="footer">
-    © 2026 HULOECOM –
-    Hệ thống quản lý và chăm sóc khách hàng
+<footer class="hulo-footer">
+    <div class="hulo-footer-container">
+
+        <div class="hulo-footer-brand">
+            <h2 class="hulo-footer-logo">HULOECOM</h2>
+            <p class="hulo-footer-description">
+                Hệ thống hỗ trợ và chăm sóc khách hàng HULO,
+                giúp khách hàng tra cứu thông tin và gửi yêu cầu hỗ trợ.
+            </p>
+        </div>
+
+        <div class="hulo-footer-column">
+            <h3>Hỗ trợ khách hàng</h3>
+            <a href="{% url 'support:home' %}">
+                Trung tâm trợ giúp
+            </a>
+            <a href="{% url 'home' %}">
+                Trang chủ
+            </a>
+        </div>
+
+        <div class="hulo-footer-column">
+            <h3>Tài khoản</h3>
+
+            {% if request.user.is_authenticated %}
+                <form method="POST" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="hulo-footer-link-button">
+                        Đăng xuất
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">
+                    Đăng nhập
+                </a>
+                <a href="{% url 'register' %}">
+                    Đăng ký
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="hulo-footer-bottom">
+        <p>
+            © {% now "Y" %} HULOECOM – Hệ thống quản lý và chăm sóc khách hàng
+        </p>
+    </div>
 </footer>
 
 {% block extra_js %}{% endblock %}
