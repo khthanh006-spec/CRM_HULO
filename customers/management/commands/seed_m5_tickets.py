@@ -1,3 +1,4 @@
+
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
@@ -8,377 +9,347 @@ from tickets.models import (
     Ticket,
     TicketCategory,
     TicketQueue,
+    TicketCategoryQueue,
     TicketLog,
+    SLAConfig,
 )
 
 
-DEMO_MARKER = '[DEMO M5 TICKETS V1]'
+# 6 tình huống nghiệp vụ POD
+# Mã khách hàng, tên danh mục, trạng thái,
+# mức ưu tiên, CSAT, tiêu đề, nội dung
 
-
-# Mã, khách hàng demo, trạng thái, ưu tiên, CSAT, tiêu đề
 SCENARIOS = [
     (
-        'M5_DEMO_TK_01', 'm5_demo_01',
-        'NEW', 'LOW', None,
-        'Cần hướng dẫn bảo quản áo in',
+        "khachhang01",
+        "Lỗi in ấn",
+        "CLOSED",
+        "HIGH",
+        2,
+        "Khách hàng phản ánh hình in bị nhòe",
+        "Khách hàng nhận được áo thun in theo yêu cầu. "
+        "Hình in trên sản phẩm bị nhòe so với thiết kế "
+        "đã xác nhận. Khách hàng đề nghị kiểm tra và "
+        "đưa ra phương án đổi sản phẩm.",
+        "Đã xác minh thông tin đơn hàng, tiếp nhận "
+        "hình ảnh sản phẩm và chuyển bộ phận chuyên môn "
+        "kiểm tra. Đã thống nhất phương án xử lý với khách.",
     ),
     (
-        'M5_DEMO_TK_02', 'm5_demo_02',
-        'ASSIGNED', 'MEDIUM', None,
-        'Cần kiểm tra tiến độ giao hàng',
+        "khachhang02",
+        "Thiếu sản phẩm / phụ kiện",
+        "IN_PROGRESS",
+        "MEDIUM",
+        None,
+        "Khách hàng nhận thiếu sản phẩm trong đơn",
+        "Khách hàng phản ánh kiện hàng chỉ có một phần "
+        "sản phẩm theo đơn đặt hàng. Đề nghị kiểm tra "
+        "quy trình đóng gói và bổ sung sản phẩm còn thiếu.",
+        "",
     ),
     (
-        'M5_DEMO_TK_03', 'm5_demo_03',
-        'IN_PROGRESS', 'HIGH', None,
-        'Màu bản in khác với mẫu đã xác nhận',
+        "khachhang03",
+        "Sai thiết kế cá nhân hóa",
+        "ASSIGNED",
+        "HIGH",
+        None,
+        "Sản phẩm chưa đúng thiết kế đã xác nhận",
+        "Khách hàng phản ánh tên cá nhân hóa trên sản phẩm "
+        "không đúng nội dung đã gửi khi đặt hàng. "
+        "Đề nghị đối chiếu file thiết kế và thông tin đặt hàng.",
+        "",
     ),
     (
-        'M5_DEMO_TK_04', 'm5_demo_04',
-        'RESOLVED_PENDING', 'MEDIUM', None,
-        'Đã hướng dẫn khắc phục lỗi bảo quản',
+        "khachhang04",
+        "Chậm giao hàng",
+        "CLOSED",
+        "MEDIUM",
+        5,
+        "Khách hàng yêu cầu kiểm tra tiến độ giao hàng",
+        "Đơn hàng đã hoàn tất sản xuất nhưng thời gian "
+        "vận chuyển kéo dài hơn dự kiến. Khách hàng liên hệ "
+        "để kiểm tra tiến độ giao nhận.",
+        "Đã kiểm tra trạng thái vận chuyển, cập nhật "
+        "thông tin cho khách hàng và xác nhận đơn hàng "
+        "đã được giao thành công.",
     ),
     (
-        'M5_DEMO_TK_05', 'm5_demo_05',
-        'RESOLVED_AGREED', 'MEDIUM', None,
-        'Khách đồng ý kết quả và chưa đánh giá',
+        "khachhang05",
+        "Hàng bị lỗi",
+        "RESOLVED",
+        "HIGH",
+        None,
+        "Khách hàng phản ánh sản phẩm có lỗi chất lượng",
+        "Khách hàng nhận sản phẩm có lỗi tại phần đường may "
+        "và bề mặt vải. Đề nghị kiểm tra chất lượng sản phẩm "
+        "và hỗ trợ phương án khắc phục.",
+        "Đã tiếp nhận hình ảnh, kiểm tra thông tin sản phẩm "
+        "và chuyển kết quả xác minh cho khách hàng. "
+        "Đang chờ khách xác nhận phương án xử lý.",
     ),
     (
-        'M5_DEMO_TK_06', 'm5_demo_06',
-        'CLOSED', 'HIGH', 1,
-        'Khách chưa hài lòng về trải nghiệm hỗ trợ',
-    ),
-    (
-        'M5_DEMO_TK_07', 'm5_demo_07',
-        'CLOSED', 'HIGH', 2,
-        'Khách phản hồi thời gian xử lý quá lâu',
-    ),
-    (
-        'M5_DEMO_TK_08', 'm5_demo_08',
-        'CLOSED', 'MEDIUM', 3,
-        'Khách đánh giá hỗ trợ ở mức trung bình',
-    ),
-    (
-        'M5_DEMO_TK_09', 'm5_demo_09',
-        'CLOSED', 'LOW', 4,
-        'Khách hài lòng với hướng dẫn sử dụng',
-    ),
-    (
-        'M5_DEMO_TK_10', 'm5_demo_10',
-        'CLOSED', 'LOW', 5,
-        'Khách rất hài lòng với hỗ trợ sau mua',
-    ),
-    (
-        'M5_DEMO_TK_11', 'm5_demo_01',
-        'REOPENED', 'URGENT', None,
-        'Khách yêu cầu kiểm tra lại lỗi bản in',
-    ),
-    (
-        'M5_DEMO_TK_12', 'm5_demo_02',
-        'RESUMED', 'HIGH', None,
-        'Đang tiếp tục xử lý sau khi mở lại',
+        "m5_demo_01",
+        "Đổi trả / Hoàn tiền",
+        "REOPENED",
+        "URGENT",
+        None,
+        "Khách hàng yêu cầu xem xét lại kết quả đổi trả",
+        "Khách hàng chưa đồng ý với phương án đổi trả "
+        "đã được thông báo trước đó và yêu cầu kiểm tra lại "
+        "tình trạng sản phẩm cùng chính sách hỗ trợ.",
+        "",
     ),
 ]
 
 
-CSAT_COMMENTS = {
-    1: 'Vấn đề đã xử lý nhưng trải nghiệm hỗ trợ chưa tốt.',
-    2: 'Đã nhận kết quả nhưng thời gian chờ còn lâu.',
-    3: 'Hỗ trợ ở mức trung bình, cần giải thích rõ hơn.',
-    4: 'Hướng dẫn rõ ràng, nhân viên hỗ trợ tốt.',
-    5: 'Rất hài lòng, nhân viên hỗ trợ nhanh và tận tình.',
-}
-
-
 class Command(BaseCommand):
     help = (
-        'Bổ sung Ticket, lịch sử và CSAT demo '
-        'cho khách hàng mẫu M5.'
+        "Khởi tạo 6 Ticket nghiệp vụ POD phục vụ kiểm thử M5. "
+        "Không tạo danh mục hoặc Queue mới."
     )
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--staff',
-            default='cskh01',
-            help='Username nhân viên CSKH phụ trách Ticket demo.',
+            "--staff",
+            default="cskh01",
+            help="Nhân viên CSKH phụ trách.",
         )
 
+    @transaction.atomic
     def handle(self, *args, **options):
+
         staff = (
             Staff.objects
-            .select_related('ma_tai_khoan')
+            .select_related("ma_tai_khoan")
             .filter(
-                ma_tai_khoan__username=options['staff'],
+                ma_tai_khoan__username=options["staff"],
                 ma_tai_khoan__is_active=True,
-                vai_tro='CSKH',
+                vai_tro="CSKH",
             )
             .first()
         )
 
         if staff is None:
             raise CommandError(
-                'Không tìm thấy nhân viên CSKH đang hoạt động. '
-                'Chạy lại với --staff username_cskh.'
+                "Không tìm thấy nhân viên CSKH đang hoạt động."
             )
-
-        usernames = {
-            scenario[1]
-            for scenario in SCENARIOS
-        }
 
         customers = {
             customer.ma_tai_khoan.username: customer
-            for customer in (
-                Customer.objects
-                .select_related('ma_tai_khoan')
-                .filter(
-                    ma_tai_khoan__username__in=usernames,
-                )
+            for customer in Customer.objects.select_related(
+                "ma_tai_khoan"
+            ).filter(
+                ma_tai_khoan__username__in={
+                    scenario[0] for scenario in SCENARIOS
+                }
             )
         }
 
-        missing = sorted(usernames - set(customers))
+        missing = {
+            scenario[0] for scenario in SCENARIOS
+        } - set(customers)
 
         if missing:
             raise CommandError(
-                'Thiếu khách hàng demo: '
-                + ', '.join(missing)
-                + '. Hãy chạy seed_m5_customers trước.'
+                "Thiếu tài khoản khách hàng: "
+                + ", ".join(sorted(missing))
             )
 
-        # Kiểm tra mã trùng trước khi ghi dữ liệu.
-        pending = []
+        queue = TicketQueue.objects.filter(
+            ten_queue="M3 - Tiếp nhận và xử lý Ticket",
+            dang_hoat_dong=True,
+        ).first()
 
-        for scenario in SCENARIOS:
-            code, username, state, priority, score, title = scenario
+        if queue is None:
+            raise CommandError(
+                "Không tìm thấy Queue M3 đang hoạt động. "
+                "Hãy chạy seed_m3_sla trước."
+            )
 
+        created_count = 0
+        skipped_count = 0
+
+        for (
+            username,
+            category_name,
+            state,
+            priority,
+            score,
+            title,
+            description,
+            resolution,
+        ) in SCENARIOS:
+
+            customer = customers[username]
+
+            category = TicketCategory.objects.filter(
+                ten_danh_muc=category_name,
+                dang_hoat_dong=True,
+            ).first()
+
+            if category is None:
+                raise CommandError(
+                    f"Không tìm thấy danh mục: {category_name}"
+                )
+
+            mapping = TicketCategoryQueue.objects.filter(
+                danh_muc=category,
+                queue=queue,
+            ).exists()
+
+            if not mapping:
+                raise CommandError(
+                    f"Danh mục {category_name} chưa được "
+                    "liên kết với Queue M3."
+                )
+
+            sla = SLAConfig.objects.filter(
+                danh_muc=category,
+                muc_uu_tien=priority,
+                dang_hoat_dong=True,
+            ).first()
+
+            if sla is None:
+                raise CommandError(
+                    f"Thiếu SLA cho {category_name} - {priority}"
+                )
+
+            # Không tạo trùng theo khách hàng, tiêu đề
+            # và nội dung nghiệp vụ.
             existing = Ticket.objects.filter(
-                ma_ticket=code,
+                khach_hang=customer,
+                tieu_de=title,
             ).first()
 
             if existing:
-                if (
-                    existing.khach_hang_id
-                    != customers[username].pk
-                    or not existing.noi_dung.startswith(DEMO_MARKER)
-                ):
-                    raise CommandError(
-                        f'Mã {code} đã được sử dụng '
-                        'bởi dữ liệu khác. Không ghi đè.'
-                    )
-
                 self.stdout.write(
-                    f'Bỏ qua Ticket đã có: {code}'
+                    f"Bỏ qua Ticket đã tồn tại: {existing.ma_ticket}"
                 )
+                skipped_count += 1
                 continue
 
-            pending.append(scenario)
+            now = timezone.now()
 
-        if not pending:
-            self.stdout.write(
-                self.style.SUCCESS(
-                    'Bộ Ticket demo đã tồn tại. '
-                    'Không thay đổi dữ liệu.'
-                )
-            )
-            return
-
-        created_codes = []
-
-        with transaction.atomic():
-            category, _ = TicketCategory.objects.get_or_create(
-                ten_danh_muc='DEMO M5 - Hỗ trợ sau mua',
-                defaults={
-                    'mo_ta': 'Danh mục dữ liệu giả lập phục vụ M5.',
-                    'dang_hoat_dong': True,
-                },
+            # Sinh mã Ticket theo định dạng hệ thống.
+            ticket_code = (
+                f"TK{now.strftime('%Y%m%d')}"
+                f"{Ticket.objects.count() + created_count + 1:06d}"
             )
 
-            queue, _ = TicketQueue.objects.get_or_create(
-                ten_queue='DEMO M5 - Chăm sóc khách hàng',
-                defaults={
-                    'mo_ta': 'Hàng đợi dữ liệu giả lập phục vụ M5.',
-                    'dang_hoat_dong': True,
-                },
+            while Ticket.objects.filter(
+                ma_ticket=ticket_code
+            ).exists():
+                created_count += 1
+                ticket_code = (
+                    f"TK{now.strftime('%Y%m%d')}"
+                    f"{Ticket.objects.count() + created_count + 1:06d}"
+                )
+
+            ticket = Ticket(
+                ma_ticket=ticket_code,
+                khach_hang=customer,
+                tieu_de=title,
+                noi_dung=description,
+                danh_muc=category,
+                muc_uu_tien=priority,
+                trang_thai=state,
+                queue=queue,
+                nguoi_phu_trach=staff,
+                sla_config=sla,
+                sla_deadline=now + timezone.timedelta(
+                    hours=sla.thoi_han_gio
+                ),
+                ket_qua_xu_ly=resolution,
+                trang_thai_xac_nhan=(
+                    "AGREED" if state == "CLOSED"
+                    else "DISAGREED" if state == "REOPENED"
+                    else "PENDING"
+                ),
+                thoi_diem_xac_nhan=(
+                    now if state in ["CLOSED", "REOPENED"]
+                    else None
+                ),
+                ly_do_khong_dong_y=(
+                    "Khách hàng đề nghị xem xét lại "
+                    "kết quả xử lý trước đó."
+                    if state == "REOPENED"
+                    else ""
+                ),
             )
 
-            if not category.dang_hoat_dong or not queue.dang_hoat_dong:
-                raise CommandError(
-                    'Danh mục hoặc hàng đợi demo đã bị tạm dừng. '
-                    'Lệnh không tự bật lại.'
+            ticket.full_clean()
+            ticket.save()
+
+            TicketLog.objects.create(
+                ticket=ticket,
+                nguoi_thuc_hien=customer.ma_tai_khoan,
+                hanh_dong="TẠO YÊU CẦU HỖ TRỢ",
+                noi_dung=(
+                    f"Khách hàng gửi yêu cầu: {title}."
+                ),
+            )
+
+            TicketLog.objects.create(
+                ticket=ticket,
+                nguoi_thuc_hien=staff.ma_tai_khoan,
+                hanh_dong="TIẾP NHẬN TICKET",
+                noi_dung=(
+                    f"Nhân viên {staff.ho_ten} tiếp nhận "
+                    "và phụ trách xử lý yêu cầu."
+                ),
+            )
+
+            if state in ["RESOLVED", "CLOSED"]:
+                TicketLog.objects.create(
+                    ticket=ticket,
+                    nguoi_thuc_hien=staff.ma_tai_khoan,
+                    hanh_dong="CẬP NHẬT KẾT QUẢ XỬ LÝ",
+                    noi_dung=resolution,
                 )
 
-            for scenario in pending:
-                code, username, state, priority, score, title = scenario
-
-                customer = customers[username]
-
-                if state in [
-                    'RESOLVED_PENDING',
-                    'RESOLVED_AGREED',
-                ]:
-                    status = 'RESOLVED'
-                elif state == 'RESUMED':
-                    status = 'IN_PROGRESS'
-                else:
-                    status = state
-
-                agreed = state in [
-                    'RESOLVED_AGREED',
-                    'CLOSED',
-                ]
-
-                reopened = state in [
-                    'REOPENED',
-                    'RESUMED',
-                ]
-
-                confirmation = (
-                    'AGREED'
-                    if agreed
-                    else 'DISAGREED'
-                    if reopened
-                    else 'PENDING'
-                )
-
-                has_result = (
-                    status in ['RESOLVED', 'CLOSED']
-                    or reopened
-                )
-
-                ticket = Ticket(
-                    ma_ticket=code,
-                    khach_hang=customer,
-                    tieu_de=title,
+            if state == "CLOSED":
+                TicketLog.objects.create(
+                    ticket=ticket,
+                    nguoi_thuc_hien=customer.ma_tai_khoan,
+                    hanh_dong="KHÁCH HÀNG XÁC NHẬN KẾT QUẢ",
                     noi_dung=(
-                        f'{DEMO_MARKER}\n'
-                        f'{title}.\n'
-                        'Tình huống giả lập để kiểm tra '
-                        'Customer 360°, CSAT và hậu mãi. '
-                        'Không phải yêu cầu thực tế.'
-                    ),
-                    danh_muc=category,
-                    muc_uu_tien=priority,
-                    trang_thai=status,
-                    queue=queue if status != 'NEW' else None,
-                    nguoi_phu_trach=(
-                        staff if status != 'NEW' else None
-                    ),
-                    trang_thai_xac_nhan=confirmation,
-                    thoi_diem_xac_nhan=(
-                        timezone.now()
-                        if agreed or reopened
-                        else None
-                    ),
-                    ly_do_khong_dong_y=(
-                        'DEMO: khách yêu cầu kiểm tra lại '
-                        'vì kết quả chưa đáp ứng mong đợi.'
-                        if reopened
-                        else ''
-                    ),
-                    ket_qua_xu_ly=(
-                        'DEMO: đã kiểm tra và cung cấp '
-                        'hướng xử lý cho khách hàng.'
-                        if has_result
-                        else ''
+                        "Khách hàng đồng ý kết quả xử lý."
                     ),
                 )
 
-                ticket.full_clean()
-                ticket.save()
-
-                def add_log(action, content, actor):
-                    return TicketLog.objects.create(
-                        ticket=ticket,
-                        nguoi_thuc_hien=actor,
-                        hanh_dong=action,
-                        noi_dung=f'{DEMO_MARKER} {content}',
-                    )
-
-                add_log(
-                    'TẠO TICKET DEMO M5',
-                    'Khởi tạo tình huống giả lập.',
-                    customer.ma_tai_khoan,
+            if state == "REOPENED":
+                TicketLog.objects.create(
+                    ticket=ticket,
+                    nguoi_thuc_hien=customer.ma_tai_khoan,
+                    hanh_dong="KHÁCH HÀNG YÊU CẦU MỞ LẠI",
+                    noi_dung=(
+                        "Khách hàng không đồng ý kết quả "
+                        "và yêu cầu tiếp tục xem xét."
+                    ),
                 )
 
-                if status != 'NEW':
-                    add_log(
-                        'TIẾP NHẬN TICKET',
-                        f'Phân công cho {staff.ho_ten}.',
-                        staff.ma_tai_khoan,
-                    )
-
-                if has_result:
-                    add_log(
-                        'HOÀN TẤT XỬ LÝ',
-                        'Đã cung cấp kết quả xử lý giả lập.',
-                        staff.ma_tai_khoan,
-                    )
-
-                if agreed:
-                    add_log(
-                        'KHÁCH HÀNG ĐỒNG Ý',
-                        'Khách đồng ý kết quả xử lý giả lập.',
-                        customer.ma_tai_khoan,
-                    )
-
-                if state == 'CLOSED':
-                    add_log(
-                        'ĐÓNG TICKET DEMO M5',
-                        'Đóng Ticket sau khi khách đồng ý.',
-                        staff.ma_tai_khoan,
-                    )
-
-                if reopened:
-                    add_log(
-                        'KHÁCH HÀNG YÊU CẦU MỞ LẠI',
-                        'Khách không đồng ý kết quả. '
-                        'Trạng thái RESOLVED → REOPENED.',
-                        customer.ma_tai_khoan,
-                    )
-
-                if state == 'RESUMED':
-                    add_log(
-                        'TIẾP TỤC XỬ LÝ',
-                        'Trạng thái REOPENED → IN_PROGRESS.',
-                        staff.ma_tai_khoan,
-                    )
-
-                if score is not None:
-                    csat = CSAT(
-                        ticket=ticket,
-                        score=score,
-                        comment=(
-                            'DEMO: '
-                            + CSAT_COMMENTS[score]
-                        ),
-                    )
-
-                    csat.full_clean()
-                    csat.save()
-
-                created_codes.append(
-                    (
-                        code,
-                        customer.ho_ten,
-                        status,
-                        score,
-                    )
+            if score is not None:
+                csat = CSAT(
+                    ticket=ticket,
+                    score=score,
+                    comment=(
+                        "Khách hàng đánh giá trải nghiệm "
+                        "hỗ trợ sau khi xử lý yêu cầu."
+                    ),
                 )
+                csat.full_clean()
+                csat.save()
 
-        for code, name, status, score in created_codes:
-            rating = (
-                f'{score}/5'
-                if score is not None
-                else 'Chưa đánh giá'
-            )
+            created_count += 1
 
             self.stdout.write(
-                f'{code} | {name} | {status} | {rating}'
+                f"{ticket_code} | {customer.ho_ten} | "
+                f"{category_name} | {state}"
             )
 
         self.stdout.write(
             self.style.SUCCESS(
-                f'Đã tạo {len(created_codes)} Ticket demo. '
-                'Dữ liệu có sẵn được giữ nguyên.'
+                f"Hoàn tất: tạo {created_count} Ticket mới, "
+                f"bỏ qua {skipped_count} Ticket đã tồn tại."
             )
         )
