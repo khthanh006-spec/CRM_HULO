@@ -2,7 +2,13 @@
 from django.contrib import admin
 from django.urls import path, include
 
+from support.views import support_home
+
+
 urlpatterns = [
+    # Trang chủ mặc định CRM HULO
+    path('', support_home, name='public_home'),
+
     # Trang quản trị Django
     path('admin/', admin.site.urls),
 
